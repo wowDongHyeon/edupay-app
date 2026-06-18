@@ -100,11 +100,15 @@ const REPORT_INSIGHT = {
   },
 };
 
-function BarCard({ grade, view, months }) {
+function BarCard({ grade, view, months, result }) {
   const [period, setPeriod] = useStateC(view === "month" ? "month" : "week");
   const isWeek = period === "week";
-  const n = Math.max(2, Math.min(months || 3, 12));
-  const monthData = (D.monthlyTrendAll || D.monthlyTrend).slice(-n);
+  // 오페리아 result(월별 추이) 우선 사용 — 없으면 기존 EDUPAY 모델로 폴백
+  const resTrend = result && Array.isArray(result.trend)
+    ? result.trend.map((t) => { const mo = +(t.month || "").slice(5, 7); return { label: (mo || "") + "월", amount: t.amount }; })
+    : null;
+  const n = resTrend ? resTrend.length : Math.max(2, Math.min(months || 3, 12));
+  const monthData = resTrend || (D.monthlyTrendAll || D.monthlyTrend).slice(-n);
   const data = isWeek ? D.dailySpending : monthData;
   const max = Math.max(...data.map((d) => d.amount));
   const maxItem = data.reduce((a, b) => (b.amount > a.amount ? b : a), data[0]);
@@ -118,14 +122,20 @@ function BarCard({ grade, view, months }) {
           ? `${prev.label}보다 ${D.won(diff)}(${pct}%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪`
           : `${prev.label}보다 ${D.won(-diff)}(${pct}%) 덜 썼어. 잘하고 있어 👏`;
       })();
-  // 결제수단별(바우처/지원금 vs 부모카드) — 월별 뷰에서 표시 기간 합계
-  const payerBreak = (!isWeek && monthData.length) ? (() => {
-    const span = { start: monthData[0].start, end: monthData[monthData.length - 1].end };
-    const ex = D.ledgerSeed.filter((e) => e.type === "expense" && e.date >= span.start && e.date <= span.end);
-    const voucher = ex.filter((e) => e.payer !== "부모카드").reduce((s, e) => s + e.amount, 0);
-    const card = ex.filter((e) => e.payer === "부모카드").reduce((s, e) => s + e.amount, 0);
-    return { voucher, card, total: (voucher + card) || 1 };
-  })() : null;
+  // 결제수단별(바우처/지원금 vs 부모카드) — result.byMeans 우선, 없으면 ledger 집계
+  const payerBreak = isWeek ? null : (
+    (result && Array.isArray(result.byMeans)) ? (() => {
+      const find = (k) => (result.byMeans.find((x) => x.means === k) || {}).amount || 0;
+      const voucher = find("VOUCHER"), card = find("APPCARD");
+      return { voucher, card, total: (voucher + card) || 1 };
+    })() : (monthData.length && monthData[0].start ? (() => {
+      const span = { start: monthData[0].start, end: monthData[monthData.length - 1].end };
+      const ex = D.ledgerSeed.filter((e) => e.type === "expense" && e.date >= span.start && e.date <= span.end);
+      const voucher = ex.filter((e) => e.payer !== "부모카드").reduce((s, e) => s + e.amount, 0);
+      const card = ex.filter((e) => e.payer === "부모카드").reduce((s, e) => s + e.amount, 0);
+      return { voucher, card, total: (voucher + card) || 1 };
+    })() : null)
+  );
   return (
     <CardShell title="소비 리포트" sub={isWeek ? "최근 7일 일별 흐름" : `최근 ${n}개월 추이`}
                right={<PeriodTabs period={period} setPeriod={setPeriod} labels={{ week: "일별", month: "월별" }} />}>
@@ -176,28 +186,28 @@ function BarCard({ grade, view, months }) {
   );
 }
 
-function InlineCard({ kind, scope, entry, only, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onDismiss, dismissed }) {
+function InlineCard({ kind, scope, entry, only, result, chart, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onDismiss, dismissed }) {
   if (kind === "spending") {
     if (scope && scope.type === "day") return <DailySpendCard ledger={ledger} date={scope.date} />;
     return <DonutCard />;
   }
   if (kind === "report") {
-    if (scope && scope.type === "range") return <PeriodReportCard ledger={ledger} range={scope} />;
-    return <BarCard grade={grade} view={scope && scope.view} months={scope && scope.months} />;
+    if (!result && scope && scope.type === "range") return <PeriodReportCard ledger={ledger} range={scope} />;
+    return <BarCard grade={grade} view={scope && scope.view} months={scope && scope.months} result={result} chart={chart} />;
   }
   if (kind === "ledger") return <LedgerCard grade={grade} ledger={ledger} range={scope && scope.type === "range" ? scope : null} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} />;
   if (kind === "quiz") return <QuizCard grade={grade} />;
   if (kind === "recorded") return <RecordedCard entry={entry} onSend={onSend} />;
-  if (kind === "friendCompare") return <FriendCompareCard />;
-  if (kind === "nudgeCompare") return <NudgeCompareCard />;
+  if (kind === "friendCompare") return <FriendCompareCard result={result} />;
+  if (kind === "nudgeCompare") return <NudgeCompareCard result={result} />;
   if (kind === "nudgeList") return <NudgeListCard />;
-  if (kind === "merchantMap") return <MerchantMapCard />;
-  if (kind === "balance") return <BalanceCard />;
-  if (kind === "channel") return <ChannelCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} only={only} />;
-  if (kind === "merchantBreakdown") return <MerchantBreakdownCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} />;
-  if (kind === "parentCard") return <ParentCardCard ledger={ledger} />;
-  if (kind === "schoolCompare") return <SchoolCompareCard grade={grade} />;
-  if (kind === "catSpend") return <CategorySpendCard ledger={ledger} ckey={scope && scope.key} label={scope && scope.label} range={scope && scope.range} />;
+  if (kind === "merchantMap") return <MerchantMapCard result={result} />;
+  if (kind === "balance") return <BalanceCard result={result} />;
+  if (kind === "channel") return <ChannelCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} only={only} result={result} />;
+  if (kind === "merchantBreakdown") return <MerchantBreakdownCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} result={result} />;
+  if (kind === "parentCard") return <ParentCardCard ledger={ledger} result={result} />;
+  if (kind === "schoolCompare") return <SchoolCompareCard grade={grade} result={result} />;
+  if (kind === "catSpend") return <CategorySpendCard ledger={ledger} ckey={scope && scope.key} label={scope && scope.label} range={scope && scope.range} result={result} chart={chart} />;
   if (kind === "timePattern") return <TimePatternCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} />;
   if (kind === "recommend") return <RecommendCard grade={grade} onOpenContent={onOpenContent} onDismiss={onDismiss} dismissed={dismissed} />;
   return null;

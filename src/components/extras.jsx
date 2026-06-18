@@ -36,8 +36,11 @@ function TriBar({ label, value, max, color, bold }) {
 }
 
 /* ── 3. 친구(또래) 사용 비교 ───────────────────────── */
-function FriendCompareCard() {
-  const c = EX.compareTotals;
+function FriendCompareCard({ result }) {
+  // 오페리아 result 우선 — 없으면 기존 EDUPAY 모델로 폴백
+  const c = result
+    ? { me: result.me, school: result.schoolGradeAvg, province: result.provinceAvg, schoolName: "흥덕중" }
+    : EX.compareTotals;
   const max = Math.max(c.me, c.school, c.province);
   const diff = c.me - c.school;
   return (
@@ -108,7 +111,74 @@ function NudgeListCard() {
 }
 
 /* ── 4b. 조르기 비교 (같은 학년 · 건수/금액) ───────────── */
-function NudgeCompareCard() {
+function NudgeCompareCard({ result }) {
+  // 오페리아 result(내 조르기 vs 같은학년/충북 평균 + 월별 횟수) 우선
+  if (result) {
+    const me = result.me || { count: 0, amount: 0 };
+    const sg = result.schoolGradeAvg || { count: 0, amount: 0 };
+    const pv = result.provinceAvg || { count: 0, amount: 0 };
+    const monthly = result.monthly || [];
+    const maxCnt = Math.max(1, me.count, sg.count, pv.count);
+    const bars = [
+      { label: "나", count: me.count, color: "#5B4DD6", bold: true },
+      { label: "우리학교 같은학년", count: sg.count, color: "#9A8FE6" },
+      { label: "충북 평균", count: pv.count, color: "#D7D2F2" },
+    ];
+    const maxMo = Math.max(1, ...monthly.map((m) => m.count));
+    const diff = me.count - sg.count;
+    return (
+      <ExCard badge="조르기" title="조르기 내역 비교" sub="이번 분기 · 같은 학년/충북 평균과 비교">
+        <div className="mt-3 flex gap-2">
+          <div className="flex-1 rounded-2xl bg-gray-50 py-3 text-center">
+            <div className="text-[11.5px] text-gray-400">내 조르기 횟수</div>
+            <div className="text-[20px] font-extrabold tracking-[-0.02em] text-violet-600">{me.count}회</div>
+            <div className="text-[11px] text-gray-400">같은학년 평균 {sg.count}회</div>
+          </div>
+          <div className="flex-1 rounded-2xl bg-gray-50 py-3 text-center">
+            <div className="text-[11.5px] text-gray-400">받은 금액</div>
+            <div className="text-[20px] font-extrabold tracking-[-0.02em] text-gray-900">{exNum(me.amount)}원</div>
+            <div className="text-[11px] text-gray-400">평균 {exNum(sg.amount)}원</div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <div className="text-[12px] text-gray-400 mb-2">조르기 횟수 비교</div>
+          <div className="flex flex-col gap-2.5">
+            {bars.map((b, i) => (
+              <div key={i} className="flex items-center gap-2.5">
+                <span className={"w-[88px] shrink-0 text-[12px] " + (b.bold ? "font-extrabold text-gray-900" : "text-gray-500")}>{b.label}</span>
+                <div className="flex-1 h-3.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: Math.max(b.count / maxCnt * 100, 5) + "%", background: b.color }}></div>
+                </div>
+                <span className="text-[12.5px] font-bold text-gray-800 tabular-nums w-9 text-right">{b.count}회</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {monthly.length > 0 && (
+          <div className="mt-4">
+            <div className="text-[12px] text-gray-400 mb-2">월별 조르기 횟수</div>
+            <div className="flex items-end justify-between gap-2" style={{ height: 70 }}>
+              {monthly.map((m, i) => {
+                const mo = +(m.month || "").slice(5, 7);
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-violet-600">{m.count}</span>
+                    <div className="w-full rounded-t-md" style={{ height: Math.max(m.count / maxMo * 44, 6) + "px", background: i === monthly.length - 1 ? "#5B4DD6" : "#C2BAEC" }}></div>
+                    <span className="text-[11px] text-gray-400">{mo}월</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        <div className="mt-4 rounded-xl bg-violet-50/70 px-3.5 py-3 text-[12.5px] text-violet-900 leading-relaxed">
+          💡 {diff > 0
+            ? `같은 학년 평균보다 ${Math.round(diff * 10) / 10}회 더 졸랐어. 꼭 필요한지 한 번 더 생각해볼까? 💪`
+            : "같은 학년 평균보다 조르기가 적어. 계획적으로 잘 쓰고 있어 👏"}
+        </div>
+      </ExCard>
+    );
+  }
   const months = (EX.nudgeByMonth || []).slice(-6);
   const cur = months[months.length - 1] || { count: 0, amount: 0, label: "" };
   const prev = months[months.length - 2] || { count: 0, amount: 0 };
@@ -151,7 +221,7 @@ function NudgeCompareCard() {
 }
 
 /* ── 5. 근처 사용 가능 가맹점 (실제 지도 Leaflet + OSM, 오프라인 시 약식 지도 폴백) ── */
-function MerchantMapCard() {
+function MerchantMapCard({ result }) {
   const mapRef = React.useRef(null);
   const mapObj = React.useRef(null);
   const [mapFailed, setMapFailed] = React.useState(typeof L === "undefined");
@@ -165,10 +235,23 @@ function MerchantMapCard() {
     return Math.round(2 * R * Math.asin(Math.sqrt(s)));
   };
 
+  // 오페리아 result(center, merchants) 우선 — 없으면 기존 EDUPAY 모델로 폴백
+  const MAP_EMOJI = { 편의점: "🏪", 식비: "🍱", 학용품: "📚", 교통: "🚌", 문화: "🎮" };
+  const center = (result && result.center) || EX.mapCenter;
+  const srcMerchants = (result && Array.isArray(result.merchants))
+    ? result.merchants.map((m) => ({
+        name: m.name, cat: m.category, lat: m.lat, lng: m.lng, addr: m.addr, channel: "offline",
+        emoji: MAP_EMOJI[m.category] || "📍",
+        // 오프라인 약식 지도용 좌표(중심 기준 상대 위치 → 0~100%)
+        x: Math.min(92, Math.max(8, 50 + (m.lng - center.lng) * 4000)),
+        y: Math.min(88, Math.max(12, 50 - (m.lat - center.lat) * 4000)),
+      }))
+    : EX.merchants.filter((m) => m.channel === "offline");
+
   // 내 위치 기준(GPS 성공 시 실제, 아니면 기본 청주)
-  const myPos = geo.status === "ok" ? { lat: geo.lat, lng: geo.lng } : EX.mapCenter;
+  const myPos = geo.status === "ok" ? { lat: geo.lat, lng: geo.lng } : center;
   // 가맹점 거리 = 내 위치 기준 실제 계산(좌표 있는 곳), 없으면 모델 거리
-  const offline = EX.merchants.filter((m) => m.channel === "offline")
+  const offline = srcMerchants
     .map((m) => ({ ...m, realDist: (m.lat != null) ? distM(myPos, { lat: m.lat, lng: m.lng }) : m.dist }))
     .sort((a, b) => a.realDist - b.realDist);
 
@@ -279,11 +362,8 @@ function MerchantMapCard() {
 }
 
 /* ── 6. 사용 가능 금액 (남은 지원금) ───────────────── */
-function BalanceCard() {
-  const remain = EX.supportRemaining;        // 바우처(지원금) 잔액
-  const allowance = EX.voucherBalance;       // 용돈 충전금 잔액
-  const points = EX.points;                  // 에듀포인트
-  const Row = ({ icon, label, sub, value, unit, tint, ink, color }) => (
+function BalanceCard({ result }) {
+  const Row = ({ icon, label, sub, value, unit, tint, ink }) => (
     <div className="flex items-center gap-3 rounded-2xl px-3.5 py-3" style={{ background: tint }}>
       <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[17px] shrink-0">{icon}</div>
       <div className="flex-1 min-w-0">
@@ -293,6 +373,32 @@ function BalanceCard() {
       <div className="text-[17px] font-extrabold tracking-[-0.02em] tabular-nums shrink-0" style={{ color: ink }}>{exNum(value)}<span className="text-[12px] font-bold">{unit}</span></div>
     </div>
   );
+
+  // 오페리아 result(바우처/조르기 잔액 + 사용 가능 합계) 우선
+  if (result) {
+    const v = result.voucher || { limit: 0, used: 0, balance: 0 };
+    const beg = result.beg || { received: 0, used: 0, balance: 0 };
+    const vPct = v.limit ? Math.round(v.balance / v.limit * 100) : 0;
+    return (
+      <ExCard badge="실시간" title="지금 쓸 수 있는 금액" sub="바우처·조르기 잔액 합산">
+        <div className="mt-3 rounded-2xl px-4 py-4" style={{ background: "linear-gradient(135deg,#5B4DD6,#4A3FB0)" }}>
+          <div className="text-[12px] font-bold text-white/75">사용 가능 합계</div>
+          <div className="mt-1 text-[30px] font-extrabold text-white tracking-[-0.02em]">{exNum(result.totalAvailable)}<span className="text-[16px] font-bold">원</span></div>
+        </div>
+        <div className="mt-3 flex flex-col gap-2.5">
+          <Row icon="🎫" label="바우처(지원금)" sub={`한도 ${exNum(v.limit)}원 중 ${exNum(v.used)}원 사용`} value={v.balance} unit="원" tint="#E2F3F2" ink="#0F5A57" />
+          <Row icon="💸" label="조르기 받은 금액" sub={`받음 ${exNum(beg.received)}원 중 ${exNum(beg.used)}원 사용`} value={beg.balance} unit="원" tint="#FAEAF1" ink="#8E2F52" />
+        </div>
+        <div className="mt-3 rounded-xl px-3.5 py-3 text-[12.5px] leading-relaxed" style={{ background: "#F6F6FB", color: "#6B6E78" }}>
+          💡 바우처 잔액은 한도의 {vPct}%가 남았어. {(result.appcard && result.appcard.note) || "부모카드는 카드사 한도(외부)"} 라 여기엔 합산되지 않아!
+        </div>
+      </ExCard>
+    );
+  }
+
+  const remain = EX.supportRemaining;        // 바우처(지원금) 잔액
+  const allowance = EX.voucherBalance;       // 용돈 충전금 잔액
+  const points = EX.points;                  // 에듀포인트
   return (
     <ExCard badge="이번 달" title="지금 쓸 수 있는 금액" sub="항목별 남은 금액 · 합산되지 않아요">
       <div className="mt-3 flex flex-col gap-2.5">
@@ -308,7 +414,39 @@ function BalanceCard() {
 }
 
 /* ── 7. 온라인/오프라인 결제 내역 (only: 한쪽만) ────── */
-function ChannelCard({ ledger, range, only }) {
+function ChannelCard({ ledger, range, only, result }) {
+  // 오페리아 result(rows: [{channel,label,amount,cnt,pct}]) 우선
+  if (Array.isArray(result)) {
+    const find = (k) => result.find((x) => x.channel === k) || { amount: 0, cnt: 0, pct: 0 };
+    const offR = find("OFFLINE"), onR = find("ONLINE");
+    const total = (offR.amount + onR.amount) || 1;
+    const seg = [
+      { k: "오프라인", v: offR.amount, cnt: offR.cnt, pct: offR.pct, c: "#5B4DD6", emoji: "🏪" },
+      { k: "온라인", v: onR.amount, cnt: onR.cnt, pct: onR.pct, c: "#4A8DD6", emoji: "📱" },
+    ];
+    return (
+      <ExCard badge="최근 3개월" title="온·오프라인 결제 내역" sub="결제 채널별 사용 비중">
+        <div className="mt-4 flex h-4 rounded-full overflow-hidden">
+          <div style={{ width: (offR.amount / total * 100) + "%", background: "#5B4DD6" }}></div>
+          <div style={{ width: (onR.amount / total * 100) + "%", background: "#4A8DD6" }}></div>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {seg.map((s, i) => (
+            <div key={i} className="rounded-2xl bg-gray-50 px-3 py-2.5">
+              <div className="flex items-center gap-1.5 text-[12px] text-gray-500"><span className="w-2.5 h-2.5 rounded-full" style={{ background: s.c }}></span>{s.emoji} {s.k}</div>
+              <div className="text-[17px] font-extrabold text-gray-900 mt-0.5">{exNum(s.v)}원</div>
+              <div className="text-[11px] text-gray-400">{s.cnt}건 · {s.pct != null ? s.pct : Math.round(s.v / total * 100)}%</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 rounded-xl bg-violet-50/70 px-3.5 py-3 text-[12.5px] text-violet-900 leading-relaxed flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#5B4DD6" }}></span>
+          오프라인 결제가 {seg[0].pct != null ? seg[0].pct : Math.round(offR.amount / total * 100)}%로 더 많아. 온라인보다 매장에서 더 자주 쓰네!
+        </div>
+      </ExCard>
+    );
+  }
+
   const r = range || EX.thisMonthRange;
   const all = (ledger || EX.ledgerSeed).filter((e) => e.type === "expense" && e.date >= r.start && e.date <= r.end);
   const on = all.filter((e) => e.channel === "online");
@@ -385,38 +523,47 @@ function ChannelCard({ ledger, range, only }) {
 }
 
 /* ── 8. 가맹점별 사용 금액 순위 ───────────────── */
-function MerchantBreakdownCard({ ledger, range }) {
+function MerchantBreakdownCard({ ledger, range, result }) {
   const r = range || EX.thisMonthRange;
-  const ex = (ledger || EX.ledgerSeed).filter((e) => e.type === "expense" && e.date >= r.start && e.date <= r.end);
-  const total = ex.reduce((s, e) => s + e.amount, 0) || 1;
-  const vouchers = (EX.schema && EX.schema.vouchers) || [];
-  // 결제 항목 → 실제 가맹점명 (가맹점 테이블 매칭되면 정식 상호, 아니면 결제처명)
-  const nameOf = (e) => {
-    const nm = e.merchant || e.title;
-    const v = vouchers.find((x) => x.MERCHANT_NM === nm || x.MERCHANT_NM.startsWith(nm) || (nm && nm.startsWith(x.MERCHANT_NM)));
-    return (v && v.MERCHANT_NM) || nm;
-  };
-  const agg = {};
-  ex.forEach((e) => { const k = nameOf(e); if (!agg[k]) agg[k] = { name: k, value: 0, count: 0, emoji: e.emoji }; agg[k].value += e.amount; agg[k].count++; });
-  const list = Object.values(agg).sort((a, b) => b.value - a.value).slice(0, 6);
-  const max = list.length ? list[0].value : 1;
-  const top = list[0] || null;
+  let list, max, top, totalAmt;
+  if (Array.isArray(result)) {
+    // 오페리아 result(rows: [{merchant, amount, pct}]) 우선
+    totalAmt = result.reduce((s, e) => s + e.amount, 0) || 1;
+    list = result.map((e) => ({ name: e.merchant, value: e.amount, pct: e.pct, count: null }));
+    max = list.length ? Math.max(...list.map((m) => m.value)) : 1;
+    top = list[0] || null;
+  } else {
+    const ex = (ledger || EX.ledgerSeed).filter((e) => e.type === "expense" && e.date >= r.start && e.date <= r.end);
+    totalAmt = ex.reduce((s, e) => s + e.amount, 0) || 1;
+    const vouchers = (EX.schema && EX.schema.vouchers) || [];
+    // 결제 항목 → 실제 가맹점명 (가맹점 테이블 매칭되면 정식 상호, 아니면 결제처명)
+    const nameOf = (e) => {
+      const nm = e.merchant || e.title;
+      const v = vouchers.find((x) => x.MERCHANT_NM === nm || x.MERCHANT_NM.startsWith(nm) || (nm && nm.startsWith(x.MERCHANT_NM)));
+      return (v && v.MERCHANT_NM) || nm;
+    };
+    const agg = {};
+    ex.forEach((e) => { const k = nameOf(e); if (!agg[k]) agg[k] = { name: k, value: 0, count: 0, emoji: e.emoji }; agg[k].value += e.amount; agg[k].count++; });
+    list = Object.values(agg).sort((a, b) => b.value - a.value).slice(0, 6);
+    max = list.length ? list[0].value : 1;
+    top = list[0] || null;
+  }
   return (
-    <ExCard badge={range && range.label ? range.label : "이번 달"} title="주로 어디에 썼을까?" sub="가맹점별 사용 금액 순">
+    <ExCard badge={Array.isArray(result) ? "최근 3개월" : (range && range.label ? range.label : "이번 달")} title="주로 어디에 썼을까?" sub="가맹점별 사용 금액 순">
       <div className="mt-4 flex flex-col gap-2.5">
         {list.map((m, i) => (
           <div key={i} className="flex items-center gap-2.5">
             <span className="w-5 text-[12px] font-extrabold text-gray-400 text-center shrink-0">{i + 1}</span>
             <span className="w-[96px] text-[12.5px] text-gray-700 shrink-0 truncate">{m.name}</span>
             <div className="flex-1 h-2.5 rounded-full bg-gray-100 overflow-hidden"><div className="h-full rounded-full" style={{ width: Math.max(m.value / max * 100, 6) + "%", background: "#5B4DD6" }}></div></div>
-            <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.count}회</span>
+            <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.count != null ? m.count + "회" : (m.pct != null ? m.pct + "%" : "")}</span>
             <span className="text-[12.5px] font-bold text-gray-800 w-[52px] text-right tabular-nums">{exNum(m.value)}</span>
           </div>
         ))}
       </div>
       {top && (
         <div className="mt-4 rounded-xl bg-violet-50/70 px-3.5 py-3 text-[12.5px] text-violet-900 leading-relaxed">
-          💡 {top.name}에서 제일 많이 썼어 ({exNum(top.value)}원, {top.count}번). 자주 가는 곳이네!
+          💡 {top.name}에서 제일 많이 썼어 ({exNum(top.value)}원{top.count != null ? `, ${top.count}번` : `, 전체의 ${top.pct != null ? top.pct : Math.round(top.value / totalAmt * 100)}%`}). 자주 가는 곳이네!
         </div>
       )}
     </ExCard>
@@ -424,9 +571,13 @@ function MerchantBreakdownCard({ ledger, range }) {
 }
 
 /* ── 9. 부모(보호자) 카드 사용 내역 ────────────────── */
-function ParentCardCard({ ledger }) {
-  const ex = (ledger || EX.ledgerSeed).filter((e) => e.type === "expense" && e.payer === "부모카드").sort((a, b) => (a.date < b.date ? 1 : -1));
-  const total = ex.reduce((s, e) => s + e.amount, 0);
+function ParentCardCard({ ledger, result }) {
+  // 오페리아 result({total, count, rows:[{date, merchant, amount}]}) 우선
+  const ex = (result && Array.isArray(result.rows))
+    ? result.rows.map((rw) => ({ id: rw.date + rw.merchant, type: "expense", date: rw.date, cat: "부모카드", emoji: "💳", title: rw.merchant, amount: rw.amount }))
+        .sort((a, b) => (a.date < b.date ? 1 : -1))
+    : (ledger || EX.ledgerSeed).filter((e) => e.type === "expense" && e.payer === "부모카드").sort((a, b) => (a.date < b.date ? 1 : -1));
+  const total = (result && result.total != null) ? result.total : ex.reduce((s, e) => s + e.amount, 0);
   return (
     <ExCard badge="보호자 카드" title="부모 카드 사용 내역" sub="연계된 보호자 카드 결제">
       <div className="mt-3 text-[26px] font-extrabold text-gray-900">{exNum(total)}원</div>
@@ -452,11 +603,19 @@ function ParentCardCard({ ledger }) {
 }
 
 /* ── 10. 학교별 사용 비교 (학교급별 충북 TOP5) ────────── */
-function SchoolCompareCard({ grade = "중학" }) {
+function SchoolCompareCard({ grade = "중학", result }) {
   const gLabel = { 초등: "초등학교", 중학: "중학교", 고등: "고등학교" }[grade] || "중학교";
-  const all = (EX.schoolCompareByGrade && EX.schoolCompareByGrade[grade]) || EX.schoolCompare;
-  const schools = all.filter((s) => !s.avg).slice().sort((a, b) => b.value - a.value);
-  const avg = all.find((s) => s.avg);
+  // 오페리아 result(rows: [{school, avgPerStudent, students, me}]) 우선 — 평균은 행에서 산출
+  let schools, avg;
+  if (Array.isArray(result)) {
+    schools = result.map((s) => ({ name: s.school, value: s.avgPerStudent, me: !!s.me, students: s.students })).sort((a, b) => b.value - a.value);
+    const mean = Math.round(schools.reduce((sum, s) => sum + s.value, 0) / (schools.length || 1));
+    avg = { name: "충북 평균", value: mean, avg: true };
+  } else {
+    const all = (EX.schoolCompareByGrade && EX.schoolCompareByGrade[grade]) || EX.schoolCompare;
+    schools = all.filter((s) => !s.avg).slice().sort((a, b) => b.value - a.value);
+    avg = all.find((s) => s.avg);
+  }
   const me = schools.find((s) => s.me);
   const myRank = schools.findIndex((s) => s.me) + 1;
   const rows = schools.slice(0, 5).map((s, i) => ({ ...s, rank: i + 1 }));

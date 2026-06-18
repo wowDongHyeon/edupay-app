@@ -4,6 +4,10 @@ import { InlineCard } from "./components/cards";
 import { RecommendModal } from "./components/recommend";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
+import { queryOperia, isOperiaAiMode } from "./api/operia";
+import { OPERIA_KINDS } from "./mock/operia";
+import { ChartRenderer } from "./charts/ChartRenderer";
+import { chartTypeForIntent } from "./charts/registry";
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
 const DATA = EDUPAY;
@@ -386,7 +390,8 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
       </div>);
 
   }
-  const bigCard = ["spending", "report", "recorded", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
+  const isChart = !!msg.chartType; // 오페리아 데이터 메시지(ChartRenderer 렌더)
+  const bigCard = isChart || ["spending", "report", "recorded", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
   return (
     <div className="flex gap-2 items-start">
       <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
@@ -399,6 +404,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
           {msg.text}
         </div>
         }
+        {isChart && <ChartRenderer type={msg.chartType} result={msg.result} intent={msg.intent} />}
         {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
       </div>
     </div>);
@@ -823,9 +829,32 @@ function App() {
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
     setTyping(true);
 
-    // 소비 조회/분석 질의 → 시각화 카드로 바로 응답 (AI 호출 없이, 즉시·정확)
+    // 소비 조회/분석 질의 → 시각화 카드로 바로 응답
     const ci = cardIntent(q);
     if (ci) {
+      // ── 데이터 질문 → 오페리아 API 호출 → ChartRenderer 렌더 ──
+      // 차트 유형은 응답이 아니라 프론트가 결정(chartTypeForIntent). 응답은 {question,sql,result}.
+      // 정적/실서버 모드: 알려진 10개 intent만. AI 시뮬 모드(§8): 미지정 데이터질문도 보내 table로 렌더
+      //   (recommend/quiz/ledger 같은 UI/비데이터 카드는 항상 로컬 보존).
+      const NON_OPERIA = ["recommend", "quiz", "ledger", "recorded"];
+      const useOperia = OPERIA_KINDS.includes(ci.kind) || (isOperiaAiMode() && !NON_OPERIA.includes(ci.kind));
+      if (useOperia) {
+        showApiToast(`오페리아${isOperiaAiMode() ? "AI" : ""} · ${ci.kind}`, "api");
+        try {
+          // ↓↓↓ [DEV MOCK] 모드 분기는 operia.js 한 곳: VITE_OPERIA_API(실서버) > VITE_OPERIA_AI(Claude 시뮬) > 정적 목업 ↓↓↓
+          const resp = await queryOperia(ci.kind, ci.scope, q);
+          // ↑↑↑ [DEV MOCK] END ↑↑↑
+          setTyping(false);
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, result: resp.result }]);
+        } catch (e) {
+          console.error("[operia] 호출 오류:", e);
+          showApiToast("오페리아 오류", "error");
+          setTyping(false);
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "데이터를 불러오지 못했어. 잠시 후 다시 시도해줘." }]);
+        }
+        return;
+      }
+      // ── 비데이터 카드(추천/퀴즈/용돈기입장 등) → 기존 로컬 로직 유지 ──
       showApiToast(`로컬 카드 · ${ci.kind}`, "local");
       await new Promise((r) => setTimeout(r, 450));
       setTyping(false);

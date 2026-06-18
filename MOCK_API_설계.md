@@ -1,0 +1,433 @@
+# 에듀페이 — 오페리아 API(목업) 연동 설계서
+
+데이터 질문(10개)을 **오페리아 API(NL2SQL 에이전트)** 호출 → `result`(쿼리 결과) 수신 → 차트 렌더 구조로 바꾼다.
+오페리아가 개발 중이라 지금은 **하드코딩 목업**이 오페리아와 **동일한 응답 형태**로 답한다(나중에 목업 자리만 실 API로 교체).
+
+- 자유 대화(기타) → 기존대로 **Claude API** (변경 없음)
+- 데이터 질문(일반 10개) → **오페리아 API(목업)** , Claude 안 탐
+
+---
+
+## 1. 응답(Response) 표준 스키마
+
+오페리아 API와 목업이 공통으로 반환하는 형태. **오페리아는 `result`(데이터)만 책임진다. 차트 유형은 응답에 없다.**
+
+```jsonc
+{
+  "question": "월별 사용 내역 알려줘",   // 원 질문(NL)
+  "sql": "SELECT ...",                  // 생성된 SQL (참고/디버그용, 없으면 null)
+  "result": <rows | object>             // ★ 쿼리 결과 (핵심). 단순 질의는 rows 배열, 복합 카드는 object
+}
+```
+
+- 단순 집계(채널/가맹점별 등) → `result`는 **행 배열**(`[{...}, ...]`)
+- 복합 카드(월별+수단별, 잔액 등) → `result`는 **object** (아래 질의별 정의)
+
+> ⚠️ **chart.type은 응답에 넣지 않는다.** 차트 유형은 "질문"만 보고 정해지므로(데이터와 무관) **프론트가 intent 분류로 결정**한다(§3.1). 오페리아(NL2SQL 에이전트)는 UI를 모르고 데이터만 준다.
+> 향후 오페리아가 차트 힌트를 주게 되면 `resp.chart ?? INTENT_CHART[intent] ?? 'table'` 우선순위로 얹어 전방 호환.
+
+---
+
+## 2. 가상 결제내역 테이블 (명세 없음 → 본 설계에서 신규 정의)
+
+실제 스키마 4개(`TB_COM_USER/ADBK/VOUCHER/PAY_API_LOG`)엔 정규화 결제내역이 없으므로, 목업·향후 연동 기준으로 아래를 가정한다.
+
+### TB_PAY_DTL (결제내역 정규화 — 가상)
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| PAY_ID | varchar | PK |
+| USER_ID | varchar | FK→TB_COM_USER |
+| MERCHANT_NO | varchar | FK→TB_COM_VOUCHER |
+| PAY_AMT | int | 결제금액 |
+| PAY_MEANS | varchar | VOUCHER(바우처) / APPCARD(부모카드) / BEG(조르기받은금액) |
+| PAY_CHANNEL | varchar | ONLINE / OFFLINE |
+| PAY_STTS | varchar | APPROVED / CANCELED |
+| PAY_DT | datetime | 결제일시 |
+
+### TB_BEG (조르기 — 가상)
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| BEG_ID | varchar | PK |
+| STUDENT_USER_ID | varchar | 학생 |
+| PARENT_USER_ID | varchar | 부모 |
+| REQ_AMT | int | 요청 금액 |
+| RECV_AMT | int | 수령(입금) 금액 |
+| REQ_STTS | varchar | REQUEST/ACCEPT/REJECT |
+| REQ_DT | datetime | 요청일시 |
+
+### TB_COM_VOUCHER 좌표 컬럼 추가 (가상)
+`LAT decimal`, `LNG decimal` — 지도용. (바우처 한도 = 학생 1인 10만원 상수)
+
+> 위 가상 항목은 `설계서.md`(루트)의 신설 요청 테이블과 일치. 오페리아 확정 시 동일 키로 매핑.
+
+---
+
+## 3. 아키텍처 / 폴더 구조
+
+```
+src/
+  api/
+    operia.js        # queryOperia(intent, params): 실 API 또는 목업 반환
+    claude.js        # (기존) 자유대화 전용
+  mock/
+    operia/
+      index.js       # intent → 목업 응답 매핑
+      monthlyUsage.js, catSpend.js, friendCompare.js, nudgeCompare.js,
+      merchantMap.js, balance.js, channel.js, merchantBreakdown.js,
+      parentCard.js, schoolCompare.js
+```
+
+### src/api/operia.js (의사코드)
+```js
+import results from "../mock/operia";
+const BASE = import.meta.env.VITE_OPERIA_API; // 실 오페리아 베이스. 비면 목업
+export async function queryOperia(intent, params) {
+  if (BASE) {
+    const r = await fetch(`${BASE}/query`, { method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ intent, params }) });
+    if (!r.ok) throw new Error("operia "+r.status);
+    return r.json();                 // { question, sql, result, chart }
+  }
+  await new Promise(r => setTimeout(r, 300)); // 실제 호출처럼 약간 지연
+  const m = results[intent];
+  if (!m) throw new Error("no mock for "+intent);
+  return typeof m === "function" ? m(params) : m;
+}
+```
+
+### 3.1 차트 유형 결정 — 프론트 소유 (질문 기반)
+chart.type은 응답이 아니라 **프론트가 intent로 결정**한다.
+
+```js
+// src/charts/registry.js
+export const INTENT_CHART = {
+  report:            "bar",       // 월별 사용내역
+  catSpend:          "donut",     // 사용처별(업종)
+  channel:           "donut",     // 온/오프라인
+  merchantBreakdown: "barlist",   // 가맹점별 비율
+  friendCompare:     "compare",   // 친구 비교
+  nudgeCompare:      "compare",   // 조르기 비교
+  schoolCompare:     "compare",   // 학교별 비교
+  balance:           "gauge",     // 잔액
+  parentCard:        "list",      // 부모카드 내역
+  merchantMap:       "map",       // 근처 가맹점
+};
+export const chartTypeForIntent = (intent) => INTENT_CHART[intent] || "table";
+```
+
+`<ChartRenderer type result/>` 가 type으로 분기, **default = table**:
+```
+bar | donut | barlist | compare | gauge | list | map | (그 외) → table
+```
+- 10개 intent → 전용 차트.
+- 매칭 안 됨(intent=null) 또는 미지원 type → **TableCard**(result rows를 그대로 표로).
+
+---
+
+## 4. 호출 흐름 (App.jsx send)
+
+기존: `cardIntent(q)` → 카드 kind 결정 → 카드가 `window.EDUPAY`에서 직접 계산해 렌더.
+변경: `cardIntent(q)` → **`await queryOperia(kind, scope)`** → 응답의 `result`를 메시지에 실어 렌더.
+
+```js
+const ci = cardIntent(q);                        // 질문 → intent (없으면 null)
+if (ci) {
+  setTyping(true);
+  try {
+    const resp = await queryOperia(ci.kind, ci.scope);     // ← 오페리아(목업): result만
+    const type = chartTypeForIntent(ci.kind);              // ← 프론트가 차트유형 결정
+    setTyping(false);
+    setMessages(m => [...m, { id:.., role:"ai", text:"",
+      chartType: type, result: resp.result, scope: ci.scope }]);
+  } catch (e) {
+    setTyping(false);
+    setMessages(m => [...m, { id:.., role:"ai", text:"데이터를 불러오지 못했어. 잠시 후 다시 시도해줘." }]);
+  }
+  return;
+}
+// intent 매칭 안 됨 → (목업 단계) 기타/자유대화 경로(Claude/로컬).
+// 실 오페리아 연동 후: 데이터성 질문이면 queryOperia('adhoc',{question:q}) → chartType='table' 로 표 렌더.
+```
+
+- `Bubble` → `<ChartRenderer type={msg.chartType} result={msg.result}/>` 로 렌더.
+- 각 차트 컴포넌트는 **`result` prop을 사용**(이행기엔 result 없으면 기존 `EDUPAY` 계산 폴백 허용).
+
+---
+
+## 5. 질의 10개 — intent · SQL · 목업 result · 차트 · 카드
+
+> 금액 단위 원. 사용자 기준 USER_ID = 'stu_demo'(중학생), 학교 '흥덕중'. 최근 3개월(4·5·6월) 기준.
+> 각 항목의 `chart:` 는 **응답 필드가 아니라** §3.1 프론트 매핑(`INTENT_CHART`) 확인용 참고값이다. 오페리아 응답엔 `result`만 포함.
+
+### ① monthlyUsage — 월별 사용내역 (card: report)
+SQL:
+```sql
+SELECT DATE_FORMAT(PAY_DT,'%Y-%m') ym, PAY_MEANS, SUM(PAY_AMT) amt
+FROM TB_PAY_DTL WHERE USER_ID=:uid AND PAY_STTS='APPROVED'
+GROUP BY ym, PAY_MEANS ORDER BY ym;
+```
+result(object):
+```json
+{ "trend":[{"month":"2026-04","amount":43000},{"month":"2026-05","amount":58000},{"month":"2026-06","amount":115000}],
+  "byMeans":[{"means":"VOUCHER","label":"바우처(지원금)","amount":195000,"pct":90},
+             {"means":"APPCARD","label":"부모카드","amount":22000,"pct":10}] }
+```
+chart: `{ "type":"bar", "x":"month", "y":"amount" }`
+
+### ② catSpend — 사용처별(편의점 등 업종) (card: catSpend)
+SQL:
+```sql
+SELECT v.BIZ_ITEM_NM cat, SUM(p.PAY_AMT) amt, COUNT(*) cnt
+FROM TB_PAY_DTL p JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO
+WHERE p.USER_ID=:uid AND p.PAY_STTS='APPROVED'
+GROUP BY v.BIZ_ITEM_NM ORDER BY amt DESC;
+```
+result(rows):
+```json
+[{"category":"편의점","amount":62000,"cnt":14},
+ {"category":"식비","amount":38000,"cnt":9},
+ {"category":"학용품","amount":12000,"cnt":3},
+ {"category":"교통","amount":9000,"cnt":6},
+ {"category":"문화","amount":8000,"cnt":2}]
+```
+chart: `{ "type":"donut", "label":"category", "value":"amount" }`
+
+### ③ friendCompare — 친구(같은 학교+학년) 비교 (card: friendCompare)
+SQL: 내 합계 vs 같은학교·학년 평균 vs 충북 전체(학생) 평균
+```sql
+SELECT u.SCH_NM, u.GRADE, AVG(t.amt) avg_amt FROM TB_COM_USER u
+LEFT JOIN (SELECT USER_ID, SUM(PAY_AMT) amt FROM TB_PAY_DTL WHERE PAY_STTS='APPROVED' GROUP BY USER_ID) t
+ON t.USER_ID=u.USER_ID WHERE u.USER_TYPE='STUDENT' GROUP BY u.SCH_NM, u.GRADE;
+```
+result(object):
+```json
+{ "me":115000, "schoolGradeAvg":98000, "provinceAvg":104000, "percentile":62,
+  "bars":[{"label":"나","amount":115000,"me":true},
+          {"label":"우리학교 같은학년","amount":98000},
+          {"label":"충북 평균","amount":104000}] }
+```
+chart: `{ "type":"bar" }`
+
+### ④ nudgeCompare — 조르기 내역 비교 (card: nudgeCompare)
+SQL: TB_BEG 기준 내 조르기 횟수/금액 vs 평균, 월별
+```sql
+SELECT DATE_FORMAT(REQ_DT,'%Y-%m') ym, COUNT(*) cnt, SUM(RECV_AMT) amt
+FROM TB_BEG WHERE STUDENT_USER_ID=:uid GROUP BY ym;
+```
+result(object):
+```json
+{ "me":{"count":5,"amount":50000},
+  "schoolGradeAvg":{"count":3.2,"amount":32000},
+  "provinceAvg":{"count":3.8,"amount":38000},
+  "monthly":[{"month":"2026-04","count":1},{"month":"2026-05","count":2},{"month":"2026-06","count":2}] }
+```
+chart: `{ "type":"bar" }`
+
+### ⑤ merchantMap — 근처 사용 가능 가맹점(지도) (card: merchantMap)
+SQL: VOUCHER 좌표 기반 근처
+```sql
+SELECT MERCHANT_NM, BIZ_ITEM_NM, ADDR, LAT, LNG FROM TB_COM_VOUCHER
+WHERE USE_YN='Y' AND VOUCHER_STTS_NM='정상';  -- 거리정렬은 좌표로
+```
+result(object):
+```json
+{ "center":{"lat":36.6372,"lng":127.4860},
+  "merchants":[
+   {"name":"GS25 청주흥덕점","category":"편의점","addr":"청주시 흥덕구 대농로 12","lat":36.6378,"lng":127.4852},
+   {"name":"분식왕 떡볶이","category":"식비","addr":"청주시 흥덕구 가경로 33","lat":36.6361,"lng":127.4889},
+   {"name":"흥덕문구","category":"학용품","addr":"청주시 흥덕구 신율로 8","lat":36.6390,"lng":127.4843},
+   {"name":"CU 가경점","category":"편의점","addr":"청주시 흥덕구 가경로 51","lat":36.6355,"lng":127.4901}] }
+```
+chart: `{ "type":"map" }`
+
+### ⑥ balance — 현재 사용 가능 금액(잔액) (card: balance)
+SQL: 바우처 잔액 = 100000 − 바우처 사용합 / 조르기 잔액 = 수령합 − 조르기 사용합
+```sql
+SELECT PAY_MEANS, SUM(PAY_AMT) used FROM TB_PAY_DTL
+WHERE USER_ID=:uid AND PAY_STTS='APPROVED' GROUP BY PAY_MEANS;
+```
+result(object):
+```json
+{ "voucher":{"limit":100000,"used":78000,"balance":22000},
+  "beg":{"received":50000,"used":30000,"balance":20000},
+  "appcard":{"note":"부모카드는 카드사 한도(외부)"},
+  "totalAvailable":42000 }
+```
+chart: `{ "type":"gauge" }`
+
+### ⑦ channel — 온/오프라인 결제내역 (card: channel)
+SQL:
+```sql
+SELECT PAY_CHANNEL, SUM(PAY_AMT) amt, COUNT(*) cnt FROM TB_PAY_DTL
+WHERE USER_ID=:uid AND PAY_STTS='APPROVED' GROUP BY PAY_CHANNEL;
+```
+result(rows):
+```json
+[{"channel":"OFFLINE","label":"오프라인","amount":150000,"cnt":28,"pct":78},
+ {"channel":"ONLINE","label":"온라인","amount":43000,"cnt":7,"pct":22}]
+```
+chart: `{ "type":"donut", "label":"label", "value":"amount" }`
+
+### ⑧ merchantBreakdown — 어디에 주로(가맹점별 비율) (card: merchantBreakdown)
+SQL:
+```sql
+SELECT v.MERCHANT_NM m, SUM(p.PAY_AMT) amt FROM TB_PAY_DTL p
+JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO
+WHERE p.USER_ID=:uid AND p.PAY_STTS='APPROVED'
+GROUP BY v.MERCHANT_NM ORDER BY amt DESC LIMIT 6;
+```
+result(rows):
+```json
+[{"merchant":"GS25 청주흥덕점","amount":48000,"pct":25},
+ {"merchant":"분식왕 떡볶이","amount":36000,"pct":19},
+ {"merchant":"교보문고 청주","amount":28000,"pct":15},
+ {"merchant":"CU 가경점","amount":24000,"pct":12},
+ {"merchant":"메가커피 흥덕","amount":18000,"pct":9},
+ {"merchant":"기타","amount":38000,"pct":20}]
+```
+chart: `{ "type":"barlist", "label":"merchant", "value":"amount", "pct":"pct" }`
+
+### ⑨ parentCard — 부모 카드(앱카드) 사용내역 (card: parentCard)
+SQL:
+```sql
+SELECT PAY_DT, v.MERCHANT_NM, p.PAY_AMT FROM TB_PAY_DTL p
+JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO
+WHERE p.USER_ID=:uid AND p.PAY_MEANS='APPCARD' AND p.PAY_STTS='APPROVED'
+ORDER BY PAY_DT DESC;
+```
+result(object):
+```json
+{ "total":22000, "count":3,
+  "rows":[{"date":"2026-06-10","merchant":"이마트 청주","amount":12000},
+          {"date":"2026-06-03","merchant":"올리브영 흥덕","amount":7000},
+          {"date":"2026-05-28","merchant":"GS25 청주흥덕점","amount":3000}] }
+```
+chart: `{ "type":"list" }`
+
+### ⑩ schoolCompare — 학교별 사용내역 비교 (card: schoolCompare)
+SQL:
+```sql
+SELECT u.SCH_NM, SUM(p.PAY_AMT)/COUNT(DISTINCT u.USER_ID) avg_per_student
+FROM TB_PAY_DTL p JOIN TB_COM_USER u ON u.USER_ID=p.USER_ID
+WHERE u.USER_TYPE='STUDENT' AND p.PAY_STTS='APPROVED'
+GROUP BY u.SCH_NM ORDER BY avg_per_student DESC;
+```
+result(rows):
+```json
+[{"school":"청주중","avgPerStudent":121000,"students":140},
+ {"school":"흥덕중(우리학교)","avgPerStudent":115000,"students":120,"me":true},
+ {"school":"가경중","avgPerStudent":104000,"students":133},
+ {"school":"복대중","avgPerStudent":92000,"students":98}]
+```
+chart: `{ "type":"bar", "label":"school", "value":"avgPerStudent" }`
+
+---
+
+## 6. 카드 리팩터 원칙
+- 각 카드 컴포넌트는 **`result`(필요 시 `chart`) prop을 우선 사용**.
+- `result`가 없으면 기존 `EDUPAY` 계산으로 폴백(이행기 안전).
+- 차트는 기존 구현(직접 SVG / Recharts / Leaflet) 그대로, 입력 데이터만 `result`로 교체.
+- 로딩: 메시지 전송 후 응답 전까지 기존 `Typing` 표시 재사용.
+
+## 7. 실 오페리아 전환 시
+- `.env`에 `VITE_OPERIA_API=https://...` 설정만 하면 `queryOperia`가 목업 대신 실 API 호출.
+- 응답이 본 문서 §1 스키마를 따르면 프론트 무수정. (다르면 operia.js에 어댑터 1곳만 추가)
+
+---
+
+## 8. 오페리아 AI 시뮬 모드 — 데이터셋 grounded 실행 (옵션 A 확정)
+정적 목업/즉석 생성 대신, **고정 JSON 데이터셋(fixture)을 DB 대역으로 두고**, Claude가
+① 질문 → SQL 생성, ② 그 SQL을 **데이터셋 행에 실제 집계 실행**, ③ 우리 카드 형태(expectedShape)로 반환.
+→ 숫자가 데이터셋에서 나와 **서로 일관**(월별 합 = 사용처별 합 등), "그 쿼리로 이 결과"가 성립.
+
+### 8.1 모드 우선순위 (operia.js)
+```
+VITE_OPERIA_API (실서버)  >  VITE_OPERIA_AI === "true" (Claude+데이터셋)  >  정적 목업 파일
+```
+- 세 모드 모두 `queryOperia(intent, params)` → `{ question, sql, result }` 동일 계약(§1). 전환 = env 스위치뿐.
+- **AI 시뮬 실패(파싱오류/키없음/네트워크/expectedShape 불일치) → throw → 화면 에러 메시지** (정적 목업 자동 폴백 안 함).
+- 비결정성 허용(호출마다 값 약간 달라짐 OK). 실 시연은 오페리아로.
+
+### 8.2 데이터셋 fixture — `src/mock/operia/dataset.json`
+4개 테이블을 행 배열로(실제 4테이블 + 가상 TB_PAY_DTL/TB_BEG). **이 fixture는 추후 edupay_db 더미데이터로 재활용.**
+```jsonc
+{
+  "TB_COM_USER": [
+    {"USER_ID":"stu_demo","USER_TYPE":"STUDENT","USER_NM":"김민준","SCH_NM":"흥덕중","GRADE":"2","CLS_NO":"3"},
+    {"USER_ID":"stu_002","USER_TYPE":"STUDENT","USER_NM":"이서연","SCH_NM":"흥덕중","GRADE":"2","CLS_NO":"3"},
+    {"USER_ID":"par_demo","USER_TYPE":"PARENT","USER_NM":"김아빠","SCH_NM":null,"GRADE":null,"CLS_NO":null}
+    // 학생 ~8명(흥덕중/청주중/가경중 분포), 부모 일부
+  ],
+  "TB_COM_VOUCHER": [
+    {"MERCHANT_NO":"M001","MERCHANT_NM":"GS25 청주흥덕점","BIZ_TYPE_NM":"소매","BIZ_ITEM_NM":"편의점","ADDR":"청주시 흥덕구 대농로 12","USE_YN":"Y","VOUCHER_STTS_NM":"정상","LAT":36.6378,"LNG":127.4852}
+    // 가맹점 ~14개(편의점/식비/학용품/교통/문화/카페), 흥덕구 좌표
+  ],
+  "TB_PAY_DTL": [
+    {"PAY_ID":"P0001","USER_ID":"stu_demo","MERCHANT_NO":"M001","PAY_AMT":4500,"PAY_MEANS":"VOUCHER","PAY_CHANNEL":"OFFLINE","PAY_STTS":"APPROVED","PAY_DT":"2026-04-03 12:15:00"}
+    // stu_demo ~40행(2026-04~06 분포). 수단 VOUCHER 70/APPCARD 15/BEG 15, 채널 OFFLINE 75/ONLINE 25,
+    // 금액 1,000~15,000, MERCHANT_NO는 VOUCHER에서. 비교용으로 타 학생 결제도 일부.
+  ],
+  "TB_BEG": [
+    {"BEG_ID":"B001","STUDENT_USER_ID":"stu_demo","PARENT_USER_ID":"par_demo","REQ_AMT":20000,"RECV_AMT":20000,"REQ_STTS":"ACCEPT","REQ_DT":"2026-05-10 19:30:00"}
+    // stu_demo ~5건(4~6월), 일부 REJECT
+  ]
+}
+```
+> CLI는 위 구조·분포 규칙대로 행을 채워 dataset.json 생성(시드 예시는 형태 참고용).
+
+### 8.3 result 형태 보장
+- **알려진 10개 intent**: 프론트가 그 intent의 **expectedShape**(§5 result 예시 = 형태 견본, 값 아님)를 프롬프트에 함께 전달 → Claude는 구조 유지·값은 데이터셋 집계로.
+- **그 외 질문**: expectedShape 없이 → rows 배열 → ChartRenderer default `table`.
+
+### 8.4 시스템 프롬프트 (operia.js)
+```
+너는 '오페리아', 충청북도 교육지원금 결제 데이터의 NL2SQL 에이전트다.
+[규칙]
+1) 사용자 질문을 MySQL SQL로 변환한다.
+2) 그 SQL을 아래 [데이터셋] 행에 '실제로' 집계 실행한 결과만 사용한다. 데이터셋에 없는 값을 지어내지 마라.
+3) 반드시 JSON만 출력(마크다운/설명 금지): {"question":..., "sql":..., "result":...}
+[result 형태]
+- expectedShape 주어지면 그 구조 유지, 값만 데이터셋 집계로 채움(키/중첩 변경 금지).
+- 없으면 rows 배열. 숫자는 number, 한글 라벨, 합계/비율 상호 일관.
+[스키마] TB_COM_USER / TB_COM_VOUCHER / TB_PAY_DTL(PAY_MEANS:VOUCHER·APPCARD·BEG, PAY_CHANNEL:ONLINE·OFFLINE, PAY_STTS:APPROVED·CANCELED) / TB_BEG
+[데모 컨텍스트] USER_ID=stu_demo, 흥덕중 2학년, 최근 3개월, 금액 원, 바우처 한도 100,000.
+[데이터셋]
+<dataset.json 전체 주입>
+```
+user 메시지: `질문: <원질문>` + (intent면) `expectedShape: <§5 형태 JSON>`.
+
+### 8.5 흐름 / 구현 위치
+- 한 번의 Claude 호출로 SQL+실행+result 동시 반환(데이터셋이 system 프롬프트에 있음).
+- `src/api/operia.js`에 AI 분기. Anthropic 호출은 `claude.js` 저수준 재사용/별도 함수(자유대화 `window.claude.complete`와 분리). 키는 `VITE_ANTHROPIC_API_KEY` 재사용.
+- chart.type은 프론트 `INTENT_CHART`가 결정(§3.1). AI는 result만.
+
+### 8.6 파싱/검증 가드
+- ```json 펜스 제거 후 `JSON.parse` 실패 → throw. `result` 키 누락 → throw.
+- expectedShape가 있는데 최상위 키 구조가 다르면 → throw(→ 화면 에러). 부분 복구 금지.
+
+### 8.7 전환 안전성
+- AI 시뮬은 `queryOperia` 계약 뒤 → `VITE_OPERIA_API` 설정 시 우회. 프론트 무수정.
+- 실 오페리아가 §1/§5 result 형태를 따르도록 **본 문서를 응답 계약으로 전달**. 다르면 operia.js 어댑터 1곳.
+- dataset.json은 **edupay_db 더미데이터로 그대로 재활용**(빈 DB 시드).
+
+---
+
+## 9. SQL 노출 (hover/탭으로 생성 쿼리 보기)
+데이터 카드에서 **AI가 만든 SQL을 보여줘** NL2SQL 동작을 투명하게 드러낸다. result는 이 SQL에 일관된 값이다.
+
+### 9.1 데이터 흐름
+- `send()`가 응답의 `sql`을 메시지 객체에 함께 저장: `{ chartType, result, sql, scope }`.
+- `Bubble → ChartRenderer` 로 `sql` 전달.
+
+### 9.2 UI
+- 각 데이터 카드 **우상단에 작은 칩** `</> SQL`.
+- **데스크탑: hover**, **모바일/WebView: 탭** 으로 팝오버 토글(둘 다 지원 — 터치엔 hover 없음).
+- 팝오버: 모노스페이스, 다크 배경, 길면 스크롤. 바깥 탭/ESC로 닫힘.
+- `sql`이 없으면 칩 숨김.
+
+### 9.3 AI 일관성 (§8 보강)
+- 시스템 프롬프트에 **"result는 반드시 sql 쿼리가 반환했을 결과와 일치(컬럼/집계/필터 의미 일관)"** 를 명시.
+
+### 9.4 전환 안전성
+- 실 오페리아도 `sql`을 반환하므로(NL2SQL) UI 그대로 동작. 칩은 응답의 `sql` 유무만 본다.

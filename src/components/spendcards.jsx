@@ -1,4 +1,5 @@
 import React from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { EDUPAY } from "../data/edupay";
 /* FOX PAY AI — 날짜별 소비 시각화 카드 (AI 답변 인라인)
    "오늘/어제/N일 얼마 썼어?" → 그 날의 합계 + 카테고리 막대 + 거래 내역 */
@@ -193,8 +194,58 @@ const CATSPEND_MATCH = {
   "학용품": (e) => e.cat === "학용품",
   "문화": (e) => e.cat === "문화",
 };
-function CategorySpendCard({ ledger, range, ckey, label }) {
+// 카테고리(업종)별 사용처 도넛 — 오페리아 result(rows: [{category, amount, cnt}]) 기반
+const CATSPEND_COLORS = ["#5B4DD6", "#7C5CD6", "#9A8FE6", "#C2BAEC", "#D7D2F2", "#E5E0F7"];
+function CategoryDonut({ result }) {
   const D = EDUPAY;
+  const rows = (result || []).slice().sort((a, b) => b.amount - a.amount);
+  const total = rows.reduce((s, e) => s + e.amount, 0) || 1;
+  const data = rows.map((e, i) => ({ name: e.category, value: e.amount, cnt: e.cnt, color: CATSPEND_COLORS[i % CATSPEND_COLORS.length] }));
+  const top = data[0];
+  return (
+    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">
+      <span className="inline-block mb-1.5 px-2 py-0.5 rounded-full bg-violet-50 text-[11.5px] font-bold text-violet-600">최근 3개월</span>
+      <div className="text-[17px] font-extrabold text-gray-900 tracking-[-0.01em]">사용처별 사용 내역</div>
+      <div className="text-[12.5px] text-gray-400 mt-0.5">업종별 사용 금액 · 가맹점 기준</div>
+      <div className="mt-4 flex items-center gap-3">
+        <div className="relative" style={{ width: 130, height: 130 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                   innerRadius={42} outerRadius={62} paddingAngle={2} stroke="none" isAnimationActive={false}>
+                {data.map((e, i) => <Cell key={i} fill={e.color} />)}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-[10px] text-gray-400">총 사용</span>
+            <span className="text-[15px] font-extrabold text-gray-900">{D.num(total)}원</span>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col gap-1.5">
+          {data.map((e, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: e.color }}></span>
+              <span className="text-[12px] text-gray-600 flex-1 truncate">{e.name}</span>
+              <span className="text-[11px] text-gray-400 tabular-nums">{e.cnt}건</span>
+              <span className="text-[12px] font-semibold text-gray-900 tabular-nums w-[52px] text-right">{D.num(e.value)}원</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {top && (
+        <div className="mt-4 rounded-xl bg-violet-50/70 px-3.5 py-3 text-[12.5px] text-violet-900 leading-relaxed">
+          💡 {top.name}에 가장 많이 썼어 ({D.num(top.value)}원, 전체의 {Math.round(top.value / total * 100)}%). 어디에 쓰는지 한눈에 보이지? 🛒
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CategorySpendCard({ ledger, range, ckey, label, result }) {
+  const D = EDUPAY;
+  // 오페리아 result(카테고리별 rows) 우선 — 없으면 기존 단일 카테고리 집계로 폴백
+  if (Array.isArray(result)) return <CategoryDonut result={result} />;
   const r = range || D.thisMonthRange;
   const match = CATSPEND_MATCH[ckey] || ((e) => e.cat === ckey);
   const fmt = (iso) => { const [, m, d] = iso.split("-").map(Number); return `${m}월 ${d}일`; };
