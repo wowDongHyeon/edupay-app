@@ -7,6 +7,12 @@ import { HistoryDrawer } from "./components/history";
 const { useState, useRef, useEffect } = React;
 const DATA = EDUPAY;
 
+// [WebView] ?view=webview 로 로드되면 폭스에듀 네이티브 앱에 임베드된 모드.
+// 자체 헤더/탭(상단바는 네이티브가 그림)을 숨기고, 인트로를 건너뛰어 금융친구 화면부터 시작.
+const WEBVIEW =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("view") === "webview";
+
 const GRADES = ["초등", "중학", "고등"];
 const GRADE_LABELS = { "초등": "초등학생", "중학": "중학생", "고등": "고등학생" };
 
@@ -449,7 +455,7 @@ function QuickReplyPanel({ onPick }) {
 /* ── 메인 앱 ──────────────────────────────────────────── */
 function App() {
   const [grade, setGrade] = useState("중학");
-  const [entered, setEntered] = useState(false);
+  const [entered, setEntered] = useState(WEBVIEW); // webview면 인트로 건너뛰고 바로 진입
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -461,6 +467,14 @@ function App() {
   });
   const [activeId, setActiveId] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
+  // [개발용] 응답 경로 디버그 토스트 (API / 로컬). dev 모드에서만 표시
+  const [apiToast, setApiToast] = useState(null);
+  const showApiToast = (msg, kind = "info") => {
+    if (!import.meta.env.DEV) return;
+    const id = Date.now();
+    setApiToast({ msg, kind, id });
+    setTimeout(() => setApiToast((cur) => (cur && cur.id === id ? null : cur)), 2600);
+  };
   const scrollRef = useRef(null);
   const started = messages.length > 0;
 
@@ -792,6 +806,7 @@ function App() {
     // 소비 조회/분석 질의 → 시각화 카드로 바로 응답 (AI 호출 없이, 즉시·정확)
     const ci = cardIntent(q);
     if (ci) {
+      showApiToast(`로컬 카드 · ${ci.kind}`, "local");
       await new Promise((r) => setTimeout(r, 450));
       setTyping(false);
       setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: ci.kind === "recommend" ? DATA.recommendIntro[grade] || "" : "", card: ci.kind, scope: ci.scope || null, only: ci.only || null }]);
@@ -802,10 +817,18 @@ function App() {
     let res;
     try {
       const hasAI = typeof window !== "undefined" && window.FINFRIEND_AI_ENDPOINT || window.claude && window.claude.complete;
-      res = hasAI ? await askAI(q, history) : fallback(q);
-      if (!res.text) res = fallback(q);
+      if (hasAI) {
+        showApiToast("🤖 Claude API 호출", "api");
+        res = await askAI(q, history);
+        if (!res.text) { res = fallback(q); showApiToast("로컬 fallback · 빈 응답", "local"); }
+      } else {
+        res = fallback(q);
+        showApiToast("로컬 응답 · AI 미설정", "local");
+      }
     } catch (e) {
       res = fallback(q);
+      showApiToast("로컬 fallback · API 오류", "error");
+      console.error("[AI] 호출 오류:", e);
     }
     setTyping(false);
     const recorded = res.action ? runAction(res.action) : null;
@@ -822,9 +845,19 @@ function App() {
   return (
     <div className="relative w-full mx-auto bg-[#F6F6FB] flex flex-col overflow-hidden phone-frame"
     style={{ maxWidth: 390 }}>
+      {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
       canBack={tab === "금융친구" && entered} onBack={() => { if (started) { setMessages([]); setActiveId(null); } else { setEntered(false); } }}
       onHistory={tab === "금융친구" ? () => setShowHistory(true) : null} />
+      }
+
+      {/* webview 모드: 헤더가 없으므로 채팅 중 메뉴로 돌아갈 작은 back 버튼 */}
+      {WEBVIEW && started &&
+      <button onClick={() => { setMessages([]); setActiveId(null); }} aria-label="메뉴로"
+      className="absolute left-3 top-3 z-40 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center active:scale-90 transition">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#1A1A1A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      }
 
       {tab !== "금융친구" ?
       <ComingSoon tab={tab} onGoChat={() => {setEntered(true);setTab("금융친구");}} /> :
@@ -872,6 +905,14 @@ function App() {
       {showHistory &&
       <HistoryDrawer convos={convos} activeId={activeId}
       onSelect={selectConvo} onNew={newChat} onDelete={deleteConvo} onClose={() => setShowHistory(false)} />
+      }
+
+      {/* [개발용] 응답 경로 디버그 토스트 */}
+      {apiToast &&
+      <div className="absolute left-1/2 -translate-x-1/2 top-16 z-50 px-3.5 py-2 rounded-full text-[12px] font-bold text-white shadow-lg edupay-fade pointer-events-none"
+      style={{ background: apiToast.kind === "api" ? "#5B4DD6" : apiToast.kind === "error" ? "#CF5A5A" : "#3A3A3C" }}>
+        {apiToast.msg}
+      </div>
       }
     </div>);
 
