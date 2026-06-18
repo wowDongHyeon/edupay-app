@@ -336,18 +336,22 @@ chart: `{ "type":"bar", "label":"school", "value":"avgPerStudent" }`
 
 ---
 
-## 8. 오페리아 AI 시뮬 모드 — 데이터셋 grounded 실행 (옵션 A 확정)
-정적 목업/즉석 생성 대신, **고정 JSON 데이터셋(fixture)을 DB 대역으로 두고**, Claude가
-① 질문 → SQL 생성, ② 그 SQL을 **데이터셋 행에 실제 집계 실행**, ③ 우리 카드 형태(expectedShape)로 반환.
-→ 숫자가 데이터셋에서 나와 **서로 일관**(월별 합 = 사용처별 합 등), "그 쿼리로 이 결과"가 성립.
+## 8. 오페리아 시뮬 모드 — 프론트 SQL 실행 (옵션 B 확정)
+데이터셋을 프롬프트에 넣으면 무겁고 불안정 → **실행을 프론트로 이동.** Claude는 **SQL만**(경량) 만들고,
+**브라우저 내 SQL 엔진 alasql**이 고정 데이터셋(dataset.json) 위에서 그 SQL을 실제 실행한다.
+→ 결정적·정확·무료(데이터셋을 Claude에 안 보냄). "그 쿼리로 이 결과"가 진짜로 성립.
+
+### 8.0 라우팅 (10개 vs 그 외)
+- **알려진 10개 intent** (`cardIntent` 매칭): **고정 SQL 템플릿** 사용(Claude 호출 없음, 결정적). 템플릿 → alasql 실행 → intent별 shaper → expectedShape.
+- **그 외 데이터 질문** (intent=null): **Claude 경량 호출**(스키마만 보고 SQL만 반환) → alasql 실행 → rows → ChartRenderer default `table`.
+- **잡담**(데이터 아님): 기존 기타(자유대화) 경로.
 
 ### 8.1 모드 우선순위 (operia.js)
 ```
-VITE_OPERIA_API (실서버)  >  VITE_OPERIA_AI === "true" (Claude+데이터셋)  >  정적 목업 파일
+VITE_OPERIA_API (실서버)  >  VITE_OPERIA_AI === "true" (alasql 로컬 실행)  >  정적 목업 파일
 ```
 - 세 모드 모두 `queryOperia(intent, params)` → `{ question, sql, result }` 동일 계약(§1). 전환 = env 스위치뿐.
-- **AI 시뮬 실패(파싱오류/키없음/네트워크/expectedShape 불일치) → throw → 화면 에러 메시지** (정적 목업 자동 폴백 안 함).
-- 비결정성 허용(호출마다 값 약간 달라짐 OK). 실 시연은 오페리아로.
+- **실패(SQL 생성/실행 오류) → throw → 화면 에러 메시지** (정적 목업 자동 폴백 안 함).
 
 ### 8.2 데이터셋 fixture — `src/mock/operia/dataset.json`
 4개 테이블을 행 배열로(실제 4테이블 + 가상 TB_PAY_DTL/TB_BEG). **이 fixture는 추후 edupay_db 더미데이터로 재활용.**
@@ -376,40 +380,61 @@ VITE_OPERIA_API (실서버)  >  VITE_OPERIA_AI === "true" (Claude+데이터셋) 
 ```
 > CLI는 위 구조·분포 규칙대로 행을 채워 dataset.json 생성(시드 예시는 형태 참고용).
 
-### 8.3 result 형태 보장
-- **알려진 10개 intent**: 프론트가 그 intent의 **expectedShape**(§5 result 예시 = 형태 견본, 값 아님)를 프롬프트에 함께 전달 → Claude는 구조 유지·값은 데이터셋 집계로.
-- **그 외 질문**: expectedShape 없이 → rows 배열 → ChartRenderer default `table`.
+### 8.3 alasql 도입 / 실행
+- `npm i alasql`. dataset.json 로드 후 테이블 등록(예: `alasql.tables.TB_PAY_DTL = {data: ds.TB_PAY_DTL}` … 4개).
+- **alasql 호환 SQL만**: `DATE_FORMAT` 등 MySQL 전용 함수 금지. 월 추출은 `SUBSTR(PAY_DT,1,7)` 사용. JOIN/GROUP BY/SUM/COUNT/서브쿼리/`ORDER BY`/`LIMIT` OK.
+- 실행: `alasql(sql)` → rows 반환.
 
-### 8.4 시스템 프롬프트 (operia.js)
+### 8.4 알려진 10개 — 고정 SQL 템플릿 + shaper (`src/mock/operia/queries.js`)
+intent별로 `{ sqls, shape }`:
+- `sqls`: 1개 또는 여러 개(복합 카드). 예: report = `{ trend: "...", byMeans: "..." }`.
+- `shape(resultSets) → expectedShape`: alasql rows를 §5 형태로 조립.
+- 예(report):
+```js
+report: {
+  sqls: {
+    trend:   "SELECT SUBSTR(PAY_DT,1,7) m, SUM(PAY_AMT) amount FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_STTS='APPROVED' GROUP BY m ORDER BY m",
+    byMeans: "SELECT PAY_MEANS means, SUM(PAY_AMT) amount FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_STTS='APPROVED' GROUP BY PAY_MEANS",
+  },
+  shape: (r) => ({ trend: r.trend.map(x=>({month:x.m, amount:x.amount})),
+                   byMeans: withPct(r.byMeans) }),
+}
 ```
-너는 '오페리아', 충청북도 교육지원금 결제 데이터의 NL2SQL 에이전트다.
-[규칙]
-1) 사용자 질문을 MySQL SQL로 변환한다.
-2) 그 SQL을 아래 [데이터셋] 행에 '실제로' 집계 실행한 결과만 사용한다. 데이터셋에 없는 값을 지어내지 마라.
-3) 반드시 JSON만 출력(마크다운/설명 금지): {"question":..., "sql":..., "result":...}
-[result 형태]
-- expectedShape 주어지면 그 구조 유지, 값만 데이터셋 집계로 채움(키/중첩 변경 금지).
-- 없으면 rows 배열. 숫자는 number, 한글 라벨, 합계/비율 상호 일관.
-[스키마] TB_COM_USER / TB_COM_VOUCHER / TB_PAY_DTL(PAY_MEANS:VOUCHER·APPCARD·BEG, PAY_CHANNEL:ONLINE·OFFLINE, PAY_STTS:APPROVED·CANCELED) / TB_BEG
-[데모 컨텍스트] USER_ID=stu_demo, 흥덕중 2학년, 최근 3개월, 금액 원, 바우처 한도 100,000.
-[데이터셋]
-<dataset.json 전체 주입>
+- 나머지 9개도 동일 패턴(§5 result 형태로 조립). 템플릿 SQL은 루트 `queries.sql` 로직을 alasql/TB_PAY_DTL 기준으로 옮김.
+- **SQL hover에 보일 sql**: 템플릿 SQL 문자열(여러 개면 `;`로 join)을 응답 `sql`에 넣음.
+
+### 8.5 그 외 질문 — Claude 경량 NL→SQL
+- system 프롬프트(작음, 데이터셋 없음):
 ```
-user 메시지: `질문: <원질문>` + (intent면) `expectedShape: <§5 형태 JSON>`.
+너는 '오페리아' NL2SQL 에이전트. 질문을 alasql 호환 SELECT 한 문장으로만 변환해 출력한다.
+SQL 외 텍스트 금지. DATE_FORMAT 금지(월은 SUBSTR(PAY_DT,1,7)). 대상 USER_ID='stu_demo'.
+[스키마] TB_COM_USER(USER_ID,USER_TYPE,SCH_NM,GRADE) / TB_COM_VOUCHER(MERCHANT_NO,MERCHANT_NM,BIZ_ITEM_NM,ADDR,LAT,LNG) / TB_PAY_DTL(USER_ID,MERCHANT_NO,PAY_AMT,PAY_MEANS,PAY_CHANNEL,PAY_STTS,PAY_DT) / TB_BEG(STUDENT_USER_ID,REQ_AMT,RECV_AMT,REQ_STTS,REQ_DT)
+```
+- 반환 SQL → alasql 실행 → rows → result(rows 그대로) → ChartRenderer `table`.
+- 파싱 가드: SQL 비었거나 SELECT 아니면 throw. alasql 실행 예외 → throw(→ 화면 에러).
+- **키 게이팅(보안)**: `VITE_ANTHROPIC_API_KEY`가 비어 있으면 **Claude 호출을 시도하지 않고** "아직 지원하지 않는 질문이에요" 친절 메시지 반환(에러 아님). → 배포본은 키 없이도 안전하게 동작.
 
-### 8.5 흐름 / 구현 위치
-- 한 번의 Claude 호출로 SQL+실행+result 동시 반환(데이터셋이 system 프롬프트에 있음).
-- `src/api/operia.js`에 AI 분기. Anthropic 호출은 `claude.js` 저수준 재사용/별도 함수(자유대화 `window.claude.complete`와 분리). 키는 `VITE_ANTHROPIC_API_KEY` 재사용.
-- chart.type은 프론트 `INTENT_CHART`가 결정(§3.1). AI는 result만.
+### 8.8 dev 모드 — 10개 intent도 Claude가 SQL 생성 (템플릿은 폴백)
+**dev에서만** 알려진 10개 intent도 고정 템플릿 대신 **Claude NL→SQL**을 사용한다. 시연/실서버 안정성은 템플릿/실 오페리아가 담당.
+- **조건**: `import.meta.env.DEV === true` AND 키 있음(`VITE_ANTHROPIC_API_KEY`) AND `VITE_OPERIA_AI`.
+- **동작**:
+  1. 해당 intent의 **출력 계약**(shaper가 기대하는 sqls 구조 = 단일 SQL 또는 `{key: SQL}` 키들 + 각 SQL이 내야 할 컬럼)을 프롬프트에 명시. 기존 템플릿 SQL을 **reference**로 함께 제공.
+  2. Claude는 **템플릿과 동일한 구조의 sqls**(같은 키, 같은 출력 컬럼)를 alasql 호환 SQL로 반환.
+  3. 그 sqls를 alasql 실행 → **기존 shaper 그대로** 조립 → result.
+  4. SQL hover엔 **Claude가 만든 SQL** 노출.
+- **폴백(안정장치)**: Claude 응답 파싱 실패 / alasql 오류 / 필수 컬럼 누락 → **고정 템플릿으로 자동 폴백**(데모 안 깨짐).
+- **dev 아님 / 키 없음 / prod 빌드**: 항상 고정 템플릿(결정적·키 무관).
 
-### 8.6 파싱/검증 가드
-- ```json 펜스 제거 후 `JSON.parse` 실패 → throw. `result` 키 누락 → throw.
-- expectedShape가 있는데 최상위 키 구조가 다르면 → throw(→ 화면 에러). 부분 복구 금지.
+### 8.6 구현 위치
+- `src/api/operia.js`: 모드 분기 + intent 분기(템플릿 vs Claude) + alasql 실행 + shaper 호출.
+  - intent 분기 세부: **dev+키 → Claude sqls(폴백 템플릿)** / 그 외 → 템플릿(§8.8).
+- Claude 호출은 `claude.js` 저수준 재사용/별도 함수(자유대화 `window.claude.complete`와 분리). 키 `VITE_ANTHROPIC_API_KEY` 재사용.
+- chart.type은 프론트 `INTENT_CHART`가 결정(§3.1).
 
 ### 8.7 전환 안전성
-- AI 시뮬은 `queryOperia` 계약 뒤 → `VITE_OPERIA_API` 설정 시 우회. 프론트 무수정.
+- 시뮬(B)은 `queryOperia` 계약 뒤 → `VITE_OPERIA_API` 설정 시 우회. 프론트 무수정.
 - 실 오페리아가 §1/§5 result 형태를 따르도록 **본 문서를 응답 계약으로 전달**. 다르면 operia.js 어댑터 1곳.
-- dataset.json은 **edupay_db 더미데이터로 그대로 재활용**(빈 DB 시드).
+- dataset.json은 **edupay_db 더미데이터로 그대로 재활용**(빈 DB 시드). 템플릿 SQL은 실 MySQL용으로 `queries.sql`에 이미 존재.
 
 ---
 
@@ -431,3 +456,32 @@ user 메시지: `질문: <원질문>` + (intent면) `expectedShape: <§5 형태 
 
 ### 9.4 전환 안전성
 - 실 오페리아도 `sql`을 반환하므로(NL2SQL) UI 그대로 동작. 칩은 응답의 `sql` 유무만 본다.
+
+---
+
+## 10. 배포 보안 프로파일 (공개 URL 매핑용)
+공개 배포본 번들에 **Claude API 키가 들어가면 누구나 추출 가능** → 공개 URL엔 키를 절대 넣지 않는다.
+**런타임 토글이 아니라 빌드 환경으로 끈다**(토글은 코드에 키가 남지만, 빌드 시 키를 비우면 번들에 키 자체가 없음).
+
+### 10.1 환경 프로파일 두 개
+| 변수 | 개발/테스트(.env) | **배포(.env.production)** |
+|---|---|---|
+| `VITE_ANTHROPIC_API_KEY` | (테스트용 저한도 키) | **빈값** (번들 미포함) |
+| `VITE_AI_ENABLED` (자유대화) | true(테스트 시) | **false** |
+| `VITE_OPERIA_AI` (시뮬) | true | **true** (alasql 템플릿용 — 키 무관) |
+| `VITE_OPERIA_API` (실서버) | 비움 | 비움(나중에 오페리아 URL) |
+
+- Vite는 `vite build`가 `.env.production`을 로드 → 배포본엔 키 없음.
+
+### 10.2 배포본 동작 (키 없음)
+- **10개 질의**: alasql 고정 템플릿 → 정상 동작(키 불필요). ✅ 데모 핵심 유지.
+- **새 자유 데이터 질문**: 키 없으니 Claude 호출 안 함 → "아직 지원하지 않는 질문" 메시지(§8.5 게이팅).
+- **자유 대화(기타)**: `VITE_AI_ENABLED=false` → 로컬 fallback. AI 토글 UI도 미노출(§config: aiFeature=false).
+- 결과: **번들·네트워크 어디에도 Claude 키/호출 없음.** 공개 URL 매핑 안전.
+
+### 10.3 검증
+- `dist/` 빌드 후 `grep -r "sk-ant" dist/` → **0건**이어야 함.
+- 배포본에서 데이터질문 10개 정상, 자유질문은 친절 메시지, 네트워크 탭에 api.anthropic.com 호출 없음 확인.
+
+### 10.4 추후 (공개 배포에서 Claude 쓰려면)
+- 유일한 안전 방법 = **백엔드 챗 프록시**(키 서버 보관, 앱은 서버 경유). 그 전까지 공개 배포는 Claude off.

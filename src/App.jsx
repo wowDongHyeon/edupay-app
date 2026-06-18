@@ -404,7 +404,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
           {msg.text}
         </div>
         }
-        {isChart && <ChartRenderer type={msg.chartType} result={msg.result} intent={msg.intent} />}
+        {isChart && <ChartRenderer type={msg.chartType} result={msg.result} intent={msg.intent} sql={msg.sql} />}
         {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
       </div>
     </div>);
@@ -511,6 +511,17 @@ function App() {
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, typing]);
+
+  // [WebView] URL ?q= 초기 질문 자동 전송 (네이티브 카드별 진입). StrictMode 중복 방지 위해 1회 가드.
+  const qFired = useRef(false);
+  useEffect(() => {
+    if (qFired.current) return;
+    qFired.current = true;
+    try {
+      const q = new URLSearchParams(window.location.search).get("q");
+      if (q && q.trim()) { setEntered(true); send(decodeURIComponent(q)); }
+    } catch (e) {}
+  }, []);
 
   /* 대화 기록 영속화 */
   useEffect(() => {
@@ -845,7 +856,12 @@ function App() {
           const resp = await queryOperia(ci.kind, ci.scope, q);
           // ↑↑↑ [DEV MOCK] END ↑↑↑
           setTyping(false);
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, result: resp.result }]);
+          // §8.5 키 게이팅: 미지원(키 없음) → 차트 대신 친절 텍스트 안내(에러 아님)
+          if (resp && resp.unsupported) {
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.message }]);
+            return;
+          }
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, result: resp.result, sql: resp.sql, scope: ci.scope || null }]);
         } catch (e) {
           console.error("[operia] 호출 오류:", e);
           showApiToast("오페리아 오류", "error");
@@ -913,7 +929,7 @@ function App() {
       <ComingSoon tab={tab} onGoChat={() => {setEntered(true);setTab("금융친구");}} /> :
       !entered ?
       <IntroScreen points={DATA.points} onStart={() => setEntered(true)} onOpenPoints={() => setEntered(true)} /> :
-      !started ?
+      (!started && !WEBVIEW) ?
       <MenuScreen onPick={(t) => send(t)} /> :
       <>
       {started && <FavoritesBar onPick={send} />}
@@ -927,7 +943,7 @@ function App() {
         </div>
         }
 
-      {started && <QuickReplyPanel onPick={send} />}
+      {(started || WEBVIEW) && <QuickReplyPanel onPick={send} />}
       <div className="shrink-0 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
           <div className="flex-1 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">

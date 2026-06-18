@@ -42,6 +42,9 @@ export function TableCard({ result, intent }) {
         </table>
       </div>
     );
+  } else if (Array.isArray(data)) {
+    // 빈 결과(0행) — 쿼리는 실행됐지만 매칭 없음
+    body = <div className="mt-3 rounded-2xl bg-gray-50 px-4 py-7 text-center text-[13.5px] text-gray-500">조회 결과가 없어요 👍</div>;
   } else if (result && typeof result === "object") {
     const entries = Object.entries(result);
     body = (

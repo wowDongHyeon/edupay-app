@@ -1,0 +1,1301 @@
+{
+ "TB_COM_USER": [
+  {
+   "USER_ID": "stu_demo",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "김민준",
+   "SCH_NM": "흥덕중",
+   "GRADE": "2",
+   "CLS_NO": "3"
+  },
+  {
+   "USER_ID": "stu_002",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "이서연",
+   "SCH_NM": "흥덕중",
+   "GRADE": "2",
+   "CLS_NO": "3"
+  },
+  {
+   "USER_ID": "stu_003",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "박지호",
+   "SCH_NM": "흥덕중",
+   "GRADE": "2",
+   "CLS_NO": "1"
+  },
+  {
+   "USER_ID": "stu_004",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "최유나",
+   "SCH_NM": "흥덕중",
+   "GRADE": "2",
+   "CLS_NO": "1"
+  },
+  {
+   "USER_ID": "stu_005",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "정시우",
+   "SCH_NM": "청주중",
+   "GRADE": "2",
+   "CLS_NO": "2"
+  },
+  {
+   "USER_ID": "stu_006",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "강하은",
+   "SCH_NM": "청주중",
+   "GRADE": "2",
+   "CLS_NO": "2"
+  },
+  {
+   "USER_ID": "stu_007",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "윤도윤",
+   "SCH_NM": "가경중",
+   "GRADE": "2",
+   "CLS_NO": "4"
+  },
+  {
+   "USER_ID": "stu_008",
+   "USER_TYPE": "STUDENT",
+   "USER_NM": "임채원",
+   "SCH_NM": "가경중",
+   "GRADE": "2",
+   "CLS_NO": "4"
+  },
+  {
+   "USER_ID": "par_demo",
+   "USER_TYPE": "PARENT",
+   "USER_NM": "김아빠",
+   "SCH_NM": null,
+   "GRADE": null,
+   "CLS_NO": null
+  },
+  {
+   "USER_ID": "par_002",
+   "USER_TYPE": "PARENT",
+   "USER_NM": "이엄마",
+   "SCH_NM": null,
+   "GRADE": null,
+   "CLS_NO": null
+  }
+ ],
+ "TB_COM_VOUCHER": [
+  {
+   "MERCHANT_NO": "M001",
+   "MERCHANT_NM": "GS25 청주흥덕점",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "편의점",
+   "ADDR": "청주시 흥덕구 대농로 12",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6378,
+   "LNG": 127.4852
+  },
+  {
+   "MERCHANT_NO": "M002",
+   "MERCHANT_NM": "CU 가경점",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "편의점",
+   "ADDR": "청주시 흥덕구 가경로 51",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6355,
+   "LNG": 127.4901
+  },
+  {
+   "MERCHANT_NO": "M003",
+   "MERCHANT_NM": "세븐일레븐 복대점",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "편의점",
+   "ADDR": "청주시 흥덕구 복대로 30",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6402,
+   "LNG": 127.481
+  },
+  {
+   "MERCHANT_NO": "M004",
+   "MERCHANT_NM": "분식왕 떡볶이",
+   "BIZ_TYPE_NM": "음식",
+   "BIZ_ITEM_NM": "식비",
+   "ADDR": "청주시 흥덕구 가경로 33",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6361,
+   "LNG": 127.4889
+  },
+  {
+   "MERCHANT_NO": "M005",
+   "MERCHANT_NM": "김밥천국 흥덕점",
+   "BIZ_TYPE_NM": "음식",
+   "BIZ_ITEM_NM": "식비",
+   "ADDR": "청주시 흥덕구 신율로 22",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6388,
+   "LNG": 127.4838
+  },
+  {
+   "MERCHANT_NO": "M006",
+   "MERCHANT_NM": "맘스터치 청주대점",
+   "BIZ_TYPE_NM": "음식",
+   "BIZ_ITEM_NM": "식비",
+   "ADDR": "청주시 흥덕구 대학로 5",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6349,
+   "LNG": 127.4925
+  },
+  {
+   "MERCHANT_NO": "M007",
+   "MERCHANT_NM": "흥덕문구",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "학용품",
+   "ADDR": "청주시 흥덕구 신율로 8",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.639,
+   "LNG": 127.4843
+  },
+  {
+   "MERCHANT_NO": "M008",
+   "MERCHANT_NM": "교보문고 청주",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "학용품",
+   "ADDR": "청주시 흥덕구 직지대로 36",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6335,
+   "LNG": 127.488
+  },
+  {
+   "MERCHANT_NO": "M009",
+   "MERCHANT_NM": "메가커피 흥덕",
+   "BIZ_TYPE_NM": "음식",
+   "BIZ_ITEM_NM": "카페",
+   "ADDR": "청주시 흥덕구 대농로 40",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6371,
+   "LNG": 127.4866
+  },
+  {
+   "MERCHANT_NO": "M010",
+   "MERCHANT_NM": "이디야 가경점",
+   "BIZ_TYPE_NM": "음식",
+   "BIZ_ITEM_NM": "카페",
+   "ADDR": "청주시 흥덕구 가경로 70",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6358,
+   "LNG": 127.4912
+  },
+  {
+   "MERCHANT_NO": "M011",
+   "MERCHANT_NM": "청주시내버스",
+   "BIZ_TYPE_NM": "운수",
+   "BIZ_ITEM_NM": "교통",
+   "ADDR": "청주시 흥덕구 전역",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6372,
+   "LNG": 127.486
+  },
+  {
+   "MERCHANT_NO": "M012",
+   "MERCHANT_NM": "CGV 청주서문",
+   "BIZ_TYPE_NM": "문화",
+   "BIZ_ITEM_NM": "문화",
+   "ADDR": "청주시 흥덕구 사직대로 20",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.6345,
+   "LNG": 127.4858
+  },
+  {
+   "MERCHANT_NO": "M013",
+   "MERCHANT_NM": "올리브영 흥덕점",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "생활",
+   "ADDR": "청주시 흥덕구 대농로 18",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.638,
+   "LNG": 127.4849
+  },
+  {
+   "MERCHANT_NO": "M014",
+   "MERCHANT_NM": "이마트 청주점",
+   "BIZ_TYPE_NM": "소매",
+   "BIZ_ITEM_NM": "생활",
+   "ADDR": "청주시 흥덕구 직지대로 50",
+   "USE_YN": "Y",
+   "VOUCHER_STTS_NM": "정상",
+   "LAT": 36.632,
+   "LNG": 127.4895
+  }
+ ],
+ "TB_PAY_DTL": [
+  {
+   "PAY_ID": "P0001",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 6700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-22 19:05:00"
+  },
+  {
+   "PAY_ID": "P0002",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 6900,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-18 13:45:00"
+  },
+  {
+   "PAY_ID": "P0003",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M011",
+   "PAY_AMT": 8100,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-25 12:44:00"
+  },
+  {
+   "PAY_ID": "P0004",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 9600,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-04 16:54:00"
+  },
+  {
+   "PAY_ID": "P0005",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M006",
+   "PAY_AMT": 12700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "CANCELED",
+   "PAY_DT": "2026-05-03 19:18:00"
+  },
+  {
+   "PAY_ID": "P0006",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 5900,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-22 13:49:00"
+  },
+  {
+   "PAY_ID": "P0007",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 3500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-21 16:10:00"
+  },
+  {
+   "PAY_ID": "P0008",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M007",
+   "PAY_AMT": 2800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-18 13:10:00"
+  },
+  {
+   "PAY_ID": "P0009",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 6600,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-08 08:51:00"
+  },
+  {
+   "PAY_ID": "P0010",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 9000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-13 21:29:00"
+  },
+  {
+   "PAY_ID": "P0011",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 14700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-14 20:25:00"
+  },
+  {
+   "PAY_ID": "P0012",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 13600,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-04 12:40:00"
+  },
+  {
+   "PAY_ID": "P0013",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 10800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-17 15:35:00"
+  },
+  {
+   "PAY_ID": "P0014",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M010",
+   "PAY_AMT": 14700,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-11 09:18:00"
+  },
+  {
+   "PAY_ID": "P0015",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M014",
+   "PAY_AMT": 7700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-17 09:55:00"
+  },
+  {
+   "PAY_ID": "P0016",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 6000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-18 19:58:00"
+  },
+  {
+   "PAY_ID": "P0017",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M012",
+   "PAY_AMT": 10200,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "CANCELED",
+   "PAY_DT": "2026-05-08 08:15:00"
+  },
+  {
+   "PAY_ID": "P0018",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M011",
+   "PAY_AMT": 13400,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-25 12:08:00"
+  },
+  {
+   "PAY_ID": "P0019",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M012",
+   "PAY_AMT": 14500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-07 19:48:00"
+  },
+  {
+   "PAY_ID": "P0020",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 10500,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-15 09:15:00"
+  },
+  {
+   "PAY_ID": "P0021",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M007",
+   "PAY_AMT": 6800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-03 21:03:00"
+  },
+  {
+   "PAY_ID": "P0022",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M006",
+   "PAY_AMT": 2800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-22 18:13:00"
+  },
+  {
+   "PAY_ID": "P0023",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 13100,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-26 17:12:00"
+  },
+  {
+   "PAY_ID": "P0024",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 11500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-02 21:41:00"
+  },
+  {
+   "PAY_ID": "P0025",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M010",
+   "PAY_AMT": 9600,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-08 13:12:00"
+  },
+  {
+   "PAY_ID": "P0026",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 12800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-15 19:06:00"
+  },
+  {
+   "PAY_ID": "P0027",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M013",
+   "PAY_AMT": 3300,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-06 17:31:00"
+  },
+  {
+   "PAY_ID": "P0028",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 5200,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-09 18:18:00"
+  },
+  {
+   "PAY_ID": "P0029",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 13400,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-07 08:37:00"
+  },
+  {
+   "PAY_ID": "P0030",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M007",
+   "PAY_AMT": 2200,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-17 12:03:00"
+  },
+  {
+   "PAY_ID": "P0031",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 2700,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-13 09:56:00"
+  },
+  {
+   "PAY_ID": "P0032",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 3000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "CANCELED",
+   "PAY_DT": "2026-06-19 19:20:00"
+  },
+  {
+   "PAY_ID": "P0033",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 7100,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-22 21:19:00"
+  },
+  {
+   "PAY_ID": "P0034",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 1200,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-04 09:34:00"
+  },
+  {
+   "PAY_ID": "P0035",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M012",
+   "PAY_AMT": 2700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-10 12:28:00"
+  },
+  {
+   "PAY_ID": "P0036",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 14500,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-10 21:06:00"
+  },
+  {
+   "PAY_ID": "P0037",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 3700,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-09 15:38:00"
+  },
+  {
+   "PAY_ID": "P0038",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 7700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-02 09:40:00"
+  },
+  {
+   "PAY_ID": "P0039",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M008",
+   "PAY_AMT": 4300,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "CANCELED",
+   "PAY_DT": "2026-05-06 18:35:00"
+  },
+  {
+   "PAY_ID": "P0040",
+   "USER_ID": "stu_demo",
+   "MERCHANT_NO": "M006",
+   "PAY_AMT": 4800,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-19 19:09:00"
+  },
+  {
+   "PAY_ID": "P0041",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M013",
+   "PAY_AMT": 2000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-22 13:42:00"
+  },
+  {
+   "PAY_ID": "P0042",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M014",
+   "PAY_AMT": 11400,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-05 13:55:00"
+  },
+  {
+   "PAY_ID": "P0043",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 11500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-11 17:51:00"
+  },
+  {
+   "PAY_ID": "P0044",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M010",
+   "PAY_AMT": 5000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-13 08:54:00"
+  },
+  {
+   "PAY_ID": "P0045",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 9900,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-08 08:42:00"
+  },
+  {
+   "PAY_ID": "P0046",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 8100,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-13 21:53:00"
+  },
+  {
+   "PAY_ID": "P0047",
+   "USER_ID": "stu_002",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 7600,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-02 09:38:00"
+  },
+  {
+   "PAY_ID": "P0048",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 14000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-07 15:02:00"
+  },
+  {
+   "PAY_ID": "P0049",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 14700,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-24 21:12:00"
+  },
+  {
+   "PAY_ID": "P0050",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M008",
+   "PAY_AMT": 9400,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-04 15:32:00"
+  },
+  {
+   "PAY_ID": "P0051",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M006",
+   "PAY_AMT": 8500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-14 21:24:00"
+  },
+  {
+   "PAY_ID": "P0052",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 8700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-10 15:13:00"
+  },
+  {
+   "PAY_ID": "P0053",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 12900,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-07 19:30:00"
+  },
+  {
+   "PAY_ID": "P0054",
+   "USER_ID": "stu_003",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 3100,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-21 20:21:00"
+  },
+  {
+   "PAY_ID": "P0055",
+   "USER_ID": "stu_004",
+   "MERCHANT_NO": "M010",
+   "PAY_AMT": 6700,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-01 08:15:00"
+  },
+  {
+   "PAY_ID": "P0056",
+   "USER_ID": "stu_004",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 12600,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-19 13:45:00"
+  },
+  {
+   "PAY_ID": "P0057",
+   "USER_ID": "stu_004",
+   "MERCHANT_NO": "M012",
+   "PAY_AMT": 1100,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-25 17:14:00"
+  },
+  {
+   "PAY_ID": "P0058",
+   "USER_ID": "stu_004",
+   "MERCHANT_NO": "M006",
+   "PAY_AMT": 2200,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-15 12:51:00"
+  },
+  {
+   "PAY_ID": "P0059",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M007",
+   "PAY_AMT": 12300,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-17 17:53:00"
+  },
+  {
+   "PAY_ID": "P0060",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 13100,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-27 21:17:00"
+  },
+  {
+   "PAY_ID": "P0061",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 8000,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-10 13:17:00"
+  },
+  {
+   "PAY_ID": "P0062",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 4800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-05 13:04:00"
+  },
+  {
+   "PAY_ID": "P0063",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 2500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-13 20:44:00"
+  },
+  {
+   "PAY_ID": "P0064",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 13200,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-10 17:54:00"
+  },
+  {
+   "PAY_ID": "P0065",
+   "USER_ID": "stu_005",
+   "MERCHANT_NO": "M010",
+   "PAY_AMT": 14900,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-16 13:17:00"
+  },
+  {
+   "PAY_ID": "P0066",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 11300,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-05 20:34:00"
+  },
+  {
+   "PAY_ID": "P0067",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 1600,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-05 18:11:00"
+  },
+  {
+   "PAY_ID": "P0068",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M004",
+   "PAY_AMT": 9300,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-09 17:16:00"
+  },
+  {
+   "PAY_ID": "P0069",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M014",
+   "PAY_AMT": 2300,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-08 21:04:00"
+  },
+  {
+   "PAY_ID": "P0070",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 7300,
+   "PAY_MEANS": "APPCARD",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-20 12:15:00"
+  },
+  {
+   "PAY_ID": "P0071",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 6500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-25 16:10:00"
+  },
+  {
+   "PAY_ID": "P0072",
+   "USER_ID": "stu_006",
+   "MERCHANT_NO": "M014",
+   "PAY_AMT": 5100,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-19 08:59:00"
+  },
+  {
+   "PAY_ID": "P0073",
+   "USER_ID": "stu_007",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 6000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-27 21:15:00"
+  },
+  {
+   "PAY_ID": "P0074",
+   "USER_ID": "stu_007",
+   "MERCHANT_NO": "M010",
+   "PAY_AMT": 4000,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-26 08:22:00"
+  },
+  {
+   "PAY_ID": "P0075",
+   "USER_ID": "stu_007",
+   "MERCHANT_NO": "M001",
+   "PAY_AMT": 9700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-27 18:06:00"
+  },
+  {
+   "PAY_ID": "P0076",
+   "USER_ID": "stu_007",
+   "MERCHANT_NO": "M009",
+   "PAY_AMT": 12700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-06 19:41:00"
+  },
+  {
+   "PAY_ID": "P0077",
+   "USER_ID": "stu_007",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 13300,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-19 15:20:00"
+  },
+  {
+   "PAY_ID": "P0078",
+   "USER_ID": "stu_007",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 12500,
+   "PAY_MEANS": "BEG",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-19 20:42:00"
+  },
+  {
+   "PAY_ID": "P0079",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 13400,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-11 15:56:00"
+  },
+  {
+   "PAY_ID": "P0080",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M014",
+   "PAY_AMT": 14200,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-08 17:31:00"
+  },
+  {
+   "PAY_ID": "P0081",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 13500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-03 15:14:00"
+  },
+  {
+   "PAY_ID": "P0082",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M005",
+   "PAY_AMT": 10400,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "ONLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-12 17:47:00"
+  },
+  {
+   "PAY_ID": "P0083",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M003",
+   "PAY_AMT": 8800,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-04-24 13:20:00"
+  },
+  {
+   "PAY_ID": "P0084",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M002",
+   "PAY_AMT": 5700,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-06-16 15:46:00"
+  },
+  {
+   "PAY_ID": "P0085",
+   "USER_ID": "stu_008",
+   "MERCHANT_NO": "M011",
+   "PAY_AMT": 3500,
+   "PAY_MEANS": "VOUCHER",
+   "PAY_CHANNEL": "OFFLINE",
+   "PAY_STTS": "APPROVED",
+   "PAY_DT": "2026-05-08 16:11:00"
+  }
+ ],
+ "TB_BEG": [
+  {
+   "BEG_ID": "B001",
+   "STUDENT_USER_ID": "stu_demo",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 15000,
+   "RECV_AMT": 15000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-04-10 19:00:00"
+  },
+  {
+   "BEG_ID": "B002",
+   "STUDENT_USER_ID": "stu_demo",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-05-23 19:34:00"
+  },
+  {
+   "BEG_ID": "B003",
+   "STUDENT_USER_ID": "stu_demo",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 0,
+   "REQ_STTS": "REJECT",
+   "REQ_DT": "2026-05-05 19:17:00"
+  },
+  {
+   "BEG_ID": "B004",
+   "STUDENT_USER_ID": "stu_demo",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 30000,
+   "RECV_AMT": 30000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-02 19:03:00"
+  },
+  {
+   "BEG_ID": "B005",
+   "STUDENT_USER_ID": "stu_demo",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 12000,
+   "RECV_AMT": 0,
+   "REQ_STTS": "REQUEST",
+   "REQ_DT": "2026-06-18 19:18:00"
+  },
+  {
+   "BEG_ID": "B006",
+   "STUDENT_USER_ID": "stu_002",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-16 19:28:00"
+  },
+  {
+   "BEG_ID": "B007",
+   "STUDENT_USER_ID": "stu_002",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 30000,
+   "RECV_AMT": 30000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-04-11 19:11:00"
+  },
+  {
+   "BEG_ID": "B008",
+   "STUDENT_USER_ID": "stu_003",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-05-03 19:25:00"
+  },
+  {
+   "BEG_ID": "B009",
+   "STUDENT_USER_ID": "stu_004",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 30000,
+   "RECV_AMT": 30000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-04-14 19:38:00"
+  },
+  {
+   "BEG_ID": "B010",
+   "STUDENT_USER_ID": "stu_004",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 10000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-04-20 19:50:00"
+  },
+  {
+   "BEG_ID": "B011",
+   "STUDENT_USER_ID": "stu_004",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-20 19:14:00"
+  },
+  {
+   "BEG_ID": "B012",
+   "STUDENT_USER_ID": "stu_004",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 10000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-04-25 19:33:00"
+  },
+  {
+   "BEG_ID": "B013",
+   "STUDENT_USER_ID": "stu_005",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-05-07 19:40:00"
+  },
+  {
+   "BEG_ID": "B014",
+   "STUDENT_USER_ID": "stu_005",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-07 19:16:00"
+  },
+  {
+   "BEG_ID": "B015",
+   "STUDENT_USER_ID": "stu_005",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 10000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-22 19:05:00"
+  },
+  {
+   "BEG_ID": "B016",
+   "STUDENT_USER_ID": "stu_005",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 0,
+   "REQ_STTS": "REJECT",
+   "REQ_DT": "2026-06-06 19:15:00"
+  },
+  {
+   "BEG_ID": "B017",
+   "STUDENT_USER_ID": "stu_006",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 10000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-16 19:18:00"
+  },
+  {
+   "BEG_ID": "B018",
+   "STUDENT_USER_ID": "stu_006",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-05-02 19:14:00"
+  },
+  {
+   "BEG_ID": "B019",
+   "STUDENT_USER_ID": "stu_007",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 20000,
+   "RECV_AMT": 20000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-06-26 19:59:00"
+  },
+  {
+   "BEG_ID": "B020",
+   "STUDENT_USER_ID": "stu_007",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 10000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-05-07 19:27:00"
+  },
+  {
+   "BEG_ID": "B021",
+   "STUDENT_USER_ID": "stu_007",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 30000,
+   "RECV_AMT": 30000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-05-04 19:34:00"
+  },
+  {
+   "BEG_ID": "B022",
+   "STUDENT_USER_ID": "stu_008",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 0,
+   "REQ_STTS": "REJECT",
+   "REQ_DT": "2026-06-26 19:19:00"
+  },
+  {
+   "BEG_ID": "B023",
+   "STUDENT_USER_ID": "stu_008",
+   "PARENT_USER_ID": "par_demo",
+   "REQ_AMT": 10000,
+   "RECV_AMT": 10000,
+   "REQ_STTS": "ACCEPT",
+   "REQ_DT": "2026-04-20 19:47:00"
+  }
+ ]
+}

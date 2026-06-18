@@ -21,120 +21,40 @@
         "source_file": "src/components/extras.jsx"
       },
       {
-        "id": "operia_10_intent_set",
-        "label": "10 Operia mock data-query intents",
+        "id": "option_b_exec_flow",
+        "label": "\uc635\uc158 B \uc54c\ub824\uc9c4-intent \uc2e4\ud589 \ud750\ub984: App.send \u2192 queryOperia \u2192 runKnown \u2192 QUERIES \u2192 alasql/dataset \u2192 ChartRenderer",
         "nodes": [
-          "monthlyUsage_mock",
-          "catSpend_mock",
-          "friendCompare_mock",
-          "nudgeCompare_mock",
-          "merchantMap_mock",
-          "balance_mock",
-          "channel_mock",
-          "merchantBreakdown_mock",
-          "parentCard_mock",
-          "schoolCompare_mock"
+          "app_send",
+          "operia_queryOperia",
+          "operia_runKnown",
+          "queries_QUERIES",
+          "operia_runSql",
+          "dataset_fixture",
+          "chartrenderer_ChartRenderer"
         ],
-        "relation": "form",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "src/mock/operia/index.js"
+        "relation": "participate_in",
+        "confidence": "INFERRED",
+        "confidence_score": 0.85,
+        "source_file": "src/api/operia.js"
       },
       {
-        "id": "response_contract",
-        "label": "{question, sql, result, chart} response contract",
+        "id": "three_mode_priority_dispatch",
+        "label": "queryOperia 3-mode \uc6b0\uc120\uc21c\uc704 \ub514\uc2a4\ud328\uce58: \uc2e4\uc11c\ubc84(VITE_OPERIA_API) > alasql AI(runKnown/runClaudeSql) > \uc815\uc801 \ubaa9\uc5c5",
         "nodes": [
-          "mockapi_responseSchema",
-          "monthlyUsage_mock",
-          "catSpend_mock",
-          "balance_mock"
+          "operia_queryOperia",
+          "operia_isOperiaAiMode",
+          "operia_runKnown",
+          "operia_runClaudeSql",
+          "operiaindex_results"
         ],
         "relation": "implement",
         "confidence": "INFERRED",
         "confidence_score": 0.85,
-        "source_file": "MOCK_API_\uc124\uacc4.md"
-      },
-      {
-        "id": "virtual_tables",
-        "label": "Virtual tables backing mock SQL",
-        "nodes": [
-          "mockapi_TB_PAY_DTL",
-          "mockapi_TB_BEG",
-          "mockapi_voucherCoords"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "MOCK_API_\uc124\uacc4.md"
-      },
-      {
-        "id": "chart_component_set",
-        "label": "Chart component set dispatched by ChartRenderer",
-        "nodes": [
-          "cards_BarChartCard",
-          "cards_DonutChartCard",
-          "cards_CompareChartCard",
-          "cards_GaugeChartCard",
-          "cards_BarListChartCard",
-          "cards_ListChartCard",
-          "MapChartCard_MapChartCard",
-          "TableCard_TableCard"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "src/charts/ChartRenderer.jsx"
-      },
-      {
-        "id": "registry_dispatch_flow",
-        "label": "registry\u2192App.send\u2192ChartRenderer\u2192TableCard(default) dispatch flow",
-        "nodes": [
-          "registry_chartTypeForIntent",
-          "App_send",
-          "ChartRenderer_ChartRenderer",
-          "TableCard_TableCard"
-        ],
-        "relation": "form",
-        "confidence": "INFERRED",
-        "confidence_score": 0.85,
-        "source_file": "src/App.jsx"
-      },
-      {
-        "id": "mock_contract",
-        "label": "10 operia mocks implement {question,sql,result} contract",
-        "nodes": [
-          "mock_monthlyUsage",
-          "mock_catSpend",
-          "mock_balance",
-          "mock_merchantMap",
-          "mock_friendCompare",
-          "mock_nudgeCompare",
-          "mock_schoolCompare",
-          "mock_channel",
-          "mock_merchantBreakdown",
-          "mock_parentCard"
-        ],
-        "relation": "implement",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
         "source_file": "src/api/operia.js"
       }
     ]
   },
   "nodes": [
-    {
-      "label": "package.json (edupay-finfriend)",
-      "file_type": "code",
-      "source_file": "package.json",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "package_edupay_finfriend",
-      "community": 15,
-      "norm_label": "package.json (edupay-finfriend)"
-    },
     {
       "label": "PostCSS Config",
       "file_type": "code",
@@ -184,7 +104,7 @@
       "author": null,
       "contributor": null,
       "id": "config_isAiFeatureOn",
-      "community": 12,
+      "community": 10,
       "norm_label": "config.isaifeatureon()"
     },
     {
@@ -197,7 +117,7 @@
       "author": null,
       "contributor": null,
       "id": "config_getAiEnabled",
-      "community": 12,
+      "community": 10,
       "norm_label": "config.getaienabled()"
     },
     {
@@ -223,11 +143,11 @@
       "author": null,
       "contributor": null,
       "id": "main_entry",
-      "community": 13,
+      "community": 0,
       "norm_label": "main.jsx (react entry)"
     },
     {
-      "label": "claude.complete() \u2014 browser Anthropic call",
+      "label": "complete (\uc800\uc218\uc900 Anthropic \ud638\ucd9c)",
       "file_type": "code",
       "source_file": "src/api/claude.js",
       "source_location": null,
@@ -236,8 +156,8 @@
       "author": null,
       "contributor": null,
       "id": "claude_complete",
-      "community": 13,
-      "norm_label": "claude.complete() \u2014 browser anthropic call"
+      "community": 0,
+      "norm_label": "complete (\u110c\u1165\u1109\u116e\u110c\u116e\u11ab anthropic \u1112\u1169\u110e\u116e\u11af)"
     },
     {
       "label": "client.api \u2014 backend skeleton (10 queries)",
@@ -249,8 +169,125 @@
       "author": null,
       "contributor": null,
       "id": "client_api",
-      "community": 3,
+      "community": 0,
       "norm_label": "client.api \u2014 backend skeleton (10 queries)"
+    },
+    {
+      "label": "BarChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cards_BarChartCard",
+      "community": 4,
+      "norm_label": "barchartcard"
+    },
+    {
+      "label": "DonutChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cards_DonutChartCard",
+      "community": 6,
+      "norm_label": "donutchartcard"
+    },
+    {
+      "label": "CompareChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cards_CompareChartCard",
+      "community": 5,
+      "norm_label": "comparechartcard"
+    },
+    {
+      "label": "GaugeChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cards_GaugeChartCard",
+      "community": 9,
+      "norm_label": "gaugechartcard"
+    },
+    {
+      "label": "BarListChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cards_BarListChartCard",
+      "community": 8,
+      "norm_label": "barlistchartcard"
+    },
+    {
+      "label": "ListChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cards_ListChartCard",
+      "community": 13,
+      "norm_label": "listchartcard"
+    },
+    {
+      "label": "MapChartCard",
+      "file_type": "code",
+      "source_file": "src/charts/MapChartCard.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "MapChartCard_MapChartCard",
+      "community": 4,
+      "norm_label": "mapchartcard"
+    },
+    {
+      "label": "chartTypeForIntent (intent \u2192 \ucc28\ud2b8\uc720\ud615)",
+      "file_type": "code",
+      "source_file": "src/charts/registry.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "registry_chartTypeForIntent",
+      "community": 3,
+      "norm_label": "charttypeforintent (intent \u2192 \u110e\u1161\u1110\u1173\u110b\u1172\u1112\u1167\u11bc)"
+    },
+    {
+      "label": "ChartShell + util helpers (num/won/monthLabel/colors)",
+      "file_type": "code",
+      "source_file": "src/charts/util.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "util_ChartShell",
+      "community": 4,
+      "norm_label": "chartshell + util helpers (num/won/monthlabel/colors)"
     },
     {
       "label": "cards.InlineCard \u2014 card router",
@@ -457,7 +494,7 @@
       "author": null,
       "contributor": null,
       "id": "ledger_LedgerCard",
-      "community": 10,
+      "community": 11,
       "norm_label": "ledgercard (\u110b\u116d\u11bc\u1103\u1169\u11ab\u1100\u1175\u110b\u1175\u11b8\u110c\u1161\u11bc + ocr)"
     },
     {
@@ -470,7 +507,7 @@
       "author": null,
       "contributor": null,
       "id": "quiz_QuizCard",
-      "community": 6,
+      "community": 7,
       "norm_label": "quizcard (\u1106\u1161\u11bd\u110e\u116e\u11b7 \u1100\u1173\u11b7\u110b\u1172\u11bc \u110f\u1171\u110c\u1173)"
     },
     {
@@ -483,7 +520,7 @@
       "author": null,
       "contributor": null,
       "id": "recommend_RecommendCard",
-      "community": 6,
+      "community": 7,
       "norm_label": "recommendcard (\u1100\u1173\u11b7\u110b\u1172\u11bc\u1100\u116d\u110b\u1172\u11a8 \u110e\u116e\u110e\u1165\u11ab \u1105\u1175\u1109\u1173\u1110\u1173)"
     },
     {
@@ -496,7 +533,7 @@
       "author": null,
       "contributor": null,
       "id": "recommend_RecommendModal",
-      "community": 6,
+      "community": 7,
       "norm_label": "recommendmodal (\u1100\u1168\u1109\u1161\u11ab\u1100\u1175/\u110f\u1171\u110c\u1173 \u1106\u1169\u1103\u1161\u11af)"
     },
     {
@@ -548,7 +585,7 @@
       "author": null,
       "contributor": null,
       "id": "spendcards_CategorySpendCard",
-      "community": 11,
+      "community": 12,
       "norm_label": "categoryspendcard"
     },
     {
@@ -561,7 +598,7 @@
       "author": null,
       "contributor": null,
       "id": "spendcards_CategoryDonut",
-      "community": 11,
+      "community": 12,
       "norm_label": "categorydonut (operia rows)"
     },
     {
@@ -587,7 +624,7 @@
       "author": null,
       "contributor": null,
       "id": "data_edupay_dragScroll",
-      "community": 10,
+      "community": 11,
       "norm_label": "dragscroll() helper"
     },
     {
@@ -600,7 +637,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_EDUPAY",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay data engine (fallback model)"
     },
     {
@@ -613,7 +650,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_ledgerSeed",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay ledgerseed (deterministic mock ledger)"
     },
     {
@@ -626,7 +663,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_payApiLogs",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay payapilogs (tb_com_pay_api_log view)"
     },
     {
@@ -639,7 +676,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_vouchers",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay vouchers (tb_com_voucher view)"
     },
     {
@@ -652,7 +689,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_USER",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay user (tb_com_user view)"
     },
     {
@@ -665,7 +702,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_adbk",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay adbk (tb_com_adbk view)"
     },
     {
@@ -678,7 +715,7 @@
       "author": null,
       "contributor": null,
       "id": "edupay_classify",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay.classify (keyword\u2192intent)"
     },
     {
@@ -691,398 +728,21 @@
       "author": null,
       "contributor": null,
       "id": "edupay_schoolCompareByGrade",
-      "community": 0,
+      "community": 2,
       "norm_label": "edupay schoolcomparebygrade model"
     },
     {
-      "label": "operia index \u2014 intent\u2192mock mapping",
+      "label": "mock: balance (gauge)",
       "file_type": "code",
-      "source_file": "src/mock/operia/index.js",
+      "source_file": "src/mock/operia/balance.js",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_operiaResults",
-      "community": 0,
-      "norm_label": "operia index \u2014 intent\u2192mock mapping"
-    },
-    {
-      "label": "OPERIA_KINDS (intent list)",
-      "file_type": "code",
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "index_OPERIA_KINDS",
-      "community": 0,
-      "norm_label": "operia_kinds (intent list)"
-    },
-    {
-      "label": "index.html (app HTML entry)",
-      "file_type": "code",
-      "source_file": "index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "index_html_entry",
-      "community": 0,
-      "norm_label": "index.html (app html entry)"
-    },
-    {
-      "label": "MOCK_API \uc124\uacc4\uc11c (Operia connect spec)",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_spec",
-      "community": 0,
-      "norm_label": "mock_api \u1109\u1165\u11af\u1100\u1168\u1109\u1165 (operia connect spec)"
-    },
-    {
-      "label": "Response schema {question, sql, result, chart}",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_responseSchema",
-      "community": 0,
-      "norm_label": "response schema {question, sql, result, chart}"
-    },
-    {
-      "label": "TB_PAY_DTL (virtual normalized payment table)",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_TB_PAY_DTL",
-      "community": 0,
-      "norm_label": "tb_pay_dtl (virtual normalized payment table)"
-    },
-    {
-      "label": "TB_BEG (virtual nudge/\uc870\ub974\uae30 table)",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_TB_BEG",
-      "community": 0,
-      "norm_label": "tb_beg (virtual nudge/\u110c\u1169\u1105\u1173\u1100\u1175 table)"
-    },
-    {
-      "label": "TB_COM_VOUCHER LAT/LNG coords (virtual)",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_voucherCoords",
-      "community": 0,
-      "norm_label": "tb_com_voucher lat/lng coords (virtual)"
-    },
-    {
-      "label": "queryOperia(intent, params) API/mock switch",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_queryOperia",
-      "community": 0,
-      "norm_label": "queryoperia(intent, params) api/mock switch"
-    },
-    {
-      "label": "INTENT_CHART (front-owned chart-type map)",
-      "file_type": "document",
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mockapi_INTENT_CHART",
-      "community": 0,
-      "norm_label": "intent_chart (front-owned chart-type map)"
-    },
-    {
-      "label": "edupay-app README",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "readme_edupayapp",
-      "community": 0,
-      "norm_label": "edupay-app readme"
-    },
-    {
-      "label": "\uc804\ud658\uacc4\ud68d (Vite+React conversion plan)",
-      "file_type": "document",
-      "source_file": "\uc804\ud658\uacc4\ud68d.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "plan_conversion",
-      "community": 0,
-      "norm_label": "\u110c\u1165\u11ab\u1112\u116a\u11ab\u1100\u1168\u1112\u116c\u11a8 (vite+react conversion plan)"
-    },
-    {
-      "label": "INTENT_CHART map (intent\u2192chartType)",
-      "file_type": "code",
-      "source_file": "src/charts/registry.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "registry_INTENT_CHART",
-      "community": 3,
-      "norm_label": "intent_chart map (intent\u2192charttype)"
-    },
-    {
-      "label": "chartTypeForIntent()",
-      "file_type": "code",
-      "source_file": "src/charts/registry.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "registry_chartTypeForIntent",
-      "community": 3,
-      "norm_label": "charttypeforintent()"
-    },
-    {
-      "label": "ChartRenderer",
-      "file_type": "code",
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "ChartRenderer_ChartRenderer",
-      "community": 2,
-      "norm_label": "chartrenderer"
-    },
-    {
-      "label": "BarChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cards_BarChartCard",
-      "community": 2,
-      "norm_label": "barchartcard"
-    },
-    {
-      "label": "DonutChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cards_DonutChartCard",
-      "community": 5,
-      "norm_label": "donutchartcard"
-    },
-    {
-      "label": "CompareChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cards_CompareChartCard",
-      "community": 4,
-      "norm_label": "comparechartcard"
-    },
-    {
-      "label": "GaugeChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cards_GaugeChartCard",
-      "community": 7,
-      "norm_label": "gaugechartcard"
-    },
-    {
-      "label": "BarListChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cards_BarListChartCard",
-      "community": 8,
-      "norm_label": "barlistchartcard"
-    },
-    {
-      "label": "ListChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cards_ListChartCard",
+      "id": "mock_balance",
       "community": 9,
-      "norm_label": "listchartcard"
-    },
-    {
-      "label": "MapChartCard",
-      "file_type": "code",
-      "source_file": "src/charts/MapChartCard.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "MapChartCard_MapChartCard",
-      "community": 2,
-      "norm_label": "mapchartcard"
-    },
-    {
-      "label": "TableCard (default fallback)",
-      "file_type": "code",
-      "source_file": "src/charts/TableCard.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "TableCard_TableCard",
-      "community": 2,
-      "norm_label": "tablecard (default fallback)"
-    },
-    {
-      "label": "ChartShell + util helpers (num/won/monthLabel/colors)",
-      "file_type": "code",
-      "source_file": "src/charts/util.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "util_ChartShell",
-      "community": 2,
-      "norm_label": "chartshell + util helpers (num/won/monthlabel/colors)"
-    },
-    {
-      "label": "queryOperia() operia client",
-      "file_type": "code",
-      "source_file": "src/api/operia.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "operia_queryOperia",
-      "community": 3,
-      "norm_label": "queryoperia() operia client"
-    },
-    {
-      "label": "App.send()",
-      "file_type": "code",
-      "source_file": "src/App.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "App_send",
-      "community": 3,
-      "norm_label": "app.send()"
-    },
-    {
-      "label": "Bubble (chat message renderer)",
-      "file_type": "code",
-      "source_file": "src/App.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "App_Bubble",
-      "community": 2,
-      "norm_label": "bubble (chat message renderer)"
-    },
-    {
-      "label": "cardIntent() intent classifier",
-      "file_type": "code",
-      "source_file": "src/App.jsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "App_cardIntent",
-      "community": 3,
-      "norm_label": "cardintent() intent classifier"
-    },
-    {
-      "label": "OPERIA_KINDS + results map",
-      "file_type": "code",
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "operiaIndex_OPERIA_KINDS",
-      "community": 4,
-      "norm_label": "operia_kinds + results map"
-    },
-    {
-      "label": "mock: monthlyUsage (report\u2192bar)",
-      "file_type": "code",
-      "source_file": "src/mock/operia/monthlyUsage.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mock_monthlyUsage",
-      "community": 2,
-      "norm_label": "mock: monthlyusage (report\u2192bar)"
+      "norm_label": "mock: balance (gauge)"
     },
     {
       "label": "mock: catSpend (donut)",
@@ -1094,7 +754,7 @@
       "author": null,
       "contributor": null,
       "id": "mock_catSpend",
-      "community": 5,
+      "community": 6,
       "norm_label": "mock: catspend (donut)"
     },
     {
@@ -1107,7 +767,7 @@
       "author": null,
       "contributor": null,
       "id": "mock_channel",
-      "community": 5,
+      "community": 6,
       "norm_label": "mock: channel (donut)"
     },
     {
@@ -1120,60 +780,21 @@
       "author": null,
       "contributor": null,
       "id": "mock_friendCompare",
-      "community": 4,
+      "community": 5,
       "norm_label": "mock: friendcompare (compare)"
     },
     {
-      "label": "mock: nudgeCompare (compare)",
+      "label": "mock/operia (\uc815\uc801 \ubaa9\uc5c5 \uc778\ub371\uc2a4)",
       "file_type": "code",
-      "source_file": "src/mock/operia/nudgeCompare.js",
+      "source_file": "src/mock/operia/index.js",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "mock_nudgeCompare",
-      "community": 4,
-      "norm_label": "mock: nudgecompare (compare)"
-    },
-    {
-      "label": "mock: schoolCompare (compare)",
-      "file_type": "code",
-      "source_file": "src/mock/operia/schoolCompare.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mock_schoolCompare",
-      "community": 4,
-      "norm_label": "mock: schoolcompare (compare)"
-    },
-    {
-      "label": "mock: merchantMap (map)",
-      "file_type": "code",
-      "source_file": "src/mock/operia/merchantMap.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mock_merchantMap",
-      "community": 2,
-      "norm_label": "mock: merchantmap (map)"
-    },
-    {
-      "label": "mock: balance (gauge)",
-      "file_type": "code",
-      "source_file": "src/mock/operia/balance.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "mock_balance",
-      "community": 7,
-      "norm_label": "mock: balance (gauge)"
+      "id": "operia_mockIndex",
+      "community": 18,
+      "norm_label": "mock/operia (\u110c\u1165\u11bc\u110c\u1165\u11a8 \u1106\u1169\u11a8\u110b\u1165\u11b8 \u110b\u1175\u11ab\u1103\u1166\u11a8\u1109\u1173)"
     },
     {
       "label": "mock: merchantBreakdown (barlist)",
@@ -1189,6 +810,45 @@
       "norm_label": "mock: merchantbreakdown (barlist)"
     },
     {
+      "label": "mock: merchantMap (map)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/merchantMap.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "mock_merchantMap",
+      "community": 4,
+      "norm_label": "mock: merchantmap (map)"
+    },
+    {
+      "label": "mock: monthlyUsage (report\u2192bar)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/monthlyUsage.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "mock_monthlyUsage",
+      "community": 4,
+      "norm_label": "mock: monthlyusage (report\u2192bar)"
+    },
+    {
+      "label": "mock: nudgeCompare (compare)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/nudgeCompare.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "mock_nudgeCompare",
+      "community": 5,
+      "norm_label": "mock: nudgecompare (compare)"
+    },
+    {
       "label": "mock: parentCard (list)",
       "file_type": "code",
       "source_file": "src/mock/operia/parentCard.js",
@@ -1198,34 +858,388 @@
       "author": null,
       "contributor": null,
       "id": "mock_parentCard",
-      "community": 9,
+      "community": 13,
       "norm_label": "mock: parentcard (list)"
     },
     {
-      "label": "WORKFLOW.md (dev-loop spec)",
+      "label": "mock: schoolCompare (compare)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/schoolCompare.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "mock_schoolCompare",
+      "community": 5,
+      "norm_label": "mock: schoolcompare (compare)"
+    },
+    {
+      "label": "index.html (app HTML entry)",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "index_html_entry",
+      "community": 2,
+      "norm_label": "index.html (app html entry)"
+    },
+    {
+      "label": "edupay-app README",
       "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_edupayapp",
+      "community": 2,
+      "norm_label": "edupay-app readme"
+    },
+    {
+      "label": "\uc804\ud658\uacc4\ud68d (Vite+React conversion plan)",
+      "file_type": "document",
+      "source_file": "\uc804\ud658\uacc4\ud68d.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "plan_conversion",
+      "community": 2,
+      "norm_label": "\u110c\u1165\u11ab\u1112\u116a\u11ab\u1100\u1168\u1112\u116c\u11a8 (vite+react conversion plan)"
+    },
+    {
+      "label": "queryOperia(intent,params,question)",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_queryOperia",
+      "community": 0,
+      "norm_label": "queryoperia(intent,params,question)"
+    },
+    {
+      "label": "isOperiaAiMode() \u2014 \uc2e4\uc11c\ubc84 \ubbf8\uc124\uc815 + AI on",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_isOperiaAiMode",
+      "community": 3,
+      "norm_label": "isoperiaaimode() \u2014 \u1109\u1175\u11af\u1109\u1165\u1107\u1165 \u1106\u1175\u1109\u1165\u11af\u110c\u1165\u11bc + ai on"
+    },
+    {
+      "label": "ensureTables() \u2014 alasql \ud14c\uc774\ube14 1\ud68c \ub4f1\ub85d(4\ud14c\uc774\ube14)",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_ensureTables",
+      "community": 0,
+      "norm_label": "ensuretables() \u2014 alasql \u1110\u1166\u110b\u1175\u1107\u1173\u11af 1\u1112\u116c \u1103\u1173\u11bc\u1105\u1169\u11a8(4\u1110\u1166\u110b\u1175\u1107\u1173\u11af)"
+    },
+    {
+      "label": "runSql(sql) \u2014 ensureTables + alasql(sql)",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_runSql",
+      "community": 0,
+      "norm_label": "runsql(sql) \u2014 ensuretables + alasql(sql)"
+    },
+    {
+      "label": "runKnown(intent,question) \u2014 \ud15c\ud50c\ub9bf SQL alasql \uc2e4\ud589 + shaper",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_runKnown",
+      "community": 0,
+      "norm_label": "runknown(intent,question) \u2014 \u1110\u1166\u11b7\u1111\u1173\u11af\u1105\u1175\u11ba sql alasql \u1109\u1175\u11af\u1112\u1162\u11bc + shaper"
+    },
+    {
+      "label": "runClaudeSql(question) \u2014 Claude \uacbd\ub7c9 NL\u2192SQL \u2192 alasql \u2192 rows",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_runClaudeSql",
+      "community": 0,
+      "norm_label": "runclaudesql(question) \u2014 claude \u1100\u1167\u11bc\u1105\u1163\u11bc nl\u2192sql \u2192 alasql \u2192 rows"
+    },
+    {
+      "label": "SQL_SYSTEM \u2014 alasql \ud638\ud658 SELECT 1\ubb38\uc7a5 system \ud504\ub86c\ud504\ud2b8(\ub370\uc774\ud130\uc14b \ubbf8\uc8fc\uc785)",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_SQL_SYSTEM",
+      "community": 0,
+      "norm_label": "sql_system \u2014 alasql \u1112\u1169\u1112\u116a\u11ab select 1\u1106\u116e\u11ab\u110c\u1161\u11bc system \u1111\u1173\u1105\u1169\u11b7\u1111\u1173\u1110\u1173(\u1103\u1166\u110b\u1175\u1110\u1165\u1109\u1166\u11ba \u1106\u1175\u110c\u116e\u110b\u1175\u11b8)"
+    },
+    {
+      "label": "stripFence(t) \u2014 \ucf54\ub4dc\ud39c\uc2a4 \uc81c\uac70",
+      "file_type": "code",
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operia_stripFence",
+      "community": 0,
+      "norm_label": "stripfence(t) \u2014 \u110f\u1169\u1103\u1173\u1111\u1166\u11ab\u1109\u1173 \u110c\u1166\u1100\u1165"
+    },
+    {
+      "label": "QUERIES \u2014 intent\ubcc4 {sqls, shape} (10\uac1c)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "queries_QUERIES",
+      "community": 0,
+      "norm_label": "queries \u2014 intent\u1107\u1167\u11af {sqls, shape} (10\u1100\u1162)"
+    },
+    {
+      "label": "withPct(rows) \u2014 amount \ud569 \ub300\ube44 pct \ubd80\uc5ec shaper helper",
+      "file_type": "code",
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "queries_withPct",
+      "community": 0,
+      "norm_label": "withpct(rows) \u2014 amount \u1112\u1161\u11b8 \u1103\u1162\u1107\u1175 pct \u1107\u116e\u110b\u1167 shaper helper"
+    },
+    {
+      "label": "report.shape \u2014 trend + byMeans(withPct) (bar)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "queries_report_shape",
+      "community": 0,
+      "norm_label": "report.shape \u2014 trend + bymeans(withpct) (bar)"
+    },
+    {
+      "label": "friendCompare.shape \u2014 me/\ud559\uad50\ud3c9\uade0/\ucda9\ubd81\ud3c9\uade0 + percentile (compare)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "queries_friendCompare_shape",
+      "community": 0,
+      "norm_label": "friendcompare.shape \u2014 me/\u1112\u1161\u11a8\u1100\u116d\u1111\u1167\u11bc\u1100\u1172\u11ab/\u110e\u116e\u11bc\u1107\u116e\u11a8\u1111\u1167\u11bc\u1100\u1172\u11ab + percentile (compare)"
+    },
+    {
+      "label": "balance.shape \u2014 \ubc14\uc6b0\ucc98/\uc870\ub974\uae30 \uc794\uc561 \uc0b0\ucd9c (gauge)",
+      "file_type": "code",
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "queries_balance_shape",
+      "community": 0,
+      "norm_label": "balance.shape \u2014 \u1107\u1161\u110b\u116e\u110e\u1165/\u110c\u1169\u1105\u1173\u1100\u1175 \u110c\u1161\u11ab\u110b\u1162\u11a8 \u1109\u1161\u11ab\u110e\u116e\u11af (gauge)"
+    },
+    {
+      "label": "dataset.json (DB \ub300\uc5ed fixture)",
+      "file_type": "document",
+      "source_file": "src/mock/operia/dataset.json",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "dataset_fixture",
+      "community": 0,
+      "norm_label": "dataset.json (db \u1103\u1162\u110b\u1167\u11a8 fixture)"
+    },
+    {
+      "label": "TableCard \u2014 \ubc94\uc6a9 \ud45c \ub80c\ub354 + \ube48\uacb0\uacfc graceful('\uc870\ud68c \uacb0\uacfc\uac00 \uc5c6\uc5b4\uc694')",
+      "file_type": "code",
+      "source_file": "src/charts/TableCard.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "tablecard_TableCard",
+      "community": 3,
+      "norm_label": "tablecard \u2014 \u1107\u1165\u11b7\u110b\u116d\u11bc \u1111\u116d \u1105\u1166\u11ab\u1103\u1165 + \u1107\u1175\u11ab\u1100\u1167\u11af\u1100\u116a graceful('\u110c\u1169\u1112\u116c \u1100\u1167\u11af\u1100\u116a\u1100\u1161 \u110b\u1165\u11b9\u110b\u1165\u110b\u116d')"
+    },
+    {
+      "label": "ChartRenderer \u2014 type\ubcc4 \ucc28\ud2b8 \ubd84\uae30 + SqlChip",
+      "file_type": "code",
+      "source_file": "src/charts/ChartRenderer.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "chartrenderer_ChartRenderer",
+      "community": 3,
+      "norm_label": "chartrenderer \u2014 type\u1107\u1167\u11af \u110e\u1161\u1110\u1173 \u1107\u116e\u11ab\u1100\u1175 + sqlchip"
+    },
+    {
+      "label": "SqlChip \u2014 </> SQL \uce69(hover/\ud0ed \ud31d\uc624\ubc84)",
+      "file_type": "code",
+      "source_file": "src/charts/ChartRenderer.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "chartrenderer_SqlChip",
+      "community": 3,
+      "norm_label": "sqlchip \u2014 </> sql \u110e\u1175\u11b8(hover/\u1110\u1162\u11b8 \u1111\u1161\u11b8\u110b\u1169\u1107\u1165)"
+    },
+    {
+      "label": "pickCard(type) \u2014 bar/donut/compare/gauge/.../default table",
+      "file_type": "code",
+      "source_file": "src/charts/ChartRenderer.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "chartrenderer_pickCard",
+      "community": 3,
+      "norm_label": "pickcard(type) \u2014 bar/donut/compare/gauge/.../default table"
+    },
+    {
+      "label": "App.send \u2014 cardIntent \u2192 queryOperia \u2192 ChartRenderer(sql/question)",
+      "file_type": "code",
+      "source_file": "src/App.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "app_send",
+      "community": 3,
+      "norm_label": "app.send \u2014 cardintent \u2192 queryoperia \u2192 chartrenderer(sql/question)"
+    },
+    {
+      "label": "cardIntent(q) \u2014 NL \uc9c8\ubb38 \u2192 intent kind \ubd84\ub958",
+      "file_type": "code",
+      "source_file": "src/App.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "app_cardIntent",
+      "community": 3,
+      "norm_label": "cardintent(q) \u2014 nl \u110c\u1175\u11af\u1106\u116e\u11ab \u2192 intent kind \u1107\u116e\u11ab\u1105\u1172"
+    },
+    {
+      "label": "Bubble \u2014 \ucc44\ud305 \ub9d0\ud48d\uc120, isChart\uba74 ChartRenderer \ub80c\ub354",
+      "file_type": "code",
+      "source_file": "src/App.jsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "app_Bubble",
+      "community": 3,
+      "norm_label": "bubble \u2014 \u110e\u1162\u1110\u1175\u11bc \u1106\u1161\u11af\u1111\u116e\u11bc\u1109\u1165\u11ab, ischart\u1106\u1167\u11ab chartrenderer \u1105\u1166\u11ab\u1103\u1165"
+    },
+    {
+      "label": "src/mock/operia index \u2014 \uc815\uc801 \ubaa9\uc5c5 \ub9e4\ud551 + OPERIA_KINDS",
+      "file_type": "code",
+      "source_file": "src/mock/operia/index.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "operiaindex_results",
+      "community": 0,
+      "norm_label": "src/mock/operia index \u2014 \u110c\u1165\u11bc\u110c\u1165\u11a8 \u1106\u1169\u11a8\u110b\u1165\u11b8 \u1106\u1162\u1111\u1175\u11bc + operia_kinds"
+    },
+    {
+      "label": "package.json \u2014 alasql ^4.17.3 dependency",
+      "file_type": "document",
+      "source_file": "package.json",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "pkg_alasql_dep",
+      "community": 0,
+      "norm_label": "package.json \u2014 alasql ^4.17.3 dependency"
+    },
+    {
+      "label": "MOCK_API_\uc124\uacc4 \u00a78 \u2014 \uc635\uc158 B \ud655\uc815(\ud504\ub860\ud2b8 alasql \uc2e4\ud589)",
+      "file_type": "document",
+      "source_file": "MOCK_API_\uc124\uacc4.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "mockdoc_section8",
+      "community": 0,
+      "norm_label": "mock_api_\u1109\u1165\u11af\u1100\u1168 \u00a78 \u2014 \u110b\u1169\u11b8\u1109\u1167\u11ab b \u1112\u116a\u11a8\u110c\u1165\u11bc(\u1111\u1173\u1105\u1169\u11ab\u1110\u1173 alasql \u1109\u1175\u11af\u1112\u1162\u11bc)"
+    },
+    {
+      "label": "WORKFLOW \u00a78 \ub9c8\uc77c\uc2a4\ud1a4 \u2014 \uc635\uc158 B(alasql) \uc644\ub8cc, \uc635\uc158 A \ud3d0\uae30",
+      "file_type": "rationale",
       "source_file": "WORKFLOW.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "WORKFLOW_doc",
-      "community": 3,
-      "norm_label": "workflow.md (dev-loop spec)"
+      "id": "workflow_milestone_optionB",
+      "community": 0,
+      "norm_label": "workflow \u00a78 \u1106\u1161\u110b\u1175\u11af\u1109\u1173\u1110\u1169\u11ab \u2014 \u110b\u1169\u11b8\u1109\u1167\u11ab b(alasql) \u110b\u116a\u11ab\u1105\u116d, \u110b\u1169\u11b8\u1109\u1167\u11ab a \u1111\u1168\u1100\u1175"
     }
   ],
   "links": [
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.65,
-      "source_file": "vite.config.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "vite_config",
-      "target": "package_edupay_finfriend"
-    },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
@@ -1257,6 +1271,26 @@
       "target": "claude_complete"
     },
     {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runClaudeSql",
+      "target": "claude_complete"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_queryOperia",
+      "target": "claude_complete"
+    },
+    {
       "relation": "semantically_similar_to",
       "confidence": "INFERRED",
       "confidence_score": 0.75,
@@ -1265,6 +1299,136 @@
       "weight": 1.0,
       "source": "client_api",
       "target": "operia_queryOperia"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/charts/cards.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "cards_BarChartCard",
+      "target": "util_ChartShell"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/monthlyUsage.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_monthlyUsage",
+      "target": "cards_BarChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/catSpend.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_catSpend",
+      "target": "cards_DonutChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/channel.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_channel",
+      "target": "cards_DonutChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/friendCompare.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_friendCompare",
+      "target": "cards_CompareChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/nudgeCompare.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_nudgeCompare",
+      "target": "cards_CompareChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/schoolCompare.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_schoolCompare",
+      "target": "cards_CompareChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/balance.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_balance",
+      "target": "cards_GaugeChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/merchantBreakdown.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_merchantBreakdown",
+      "target": "cards_BarListChartCard"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/parentCard.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_parentCard",
+      "target": "cards_ListChartCard"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/charts/MapChartCard.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "MapChartCard_MapChartCard",
+      "target": "util_ChartShell"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/mock/operia/merchantMap.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mock_merchantMap",
+      "target": "MapChartCard_MapChartCard"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "app_send",
+      "target": "registry_chartTypeForIntent"
     },
     {
       "relation": "renders",
@@ -1767,16 +1931,6 @@
       "target": "edupay_schoolCompareByGrade"
     },
     {
-      "relation": "conceptually_related_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_queryOperia",
-      "target": "edupay_EDUPAY"
-    },
-    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -1807,66 +1961,6 @@
       "target": "edupay_vouchers"
     },
     {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/data/edupay.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "edupay_payApiLogs",
-      "target": "mockapi_TB_PAY_DTL"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "src/data/edupay.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "edupay_vouchers",
-      "target": "mockapi_voucherCoords"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.65,
-      "source_file": "src/data/edupay.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "edupay_adbk",
-      "target": "mockapi_TB_BEG"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "index_OPERIA_KINDS",
-      "target": "index_operiaResults"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_queryOperia",
-      "target": "index_operiaResults"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_INTENT_CHART",
-      "target": "index_OPERIA_KINDS"
-    },
-    {
       "relation": "conceptually_related_to",
       "confidence": "INFERRED",
       "confidence_score": 0.65,
@@ -1880,66 +1974,6 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_spec",
-      "target": "mockapi_responseSchema"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_spec",
-      "target": "mockapi_TB_PAY_DTL"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_spec",
-      "target": "mockapi_TB_BEG"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_spec",
-      "target": "mockapi_voucherCoords"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_spec",
-      "target": "mockapi_INTENT_CHART"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mockapi_queryOperia",
-      "target": "mockapi_responseSchema"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
@@ -1947,44 +1981,44 @@
       "target": "plan_conversion"
     },
     {
-      "relation": "references",
+      "relation": "calls",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/charts/registry.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "registry_chartTypeForIntent",
-      "target": "registry_INTENT_CHART"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/charts/registry.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "App_cardIntent",
-      "target": "registry_INTENT_CHART"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
       "source_file": "src/api/operia.js",
       "source_location": null,
       "weight": 1.0,
       "source": "operia_queryOperia",
-      "target": "registry_INTENT_CHART"
+      "target": "operia_runKnown"
     },
     {
-      "relation": "rationale_for",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "WORKFLOW.md",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "WORKFLOW_doc",
-      "target": "registry_INTENT_CHART"
+      "source": "operia_queryOperia",
+      "target": "operia_runClaudeSql"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_queryOperia",
+      "target": "operiaindex_results"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_queryOperia",
+      "target": "pkg_alasql_dep"
     },
     {
       "relation": "calls",
@@ -1993,398 +2027,278 @@
       "source_file": "src/App.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "App_send",
-      "target": "registry_chartTypeForIntent"
+      "source": "app_send",
+      "target": "operia_queryOperia"
     },
     {
-      "relation": "conceptually_related_to",
+      "relation": "implements",
       "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/charts/ChartRenderer.jsx",
+      "confidence_score": 0.95,
+      "source_file": "src/api/operia.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "registry_chartTypeForIntent"
+      "source": "operia_queryOperia",
+      "target": "mockdoc_section8"
     },
     {
-      "relation": "renders",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "WORKFLOW.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "workflow_milestone_optionB",
+      "target": "operia_queryOperia"
+    },
+    {
+      "relation": "calls",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "App_Bubble",
-      "target": "ChartRenderer_ChartRenderer"
+      "source": "app_send",
+      "target": "operia_isOperiaAiMode"
     },
     {
-      "relation": "imports",
+      "relation": "calls",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runSql",
+      "target": "operia_ensureTables"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_ensureTables",
+      "target": "dataset_fixture"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runKnown",
+      "target": "operia_runSql"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runClaudeSql",
+      "target": "operia_runSql"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runKnown",
+      "target": "queries_QUERIES"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runClaudeSql",
+      "target": "operia_SQL_SYSTEM"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/api/operia.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "operia_runClaudeSql",
+      "target": "operia_stripFence"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
       "source_file": "src/charts/ChartRenderer.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "cards_BarChartCard"
+      "source": "chartrenderer_SqlChip",
+      "target": "operia_runClaudeSql"
     },
     {
-      "relation": "renders",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "cards_DonutChartCard"
-    },
-    {
-      "relation": "renders",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "cards_CompareChartCard"
-    },
-    {
-      "relation": "renders",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "cards_GaugeChartCard"
-    },
-    {
-      "relation": "renders",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "cards_BarListChartCard"
-    },
-    {
-      "relation": "renders",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "cards_ListChartCard"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "MapChartCard_MapChartCard"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "ChartRenderer_ChartRenderer",
-      "target": "TableCard_TableCard"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/cards.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cards_BarChartCard",
-      "target": "util_ChartShell"
-    },
-    {
-      "relation": "shares_data_with",
+      "relation": "conceptually_related_to",
       "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/monthlyUsage.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_monthlyUsage",
-      "target": "cards_BarChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/catSpend.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_catSpend",
-      "target": "cards_DonutChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/channel.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_channel",
-      "target": "cards_DonutChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/friendCompare.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_friendCompare",
-      "target": "cards_CompareChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/nudgeCompare.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_nudgeCompare",
-      "target": "cards_CompareChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/schoolCompare.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_schoolCompare",
-      "target": "cards_CompareChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/balance.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_balance",
-      "target": "cards_GaugeChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/merchantBreakdown.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_merchantBreakdown",
-      "target": "cards_BarListChartCard"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/parentCard.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_parentCard",
-      "target": "cards_ListChartCard"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/MapChartCard.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "MapChartCard_MapChartCard",
-      "target": "util_ChartShell"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/mock/operia/merchantMap.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "mock_merchantMap",
-      "target": "MapChartCard_MapChartCard"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
+      "confidence_score": 0.65,
       "source_file": "src/charts/TableCard.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "TableCard_TableCard",
-      "target": "util_ChartShell"
+      "source": "tablecard_TableCard",
+      "target": "operia_runClaudeSql"
     },
     {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/App.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "App_send",
-      "target": "operia_queryOperia"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.55,
       "source_file": "src/api/operia.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "operia_queryOperia",
-      "target": "operiaIndex_OPERIA_KINDS"
+      "source": "operia_runClaudeSql",
+      "target": "queries_QUERIES"
     },
     {
       "relation": "rationale_for",
       "confidence": "INFERRED",
-      "confidence_score": 0.65,
-      "source_file": "WORKFLOW.md",
+      "confidence_score": 0.85,
+      "source_file": "MOCK_API_\uc124\uacc4.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "WORKFLOW_doc",
-      "target": "operia_queryOperia"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/App.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "App_send",
-      "target": "App_cardIntent"
+      "source": "mockdoc_section8",
+      "target": "operia_SQL_SYSTEM"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "queries_QUERIES",
+      "target": "queries_report_shape"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "queries_QUERIES",
+      "target": "queries_friendCompare_shape"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "queries_QUERIES",
+      "target": "queries_balance_shape"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "queries_QUERIES",
+      "target": "dataset_fixture"
+    },
+    {
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "queries_QUERIES",
+      "target": "mockdoc_section8"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/mock/operia/queries.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "queries_report_shape",
+      "target": "queries_withPct"
+    },
+    {
+      "relation": "renders",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/charts/ChartRenderer.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chartrenderer_pickCard",
+      "target": "tablecard_TableCard"
+    },
+    {
+      "relation": "renders",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "src/App.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "App_send",
-      "target": "operiaIndex_OPERIA_KINDS"
+      "source": "app_Bubble",
+      "target": "chartrenderer_ChartRenderer"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/charts/ChartRenderer.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chartrenderer_ChartRenderer",
+      "target": "chartrenderer_pickCard"
+    },
+    {
+      "relation": "renders",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/charts/ChartRenderer.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chartrenderer_ChartRenderer",
+      "target": "chartrenderer_SqlChip"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "app_send",
+      "target": "app_cardIntent"
     },
     {
       "relation": "conceptually_related_to",
       "confidence": "INFERRED",
-      "confidence_score": 0.85,
+      "confidence_score": 0.75,
       "source_file": "src/App.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "App_send",
-      "target": "App_Bubble"
+      "source": "app_send",
+      "target": "app_Bubble"
     },
     {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "WORKFLOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_monthlyUsage"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_catSpend"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_channel"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_friendCompare"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_nudgeCompare"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_schoolCompare"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_merchantMap"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_balance"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_merchantBreakdown"
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "operiaIndex_OPERIA_KINDS",
-      "target": "mock_parentCard"
+      "source": "workflow_milestone_optionB",
+      "target": "mockdoc_section8"
     }
   ],
   "hyperedges": [
@@ -2406,104 +2320,37 @@
       "source_file": "src/components/extras.jsx"
     },
     {
-      "id": "operia_10_intent_set",
-      "label": "10 Operia mock data-query intents",
+      "id": "option_b_exec_flow",
+      "label": "\uc635\uc158 B \uc54c\ub824\uc9c4-intent \uc2e4\ud589 \ud750\ub984: App.send \u2192 queryOperia \u2192 runKnown \u2192 QUERIES \u2192 alasql/dataset \u2192 ChartRenderer",
       "nodes": [
-        "monthlyUsage_mock",
-        "catSpend_mock",
-        "friendCompare_mock",
-        "nudgeCompare_mock",
-        "merchantMap_mock",
-        "balance_mock",
-        "channel_mock",
-        "merchantBreakdown_mock",
-        "parentCard_mock",
-        "schoolCompare_mock"
+        "app_send",
+        "operia_queryOperia",
+        "operia_runKnown",
+        "queries_QUERIES",
+        "operia_runSql",
+        "dataset_fixture",
+        "chartrenderer_ChartRenderer"
       ],
-      "relation": "form",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/mock/operia/index.js"
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/api/operia.js"
     },
     {
-      "id": "response_contract",
-      "label": "{question, sql, result, chart} response contract",
+      "id": "three_mode_priority_dispatch",
+      "label": "queryOperia 3-mode \uc6b0\uc120\uc21c\uc704 \ub514\uc2a4\ud328\uce58: \uc2e4\uc11c\ubc84(VITE_OPERIA_API) > alasql AI(runKnown/runClaudeSql) > \uc815\uc801 \ubaa9\uc5c5",
       "nodes": [
-        "mockapi_responseSchema",
-        "monthlyUsage_mock",
-        "catSpend_mock",
-        "balance_mock"
+        "operia_queryOperia",
+        "operia_isOperiaAiMode",
+        "operia_runKnown",
+        "operia_runClaudeSql",
+        "operiaindex_results"
       ],
       "relation": "implement",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
-      "source_file": "MOCK_API_\uc124\uacc4.md"
-    },
-    {
-      "id": "virtual_tables",
-      "label": "Virtual tables backing mock SQL",
-      "nodes": [
-        "mockapi_TB_PAY_DTL",
-        "mockapi_TB_BEG",
-        "mockapi_voucherCoords"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "MOCK_API_\uc124\uacc4.md"
-    },
-    {
-      "id": "chart_component_set",
-      "label": "Chart component set dispatched by ChartRenderer",
-      "nodes": [
-        "cards_BarChartCard",
-        "cards_DonutChartCard",
-        "cards_CompareChartCard",
-        "cards_GaugeChartCard",
-        "cards_BarListChartCard",
-        "cards_ListChartCard",
-        "MapChartCard_MapChartCard",
-        "TableCard_TableCard"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/charts/ChartRenderer.jsx"
-    },
-    {
-      "id": "registry_dispatch_flow",
-      "label": "registry\u2192App.send\u2192ChartRenderer\u2192TableCard(default) dispatch flow",
-      "nodes": [
-        "registry_chartTypeForIntent",
-        "App_send",
-        "ChartRenderer_ChartRenderer",
-        "TableCard_TableCard"
-      ],
-      "relation": "form",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/App.jsx"
-    },
-    {
-      "id": "mock_contract",
-      "label": "10 operia mocks implement {question,sql,result} contract",
-      "nodes": [
-        "mock_monthlyUsage",
-        "mock_catSpend",
-        "mock_balance",
-        "mock_merchantMap",
-        "mock_friendCompare",
-        "mock_nudgeCompare",
-        "mock_schoolCompare",
-        "mock_channel",
-        "mock_merchantBreakdown",
-        "mock_parentCard"
-      ],
-      "relation": "implement",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "src/api/operia.js"
     }
   ],
-  "built_at_commit": "45f47e8fa9bef066562faa2ab7654f31ec6dd3b0"
+  "built_at_commit": "4a11b5cafa41d384cd583d5d8cc904f49d2ffaa5"
 }

@@ -17,9 +17,9 @@
 3. **CLI 코드 작성** — 설계서 + graphify + CLAUDE.md 보고 구현.
 4. **CLI Playwright 검증** — dev 서버(localhost:5173) 진입, 시나리오 실행, **스크린샷 분석**(§6).
 5. **불일치 → CLI 재작성** (3↔4 루프) — 갭 하나씩. 구조 깨지면 `git` 롤백 후 재시작.
-6. **완료** — 기능 단위 끝나면 `graphify update .` + 마일스톤 현황 갱신(§7).
+6. **완료** — 기능 단위 끝나면 마일스톤 현황 갱신(§8). **`graphify update`는 자동 실행하지 않는다**(§3).
 
-> 핑퐁 중(같은 기능 반복 수정)엔 `graphify update` 스킵. 기능 완료/모듈 전환 시 실행.
+> `graphify update`(그래프 갱신)는 느리다 → **자동/매 완료 시 실행 금지.** 사용자가 명시적으로 지시할 때만(§3).
 
 ---
 
@@ -28,10 +28,11 @@ graphify는 **CLI 환경 전용** CLI 도구(Cowork엔 없음). 코드그래프 
 
 - 코드베이스 질문은 **먼저 `graphify query "<질문>"`** (graphify-out/graph.json 있을 때). 관계는 `graphify path "<A>" "<B>"`, 개념은 `graphify explain "<개념>"`. raw grep/전체 리포트보다 작은 스코프 서브그래프 반환.
 - 넓은 탐색은 `graphify-out/wiki/index.md` 우선. 아키텍처 전반 검토 시에만 `GRAPH_REPORT.md`.
-- **코드 수정 후 `graphify update .`** 로 그래프 최신화(AST 전용, API 비용 없음).
-- 최초 1회: edupay-app 루트에서 `graphify init .`(또는 팀 표준 init)로 `graphify-out/` 생성.
+- `graphify query/path/explain`(조회)는 가볍다 → 작업 시작 시 자유롭게 사용.
+- **`graphify update .`(그래프 갱신)는 느리다 → 자동 실행 금지. 사용자가 "graphify 업데이트해"라고 지시할 때만** 실행(여러 변경 누적 후 한 번에).
+- 최초 1회: `graphify init .`로 `graphify-out/` 생성.
 
-타이밍: 핑퐁 중 스킵 → 기능 완료/모듈 전환 시 `graphify update .`.
+타이밍: **update는 수동(사용자 지시)만.** 작업 중엔 query만 쓰고 update는 미룬다.
 
 ---
 
@@ -60,7 +61,7 @@ graphify query "<이번 작업과 관련된 질문 — 예: 데이터 질문 카
 - 스크린샷 저장 후 Read로 분석. 실패 시 수정-재검증 반복(통과까지).
 
 ## 완료
-- 통과 시 `graphify update .` 실행, WORKFLOW.md §7 마일스톤 현황 갱신.
+- 통과 시 WORKFLOW.md §8 마일스톤 현황 갱신. (`graphify update`는 실행하지 말 것 — 사용자가 따로 지시할 때만)
 ```
 
 원칙: **목적·의도만 간결히**. 세부 구현은 CLI가 graphify+설계서 보고 판단. 한 번에 갭 하나.
@@ -115,12 +116,16 @@ const resp = await queryOperia(intent, scope);   // operia.js가 목업/실API �
 ---
 
 ## 8. 마일스톤 완료 현황
-> 기능 단위 완료 시 체크 + `graphify update .`. (Cowork이 설계/프롬프트 단계 표시, CLI가 구현/검증 표시)
+> 기능 단위 완료 시 체크. **`graphify update`는 사용자 지시 시에만**(자동 금지). (Cowork이 설계/프롬프트 단계 표시, CLI가 구현/검증 표시)
 
 - [x] 프로토타입 → Vite+React 이식 (스캐폴드 + 9개 모듈 ES모듈화)
 - [x] WebView 모드(`?view=webview`) — 헤더 숨김/메뉴 직행
 - [x] 자유대화 Claude 직접 호출(시연용) + AI 기능 플래그(`VITE_AI_ENABLED`)
 - [x] 오페리아 목업 연동 — operia.js + mock 10개 + 차트 레지스트리(INTENT_CHART) + ChartRenderer(default table) **(CLI 구현·Playwright 검증 완료 2026-06-18)**
+- [x] 오페리아 시뮬 모드(§8 옵션 B — 프론트 alasql 실행) — `VITE_OPERIA_AI`. 알려진 10개 intent는 고정 SQL 템플릿(queries.js)을 **alasql이 dataset.json 위에서 실제 집계**(Claude 호출 없음·결정적·일관), 그 외 데이터질문은 Claude 경량 NL→SQL(데이터셋 미주입)→alasql→table. SQL 칩(hover/탭) 노출. 우선순위 실서버>AI>목업, 실패 throw(폴백금지) **(CLI 구현·Playwright 검증 완료 2026-06-18)**
+  - ※ 폐기: 옵션 A(데이터셋 프롬프트 주입 후 Claude가 result 생성) — 무겁고 JSON 파싱 불안정 → B로 대체.
+- [x] 배포 보안 프로파일(Claude off 빌드, §10) — `.env.production`(키 빈값·`VITE_AI_ENABLED=false`)로 **빌드 시 키를 번들에서 제외**. 키 게이팅(operia.js: 키 없으면 자유 데이터질문은 Claude 호출 없이 친절 안내). 10개 alasql 템플릿은 키 무관 정상. 검증: `grep sk-ant dist/`=0, anthropic 호출 0, dev(키)에선 NL→SQL 정상 **(Playwright 검증 완료 2026-06-18)**
+- [x] WebView=채팅 직행 + `?q=` 자동전송 — `?view=webview`는 MenuScreen 건너뛰고 채팅 셸부터(빈 상태=WelcomeScreen+자주묻는질문+입력창), URL `?q=<질문>`이 있으면 최초 1회 자동 send. 일반 모드 Intro→Menu→Chat 회귀 유지. back 버튼은 빈 채팅 셸로 초기화 **(Playwright 검증 완료 2026-06-18)**
 - [ ] (이후) 실 오페리아 연동 — `VITE_OPERIA_API` 스위치
 - [ ] (이후) 백엔드 챗 프록시(키 서버 보관) 전환
 
