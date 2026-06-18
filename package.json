@@ -1,0 +1,26 @@
+{
+  "name": "edupay-finfriend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "에듀페이(다채움) AI 금융친구 — 충청북도 교육 지원금 결제 앱",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.7",
+    "vite": "^5.3.4"
+  }
+}
