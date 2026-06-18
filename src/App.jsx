@@ -3,6 +3,7 @@ import { EDUPAY, dragScroll } from "./data/edupay";
 import { InlineCard } from "./components/cards";
 import { RecommendModal } from "./components/recommend";
 import { HistoryDrawer } from "./components/history";
+import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
 const DATA = EDUPAY;
@@ -65,7 +66,7 @@ function SparkleIcon({ size = 88 }) {
 const TABS = ["앱카드", "학생증", "금융친구"];
 
 /* ── 헤더 (FOX PAY 글로벌 헤더 + 탭바) ────────────────── */
-function Header({ grade, setGrade, tab, setTab, canBack, onBack, onHistory }) {
+function Header({ grade, setGrade, tab, setTab, canBack, onBack, onHistory, aiFeature, aiEnabled, onToggleAi }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="relative z-20 bg-white shrink-0"
@@ -113,7 +114,7 @@ function Header({ grade, setGrade, tab, setTab, canBack, onBack, onHistory }) {
           {open &&
           <>
               <div className="fixed inset-0 z-20" onClick={() => setOpen(false)}></div>
-              <div className="absolute right-0 top-10 w-36 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 overflow-hidden">
+              <div className={(aiFeature ? "w-44" : "w-36") + " absolute right-0 top-10 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 overflow-hidden"}>
                 <div className="px-3.5 pt-1.5 pb-1 text-[11px] font-bold text-gray-400">학년 선택</div>
                 {GRADES.map((g) =>
               <button key={g} onClick={() => {setGrade(g);setOpen(false);}}
@@ -122,6 +123,21 @@ function Header({ grade, setGrade, tab, setTab, canBack, onBack, onHistory }) {
                     {GRADE_LABELS[g]} {g === grade && <span className="text-violet-500">✓</span>}
                   </button>
               )}
+                {/* ── AI 답변 설정 (VITE_AI_ENABLED=true 일 때만) ── */}
+                {aiFeature &&
+                <>
+                  <div className="my-1 border-t border-gray-100"></div>
+                  <div className="px-3.5 pt-1 pb-1 text-[11px] font-bold text-gray-400">설정</div>
+                  <button onClick={() => onToggleAi && onToggleAi(!aiEnabled)}
+                  className="w-full text-left px-3.5 py-2 text-[13px] font-medium flex items-center justify-between text-gray-700 active:bg-gray-50">
+                    <span>AI 답변(Claude)</span>
+                    <span className={"relative inline-flex w-9 h-5 rounded-full transition " + (aiEnabled ? "bg-violet-600" : "bg-gray-300")}>
+                      <span className={"absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all " + (aiEnabled ? "left-[18px]" : "left-0.5")}></span>
+                    </span>
+                  </button>
+                  <div className="px-3.5 pb-1.5 text-[10.5px] text-gray-400 leading-tight">{aiEnabled ? "켜짐 · 자유대화는 Claude 호출" : "꺼짐 · 로컬 답변만"}</div>
+                </>
+                }
               </div>
             </>
           }
@@ -467,6 +483,10 @@ function App() {
   });
   const [activeId, setActiveId] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
+  // AI(Claude) 답변 — VITE_AI_ENABLED=true 일 때만 기능/토글 노출. 런타임 토글은 localStorage 유지
+  const aiFeature = isAiFeatureOn();
+  const [aiEnabled, setAiEnabled] = useState(() => getAiEnabled());
+  const toggleAi = (on) => { persistAiEnabled(on); setAiEnabled(on); };
   // [개발용] 응답 경로 디버그 토스트 (API / 로컬). dev 모드에서만 표시
   const [apiToast, setApiToast] = useState(null);
   const showApiToast = (msg, kind = "info") => {
@@ -816,14 +836,14 @@ function App() {
     // 그 외 → 실제 AI 답변
     let res;
     try {
-      const hasAI = typeof window !== "undefined" && window.FINFRIEND_AI_ENDPOINT || window.claude && window.claude.complete;
+      const hasAI = aiEnabled && (typeof window !== "undefined" && window.FINFRIEND_AI_ENDPOINT || window.claude && window.claude.complete);
       if (hasAI) {
         showApiToast("🤖 Claude API 호출", "api");
         res = await askAI(q, history);
         if (!res.text) { res = fallback(q); showApiToast("로컬 fallback · 빈 응답", "local"); }
       } else {
         res = fallback(q);
-        showApiToast("로컬 응답 · AI 미설정", "local");
+        showApiToast(aiEnabled ? "로컬 응답 · AI 미설정(키없음)" : "로컬 응답 · AI OFF", "local");
       }
     } catch (e) {
       res = fallback(q);
@@ -848,7 +868,8 @@ function App() {
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
       canBack={tab === "금융친구" && entered} onBack={() => { if (started) { setMessages([]); setActiveId(null); } else { setEntered(false); } }}
-      onHistory={tab === "금융친구" ? () => setShowHistory(true) : null} />
+      onHistory={tab === "금융친구" ? () => setShowHistory(true) : null}
+      aiFeature={aiFeature} aiEnabled={aiEnabled} onToggleAi={toggleAi} />
       }
 
       {/* webview 모드: 헤더가 없으므로 채팅 중 메뉴로 돌아갈 작은 back 버튼 */}
