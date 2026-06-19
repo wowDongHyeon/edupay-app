@@ -109,7 +109,7 @@ export const INTENT_CHART = {
   friendCompare:     "compare",   // 친구 비교
   nudgeCompare:      "compare",   // 조르기 비교
   schoolCompare:     "compare",   // 학교별 비교
-  balance:           "gauge",     // 잔액
+  balance:           "balanceList", // 잔액(합계 없는 3항목 리스트, §5 ⑥)
   parentCard:        "list",      // 부모카드 내역
   merchantMap:       "map",       // 근처 가맹점
 };
@@ -242,19 +242,26 @@ result(object):
 chart: `{ "type":"map" }`
 
 ### ⑥ balance — 현재 사용 가능 금액(잔액) (card: balance)
-SQL: 바우처 잔액 = 100000 − 바우처 사용합 / 조르기 잔액 = 수령합 − 조르기 사용합
+**화면설계 기준**: 합계(총합) 박스·도넛 **없음**. 항목 3개를 "남은 금액"으로 나열(합산하지 않음).
+- 바우처(지원금) 잔액 = 한도(100,000) − 바우처 사용합  (**음수 불가** — 데이터상 사용합 ≤ 한도)
+- 용돈 충전금 잔액 = 보호자 충전(수령)합 − 충전금 사용합   (기존 'beg/조르기' → UI 라벨 "용돈 충전금")
+- 에듀포인트 = 적립 포인트 잔액 (결제와 별개. TB_COM_USER에 포인트 컬럼 추가해 단일 SQL에 포함)
+
+단일 SQL(UNION ALL, §8.4):
 ```sql
-SELECT PAY_MEANS, SUM(PAY_AMT) used FROM TB_PAY_DTL
-WHERE USER_ID=:uid AND PAY_STTS='APPROVED' GROUP BY PAY_MEANS;
+SELECT 'voucher_used' k, SUM(PAY_AMT) v FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_MEANS='VOUCHER' AND PAY_STTS='APPROVED'
+UNION ALL SELECT 'charge_recv', SUM(RECV_AMT) FROM TB_BEG WHERE STUDENT_USER_ID='stu_demo' AND REQ_STTS='ACCEPT'
+UNION ALL SELECT 'charge_used', SUM(PAY_AMT) FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_MEANS='BEG' AND PAY_STTS='APPROVED'
+UNION ALL SELECT 'points', POINT_BAL FROM TB_COM_USER WHERE USER_ID='stu_demo'
 ```
-result(object):
+result(object) — 항목별 잔액만(합계 없음):
 ```json
-{ "voucher":{"limit":100000,"used":78000,"balance":22000},
-  "beg":{"received":50000,"used":30000,"balance":20000},
-  "appcard":{"note":"부모카드는 카드사 한도(외부)"},
-  "totalAvailable":42000 }
+{ "voucher": { "label":"바우처(지원금)", "sub":"학생 복지 지원금",   "limit":100000, "used":56200, "balance":43800 },
+  "charge":  { "label":"용돈 충전금",   "sub":"보호자가 충전한 용돈", "received":65000, "used":20000, "balance":45000 },
+  "points":  { "label":"에듀포인트",    "sub":"질문·퀴즈로 모은 포인트", "balance":1000, "unit":"P" } }
 ```
-chart: `{ "type":"gauge" }`
+chart: `{ "type":"balanceList" }`  // 도넛/합계 없는 3항목 리스트 카드
+카드 UI: 제목 "지금 쓸 수 있는 금액" / 부제 "항목별 남은 금액 · 합산되지 않아요" / 항목 3개(아이콘+라벨+sub+금액, 포인트는 P) / 💡 "바우처와 용돈 충전금은 따로 관리돼요. 포인트는 결제와 별개로 쌓이는 거예요!"
 
 ### ⑦ channel — 온/오프라인 결제내역 (card: channel)
 SQL:
@@ -386,22 +393,34 @@ VITE_OPERIA_API (실서버)  >  VITE_OPERIA_AI === "true" (alasql 로컬 실행)
 - 실행: `alasql(sql)` → rows 반환.
 
 ### 8.4 알려진 10개 — 고정 SQL 템플릿 + shaper (`src/mock/operia/queries.js`)
-intent별로 `{ sqls, shape }`:
-- `sqls`: 1개 또는 여러 개(복합 카드). 예: report = `{ trend: "...", byMeans: "..." }`.
-- `shape(resultSets) → expectedShape`: alasql rows를 §5 형태로 조립.
-- 예(report):
+> ★ **실 오페리아 계약 = 한 요청 = SQL 1문장 = 결과셋 1개(rows).** 따라서 **intent당 SQL은 정확히 1문장**(여러 `SELECT;`를 나열하지 말 것). 한 문장 안의 `UNION ALL`은 허용(여전히 결과셋 1개). shaper가 그 단일 rows에서 카드를 조립한다.
+
+intent별로 `{ sql, shape }`:
+- `sql`: **단일 문장**(GROUP BY에 차원 추가 또는 UNION ALL로 한 방에).
+- `shape(rows) → expectedShape`: 단일 rows에서 §5 형태로 파생.
+- 예(report — 2쿼리 금지, 1쿼리로):
 ```js
 report: {
-  sqls: {
-    trend:   "SELECT SUBSTR(PAY_DT,1,7) m, SUM(PAY_AMT) amount FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_STTS='APPROVED' GROUP BY m ORDER BY m",
-    byMeans: "SELECT PAY_MEANS means, SUM(PAY_AMT) amount FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_STTS='APPROVED' GROUP BY PAY_MEANS",
-  },
-  shape: (r) => ({ trend: r.trend.map(x=>({month:x.m, amount:x.amount})),
-                   byMeans: withPct(r.byMeans) }),
+  sql: "SELECT SUBSTR(PAY_DT,1,7) month, PAY_MEANS means, SUM(PAY_AMT) amount " +
+       "FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_STTS='APPROVED' " +
+       "GROUP BY month, means ORDER BY month",
+  // rows: [{month, means, amount} ...] (월×수단)
+  shape: (rows) => ({
+    trend:   sumBy(rows, 'month'),        // 월별 합
+    byMeans: withPct(sumBy(rows, 'means'))// 수단별 합 + 비율
+  }),
 }
 ```
-- 나머지 9개도 동일 패턴(§5 result 형태로 조립). 템플릿 SQL은 루트 `queries.sql` 로직을 alasql/TB_PAY_DTL 기준으로 옮김.
-- **SQL hover에 보일 sql**: 템플릿 SQL 문자열(여러 개면 `;`로 join)을 응답 `sql`에 넣음.
+- 예(balance — UNION ALL 한 문장):
+```sql
+SELECT 'voucher_used' k, SUM(PAY_AMT) v FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_MEANS='VOUCHER' AND PAY_STTS='APPROVED'
+UNION ALL SELECT 'beg_recv', SUM(RECV_AMT) FROM TB_BEG WHERE STUDENT_USER_ID='stu_demo' AND REQ_STTS='ACCEPT'
+UNION ALL SELECT 'beg_used', SUM(PAY_AMT) FROM TB_PAY_DTL WHERE USER_ID='stu_demo' AND PAY_MEANS='BEG' AND PAY_STTS='APPROVED'
+```
+- friend/nudge/school 비교도 UNION ALL(나/학교평균/충북평균 등) **한 문장**.
+- 나머지(catSpend/channel/merchantBreakdown/parentCard/merchantMap)는 원래 단일 GROUP BY/SELECT라 그대로 1문장.
+- **SQL hover의 `sql`**: 이 단일 문장 그대로(여러 문장 join 금지).
+- 루트 `queries.sql`(실 MySQL용)도 단일 문장 기준으로 정리.
 
 ### 8.5 그 외 질문 — Claude 경량 NL→SQL
 - system 프롬프트(작음, 데이터셋 없음):
@@ -414,20 +433,21 @@ SQL 외 텍스트 금지. DATE_FORMAT 금지(월은 SUBSTR(PAY_DT,1,7)). 대상 
 - 파싱 가드: SQL 비었거나 SELECT 아니면 throw. alasql 실행 예외 → throw(→ 화면 에러).
 - **키 게이팅(보안)**: `VITE_ANTHROPIC_API_KEY`가 비어 있으면 **Claude 호출을 시도하지 않고** "아직 지원하지 않는 질문이에요" 친절 메시지 반환(에러 아님). → 배포본은 키 없이도 안전하게 동작.
 
-### 8.8 dev 모드 — 10개 intent도 Claude가 SQL 생성 (템플릿은 폴백)
-**dev에서만** 알려진 10개 intent도 고정 템플릿 대신 **Claude NL→SQL**을 사용한다. 시연/실서버 안정성은 템플릿/실 오페리아가 담당.
-- **조건**: `import.meta.env.DEV === true` AND 키 있음(`VITE_ANTHROPIC_API_KEY`) AND `VITE_OPERIA_AI`.
+### 8.8 10개 intent도 Claude가 SQL 생성 (템플릿은 폴백)
+알려진 10개 intent도 고정 템플릿 대신 **Claude NL→SQL**을 사용한다. 키 유무가 자연스럽게 dev/prod를 가른다(키 없는 prod 빌드는 자동 템플릿).
+- **조건**: 키 있음(`VITE_ANTHROPIC_API_KEY`) AND `VITE_OPERIA_AI`. (`import.meta.env.DEV` 조건 불필요 — 키 게이팅으로 충분)
 - **동작**:
-  1. 해당 intent의 **출력 계약**(shaper가 기대하는 sqls 구조 = 단일 SQL 또는 `{key: SQL}` 키들 + 각 SQL이 내야 할 컬럼)을 프롬프트에 명시. 기존 템플릿 SQL을 **reference**로 함께 제공.
-  2. Claude는 **템플릿과 동일한 구조의 sqls**(같은 키, 같은 출력 컬럼)를 alasql 호환 SQL로 반환.
-  3. 그 sqls를 alasql 실행 → **기존 shaper 그대로** 조립 → result.
+  1. 해당 intent의 **출력 계약**(shaper가 기대하는 **단일 SQL의 출력 컬럼**)을 프롬프트에 명시. 기존 템플릿 SQL(단일 문장)을 **reference**로 함께 제공.
+  2. Claude는 **단일 SQL 1문장**(UNION ALL 허용, 여러 `SELECT;` 금지)을 동일 출력 컬럼으로 반환.
+  3. 그 SQL을 alasql 실행 → **기존 shaper 그대로** 조립 → result.
   4. SQL hover엔 **Claude가 만든 SQL** 노출.
 - **폴백(안정장치)**: Claude 응답 파싱 실패 / alasql 오류 / 필수 컬럼 누락 → **고정 템플릿으로 자동 폴백**(데모 안 깨짐).
-- **dev 아님 / 키 없음 / prod 빌드**: 항상 고정 템플릿(결정적·키 무관).
+- **키 없음 / prod 빌드**: 항상 고정 템플릿(결정적·키 무관).
+- **출처 표시(`source`)**: 응답에 `source` 포함 → `claude`(AI SQL 성공) / `fallback`(Claude 시도 실패→템플릿) / `template`(키 없음·prod) / `mock` / `api`(실서버). **폴백을 화면에서 알 수 있게** §9.5에서 노출.
 
 ### 8.6 구현 위치
 - `src/api/operia.js`: 모드 분기 + intent 분기(템플릿 vs Claude) + alasql 실행 + shaper 호출.
-  - intent 분기 세부: **dev+키 → Claude sqls(폴백 템플릿)** / 그 외 → 템플릿(§8.8).
+  - intent 분기 세부: **키 있음+VITE_OPERIA_AI → Claude sqls(폴백 템플릿)** / 그 외 → 템플릿(§8.8).
 - Claude 호출은 `claude.js` 저수준 재사용/별도 함수(자유대화 `window.claude.complete`와 분리). 키 `VITE_ANTHROPIC_API_KEY` 재사용.
 - chart.type은 프론트 `INTENT_CHART`가 결정(§3.1).
 
@@ -456,6 +476,25 @@ SQL 외 텍스트 금지. DATE_FORMAT 금지(월은 SUBSTR(PAY_DT,1,7)). 대상 
 
 ### 9.4 전환 안전성
 - 실 오페리아도 `sql`을 반환하므로(NL2SQL) UI 그대로 동작. 칩은 응답의 `sql` 유무만 본다.
+
+### 9.5 출처(source) 표시 — 폴백 가시화
+- `send()`가 응답의 `source`도 메시지에 저장 → ChartRenderer로 전달.
+- SQL 칩 라벨/색으로 출처 구분:
+  - `claude` → `</> AI SQL`
+  - `fallback` → `⚠️ 템플릿(폴백)` (주황 톤) — **Claude 시도 실패로 템플릿 사용됨을 명시**
+  - `template` → `</> 템플릿`
+  - `api` → `</> SQL` (실 오페리아)
+  - `mock` → `</> 목업`
+- 팝오버 상단에 출처 한 줄(예: "출처: Claude 생성 / 폴백: 템플릿") 표기.
+- (선택) dev에서 폴백 시 토스트 "⚠️ 템플릿 폴백 · {intent}".
+
+### 9.6 쿼리 결과(result) 함께 노출 — 차트 검증
+SQL만이 아니라 **그 쿼리가 낸 result(차트가 실제로 쓴 데이터)**도 팝오버에 보여 "쿼리→결과→차트" 일치를 눈으로 검증.
+- 팝오버를 **2단(또는 탭)**: ① `SQL` ② `결과(result)`.
+- 결과 표시:
+  - rows 배열 → **작은 표**(컬럼 자동 추출). object(report의 `{trend,byMeans}` 등) → **pretty JSON**(`JSON.stringify(result,null,2)`, 모노스페이스·스크롤).
+- 데이터 추가 배선 불필요 — 카드가 받은 `result` 그대로 표시(차트와 동일 소스).
+- 길면 스크롤, 바깥탭/ESC 닫힘(기존 팝오버 규칙 유지).
 
 ---
 

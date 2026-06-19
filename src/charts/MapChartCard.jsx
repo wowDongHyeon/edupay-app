@@ -1,9 +1,13 @@
 import React from "react";
-import L from "leaflet";
 import { ChartShell, CAT_EMOJI } from "./util";
 /* map : 근처 사용 가능 가맹점 (오페리아 result {center:{lat,lng}, merchants:[{name,category,addr,lat,lng}]})
-   Leaflet+OSM 실지도, 타일 실패/오프라인 시 약식 지도 폴백. GPS 성공 시 실제 거리. */
+   카카오 지도(JS SDK) 실지도 + 가맹점 마커/라벨. 기본 위치 = 청주 흥덕 중심(거리 현실화).
+   VITE_KAKAO_MAP_KEY 없거나 SDK 로드 실패 → 기존 '오프라인 약식 지도'(격자+상대좌표) 폴백. */
 
+const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
+const CHEONGJU = { lat: 36.6372, lng: 127.486 }; // 청주 흥덕 중심(서울 기본값 → 111km 문제 제거)
+
+// 하버사인 거리(m)
 const distM = (a, b) => {
   const R = 6371000, toR = (d) => d * Math.PI / 180;
   const dLat = toR(b.lat - a.lat), dLng = toR(b.lng - a.lng);
@@ -11,25 +15,56 @@ const distM = (a, b) => {
   return Math.round(2 * R * Math.asin(Math.sqrt(s)));
 };
 
+// 카카오 지도 SDK 1회 동적 로드(autoload=false → kakao.maps.load로 초기화). 키 없으면 거부 → 폴백.
+let kakaoPromise = null;
+function loadKakao(key) {
+  if (typeof window === "undefined" || !key) return Promise.reject(new Error("no kakao key"));
+  if (window.kakao && window.kakao.maps && window.kakao.maps.Map) return Promise.resolve(window.kakao);
+  if (kakaoPromise) return kakaoPromise;
+  kakaoPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false&libraries=services`;
+    s.async = true;
+    s.onload = () => {
+      if (window.kakao && window.kakao.maps) window.kakao.maps.load(() => resolve(window.kakao));
+      else reject(new Error("kakao sdk missing"));
+    };
+    s.onerror = () => { kakaoPromise = null; reject(new Error("kakao sdk script error")); };
+    document.head.appendChild(s);
+  });
+  return kakaoPromise;
+}
+
 export function MapChartCard({ result }) {
   const mapRef = React.useRef(null);
-  const mapObj = React.useRef(null);
-  const [mapFailed, setMapFailed] = React.useState(typeof L === "undefined");
+  const [mapFailed, setMapFailed] = React.useState(!KAKAO_KEY); // 키 없으면 처음부터 약식 폴백
   const [geo, setGeo] = React.useState({ status: "locating", lat: null, lng: null });
 
-  const center = (result && result.center) || { lat: 36.6372, lng: 127.486 };
-  const merchants = (result && Array.isArray(result.merchants) ? result.merchants : []).map((m, i) => ({
+  const merchantsRaw = (result && Array.isArray(result.merchants) ? result.merchants : []).filter((m) => m.lat != null && m.lng != null);
+  // 지도 중심: result.center → 가맹점 평균 → 청주 기본
+  const avg = merchantsRaw.length
+    ? { lat: merchantsRaw.reduce((s, m) => s + m.lat, 0) / merchantsRaw.length, lng: merchantsRaw.reduce((s, m) => s + m.lng, 0) / merchantsRaw.length }
+    : null;
+  const center = (result && result.center) || avg || CHEONGJU;
+
+  // 약식 폴백용 상대좌표(x/y%)
+  const merchants = (result && Array.isArray(result.merchants) ? result.merchants : []).map((m) => ({
     name: m.name, cat: m.category, lat: m.lat, lng: m.lng, addr: m.addr,
     emoji: CAT_EMOJI[m.category] || "📍",
     x: Math.min(92, Math.max(8, 50 + (m.lng - center.lng) * 4000)),
     y: Math.min(88, Math.max(12, 50 - (m.lat - center.lat) * 4000)),
   }));
 
-  const myPos = geo.status === "ok" ? { lat: geo.lat, lng: geo.lng } : center;
+  // 내 위치 정책(데모): GPS가 가맹점 무리에서 멀면(>30km, 예: 서울 접속) 청주 흥덕 중심으로 대체.
+  //   가까우면 실 GPS 사용 → 어디서 접속해도 청주 기준·거리 수백 m, 지도도 동네 단위로 확대.
+  const gps = geo.status === "ok" ? { lat: geo.lat, lng: geo.lng } : null;
+  const realLoc = !!(gps && distM(gps, center) <= 30000); // 30km 이내면 실 위치로 인정
+  const myPos = realLoc ? gps : CHEONGJU;
   const list = merchants
     .map((m) => ({ ...m, realDist: m.lat != null ? distM(myPos, { lat: m.lat, lng: m.lng }) : null }))
     .sort((a, b) => (a.realDist ?? 9e9) - (b.realDist ?? 9e9));
 
+  // GPS
   React.useEffect(() => {
     if (!navigator.geolocation) { setGeo({ status: "unsupported" }); return; }
     navigator.geolocation.getCurrentPosition(
@@ -39,41 +74,58 @@ export function MapChartCard({ result }) {
     );
   }, []);
 
+  // 카카오 지도 렌더 (geo 확정 후)
   React.useEffect(() => {
     if (geo.status === "locating") return;
-    if (typeof L === "undefined" || !mapRef.current) { setMapFailed(true); return; }
-    let map;
-    try {
-      map = L.map(mapRef.current, { zoomControl: false, attributionControl: false, scrollWheelZoom: false }).setView([myPos.lat, myPos.lng], 15);
-      mapObj.current = map;
-      const tiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 });
-      let any = false;
-      tiles.on("tileload", () => { any = true; });
-      tiles.on("tileerror", () => { if (!any) setMapFailed(true); });
-      tiles.addTo(map);
-      const meColor = geo.status === "ok" ? "#4A8DD6" : "#5B4DD6";
-      L.marker([myPos.lat, myPos.lng], { icon: L.divIcon({ className: "", html: `<div style="width:16px;height:16px;border-radius:50%;background:${meColor};border:3px solid #fff;box-shadow:0 0 0 4px rgba(37,99,235,.3)"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map).bindPopup("📍 내 위치");
-      const pts = [[myPos.lat, myPos.lng]];
+    if (!KAKAO_KEY) { setMapFailed(true); return; }
+    let cancelled = false;
+    loadKakao(KAKAO_KEY).then((kakao) => {
+      if (cancelled || !mapRef.current) return;
+      const ctr = new kakao.maps.LatLng(myPos.lat, myPos.lng);
+      const map = new kakao.maps.Map(mapRef.current, { center: ctr, level: 5, draggable: true });
+      const bounds = new kakao.maps.LatLngBounds();
+      bounds.extend(ctr);
+      // 내 위치 점
+      const meColor = realLoc ? "#4A8DD6" : "#5B4DD6";
+      new kakao.maps.CustomOverlay({
+        map, position: ctr, xAnchor: 0.5, yAnchor: 0.5, zIndex: 5,
+        content: `<div style="width:16px;height:16px;border-radius:50%;background:${meColor};border:3px solid #fff;box-shadow:0 0 0 4px rgba(37,99,235,.3)"></div>`,
+      });
+      // 가맹점 마커 + 간단 라벨(이름)
       list.forEach((m) => {
         if (m.lat == null) return;
-        pts.push([m.lat, m.lng]);
-        const icon = L.divIcon({ className: "", html: `<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;background:#fff;border:2px solid #C4B5FD;box-shadow:0 2px 6px rgba(80,60,160,.25);transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:14px">${m.emoji}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 28] });
-        L.marker([m.lat, m.lng], { icon }).addTo(map).bindPopup(`<b>${m.name}</b><br>${m.cat} · ${m.realDist}m`);
+        const pos = new kakao.maps.LatLng(m.lat, m.lng);
+        bounds.extend(pos);
+        new kakao.maps.Marker({ map, position: pos, title: m.name });
+        new kakao.maps.CustomOverlay({
+          map, position: pos, yAnchor: 2.35, zIndex: 4,
+          content: `<div style="padding:1px 6px;background:#fff;border:1px solid #E0D9F7;border-radius:8px;font-size:10.5px;font-weight:700;color:#5B4DD6;white-space:nowrap;box-shadow:0 1px 3px rgba(80,60,160,.18)">${m.name}</div>`,
+        });
       });
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-      if (geo.status === "ok" && pts.length > 1) { try { map.fitBounds(pts, { padding: [30, 30], maxZoom: 16 }); } catch (e) {} }
-      setTimeout(() => map.invalidateSize(), 200);
-    } catch (e) { setMapFailed(true); }
-    return () => { if (map) { map.remove(); mapObj.current = null; } };
+      // 가맹점(+가까운 내 위치) 기준으로 맞춤. 원거리 GPS는 위에서 청주로 대체돼 줌아웃되지 않음.
+      // 레벨 클램프: 너무 넓으면(>6) 동네 단위로, 한 점에 몰리면(<4) 과확대 방지.
+      const applyBounds = () => {
+        if (!list.some((m) => m.lat != null)) return;
+        try {
+          map.setBounds(bounds, 28, 28, 28, 28);
+          const lv = map.getLevel();
+          if (lv > 6) map.setLevel(6);
+          else if (lv < 4) map.setLevel(4);
+        } catch (e) {}
+      };
+      applyBounds();
+      setMapFailed(false);
+      setTimeout(() => { try { map.relayout(); applyBounds(); } catch (e) {} }, 200);
+    }).catch(() => { if (!cancelled) setMapFailed(true); });
+    return () => { cancelled = true; };
   }, [geo.status, geo.lat, geo.lng]);
 
-  const statusBar = {
-    locating: { txt: "내 위치 찾는 중…", cls: "bg-gray-100 text-gray-500" },
-    ok: { txt: "📍 현재 위치 기준 · 실제 거리", cls: "bg-emerald-50 text-emerald-700" },
-    denied: { txt: "위치 권한이 꺼져 있어 기본 위치(청주)로 보여줘요", cls: "bg-amber-50 text-amber-700" },
-    error: { txt: "위치를 못 찾아 기본 위치(청주)로 보여줘요", cls: "bg-amber-50 text-amber-700" },
-    unsupported: { txt: "이 기기는 위치를 지원하지 않아 기본 위치로 보여줘요", cls: "bg-amber-50 text-amber-700" },
-  }[geo.status] || { txt: "", cls: "" };
+  // 배지: 실 위치(가까운 GPS)면 "현재 위치 기준 · 실제 거리", 그 외(원거리 GPS·미허용·실패)는 "청주 기준 · 예시 거리"
+  const statusBar = geo.status === "locating"
+    ? { txt: "내 위치 찾는 중…", cls: "bg-gray-100 text-gray-500" }
+    : realLoc
+    ? { txt: "📍 현재 위치 기준 · 실제 거리", cls: "bg-emerald-50 text-emerald-700" }
+    : { txt: "청주 기준 · 예시 거리", cls: "bg-amber-50 text-amber-700" };
 
   const retry = () => {
     setGeo({ status: "locating" });

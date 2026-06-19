@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "alasql": "^4.17.3",
-    "leaflet": "^1.9.4",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

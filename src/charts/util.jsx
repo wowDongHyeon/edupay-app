@@ -11,6 +11,13 @@ export const monthLabel = (ym) => {
   return mm ? mm + "월" : String(ym || "");
 };
 
+// "2026-06-13" → "6/13"
+export const dayLabel = (ymd) => {
+  const s = String(ymd || "");
+  const mm = +s.slice(5, 7), dd = +s.slice(8, 10);
+  return mm && dd ? `${mm}/${dd}` : s;
+};
+
 export function ChartShell({ title, sub, badge, children }) {
   return (
     <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">

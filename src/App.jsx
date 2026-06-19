@@ -6,7 +6,7 @@ import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
 import { queryOperia, isOperiaAiMode } from "./api/operia";
 import { OPERIA_KINDS } from "./mock/operia";
-import { ChartRenderer } from "./charts/ChartRenderer";
+import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
 import { chartTypeForIntent } from "./charts/registry";
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
@@ -380,7 +380,9 @@ function WelcomeScreen({ onPick }) {
 }
 
 /* ── 채팅 말풍선 ──────────────────────────────────────── */
-function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent }) {
+function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery }) {
+  // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
+  const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, result: msg.result, rawRows: msg.rawRows });
   if (msg.role === "user") {
     return (
       <div className="flex justify-end">
@@ -393,20 +395,24 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
   const isChart = !!msg.chartType; // 오페리아 데이터 메시지(ChartRenderer 렌더)
   const bigCard = isChart || ["spending", "report", "recorded", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
   return (
-    <div className="flex gap-2 items-start">
-      <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
-      style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
-      </div>
-      <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
-        {msg.text &&
-        <div className="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
-          {msg.text}
+    <div className="flex flex-col gap-1.5">
+      <div className="flex gap-2 items-start">
+        <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
+        style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
         </div>
-        }
-        {isChart && <ChartRenderer type={msg.chartType} result={msg.result} intent={msg.intent} sql={msg.sql} />}
-        {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
+        <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
+          {msg.text &&
+          <div className="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
+            {msg.text}
+          </div>
+          }
+          {isChart && <ChartRenderer type={msg.chartType} result={msg.result} intent={msg.intent} sql={msg.sql} source={msg.source} rawRows={msg.rawRows} onCardQuery={onCardQuery} onActiveSql={setChip} />}
+          {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
+        </div>
       </div>
+      {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
+      {isChart && <SqlChip sql={chip.sql} source={chip.source} result={chip.result} rawRows={chip.rawRows} />}
     </div>);
 
 }
@@ -832,6 +838,14 @@ function App() {
     return entry;
   }
 
+  // 카드 내부 lazy 질의(예: 리포트 카드 '일별' 탭) — 새 말풍선/대화턴을 만들지 않고 데이터만 가져온다.
+  // NL 텍스트가 '본 신호'다(실 오페리아는 텍스트만 받음). intentHint는 시뮬(operia.js) 템플릿/컬럼계약/폴백 라우팅용일 뿐.
+  async function cardQuery(text, intentHint) {
+    const ci = cardIntent(text);
+    const intent = intentHint || (ci && ci.kind) || null;
+    return await queryOperia(intent, ci ? ci.scope : null, text); // { result, sql, source, rawRows }
+  }
+
   async function send(text) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
@@ -861,7 +875,9 @@ function App() {
             setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.message }]);
             return;
           }
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, result: resp.result, sql: resp.sql, scope: ci.scope || null }]);
+          // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
+          if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, result: resp.result, rawRows: resp.rawRows, sql: resp.sql, source: resp.source, scope: ci.scope || null }]);
         } catch (e) {
           console.error("[operia] 호출 오류:", e);
           showApiToast("오페리아 오류", "error");
@@ -902,8 +918,9 @@ function App() {
       setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: res.text, card: "recorded", entry: recorded }]);
       return;
     }
-    // AI가 정적 소비/분석/기입장 카드를 골랐더라도 무시(카드는 cardIntent가 전담) → 텍스트로 답
-    if (res.card === "spending" || res.card === "report") res.card = null;
+    // 데이터 intent 카드는 InlineCard로 렌더하지 않는다(ChartRenderer 단일 경로). AI가 골라도 무시 → 텍스트로 답.
+    const DATA_INTENTS = ["spending", "report", "catSpend", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "timePattern"];
+    if (DATA_INTENTS.includes(res.card)) res.card = null;
     setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: res.text, card: res.card }]);
   }
 
@@ -932,12 +949,13 @@ function App() {
       (!started && !WEBVIEW) ?
       <MenuScreen onPick={(t) => send(t)} /> :
       <>
-      {started && <FavoritesBar onPick={send} />}
-      {!started ?
+      {(started || WEBVIEW) && <FavoritesBar onPick={send} />}
+      {/* webview: 빈 상태에서도 WelcomeScreen 대신 채팅 셸(상단 칩+빈 대화영역). 일반 모드는 기존대로 !started→WelcomeScreen */}
+      {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
-          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} />)}
+          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} />)}
           {typing && <Typing />}
           <div className="h-1"></div>
         </div>

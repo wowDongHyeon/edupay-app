@@ -1,11 +1,12 @@
 import React from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, ResponsiveContainer, Tooltip, LabelList } from "recharts";
 import { EDUPAY } from "../data/edupay";
-import { DailySpendCard, RecordedCard, PeriodReportCard, CategorySpendCard } from "./spendcards";
+import { RecordedCard } from "./spendcards";
 import { LedgerCard } from "./ledger";
 import { QuizCard } from "./quiz";
 import { RecommendCard } from "./recommend";
-import { FriendCompareCard, NudgeListCard, NudgeCompareCard, MerchantMapCard, BalanceCard, ChannelCard, MerchantBreakdownCard, ParentCardCard, SchoolCompareCard, TimePatternCard } from "./extras";
+// ※ 데이터 카드(merchantMap/balance/channel/… 10개 + spending/report/catSpend/timePattern)는
+//   새 경로 ChartRenderer→charts/* 로만 렌더한다. 옛 components/extras 데이터 카드는 제거됨.
 /* FOX PAY AI — AI 답변에 인라인으로 붙는 데이터 카드들 (Recharts) */
 const D = EDUPAY;
 const { useState: useStateC } = React;
@@ -186,29 +187,14 @@ function BarCard({ grade, view, months, result }) {
   );
 }
 
-function InlineCard({ kind, scope, entry, only, result, chart, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onDismiss, dismissed }) {
-  if (kind === "spending") {
-    if (scope && scope.type === "day") return <DailySpendCard ledger={ledger} date={scope.date} />;
-    return <DonutCard />;
-  }
-  if (kind === "report") {
-    if (!result && scope && scope.type === "range") return <PeriodReportCard ledger={ledger} range={scope} />;
-    return <BarCard grade={grade} view={scope && scope.view} months={scope && scope.months} result={result} chart={chart} />;
-  }
+// InlineCard — 비데이터 UI 카드 전용(recommend/quiz/ledger/recorded).
+// 데이터 intent(report/catSpend/merchantMap/balance/channel/merchantBreakdown/parentCard/
+//   friendCompare/nudgeCompare/schoolCompare/spending/timePattern/nudgeList)는 여기서 렌더하지 않고
+//   App.send()가 항상 chartType 메시지로 push → ChartRenderer→charts/* 가 렌더한다(단일 경로).
+function InlineCard({ kind, scope, entry, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onDismiss, dismissed }) {
   if (kind === "ledger") return <LedgerCard grade={grade} ledger={ledger} range={scope && scope.type === "range" ? scope : null} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} />;
   if (kind === "quiz") return <QuizCard grade={grade} />;
   if (kind === "recorded") return <RecordedCard entry={entry} onSend={onSend} />;
-  if (kind === "friendCompare") return <FriendCompareCard result={result} />;
-  if (kind === "nudgeCompare") return <NudgeCompareCard result={result} />;
-  if (kind === "nudgeList") return <NudgeListCard />;
-  if (kind === "merchantMap") return <MerchantMapCard result={result} />;
-  if (kind === "balance") return <BalanceCard result={result} />;
-  if (kind === "channel") return <ChannelCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} only={only} result={result} />;
-  if (kind === "merchantBreakdown") return <MerchantBreakdownCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} result={result} />;
-  if (kind === "parentCard") return <ParentCardCard ledger={ledger} result={result} />;
-  if (kind === "schoolCompare") return <SchoolCompareCard grade={grade} result={result} />;
-  if (kind === "catSpend") return <CategorySpendCard ledger={ledger} ckey={scope && scope.key} label={scope && scope.label} range={scope && scope.range} result={result} chart={chart} />;
-  if (kind === "timePattern") return <TimePatternCard ledger={ledger} range={scope && scope.type === "range" ? scope : null} />;
   if (kind === "recommend") return <RecommendCard grade={grade} onOpenContent={onOpenContent} onDismiss={onDismiss} dismissed={dismissed} />;
   return null;
 }
