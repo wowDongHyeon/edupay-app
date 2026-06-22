@@ -949,8 +949,9 @@ function App() {
       (!started && !WEBVIEW) ?
       <MenuScreen onPick={(t) => send(t)} /> :
       <>
-      {(started || WEBVIEW) && <FavoritesBar onPick={send} />}
-      {/* webview: 빈 상태에서도 WelcomeScreen 대신 채팅 셸(상단 칩+빈 대화영역). 일반 모드는 기존대로 !started→WelcomeScreen */}
+      {/* 상단 추천칩(FavoritesBar)은 webview에선 네이티브(Flutter)가 그리므로 숨김. 일반 모드는 started시 노출(기존 동작). */}
+      {started && !WEBVIEW && <FavoritesBar onPick={send} />}
+      {/* webview: 빈 상태에서도 WelcomeScreen 대신 채팅 셸(빈 대화영역). 일반 모드는 기존대로 !started→WelcomeScreen */}
       {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
@@ -962,20 +963,23 @@ function App() {
         }
 
       {(started || WEBVIEW) && <QuickReplyPanel onPick={send} />}
-      <div className="shrink-0 bg-white/95 backdrop-blur border-t border-gray-100">
+      {/* 입력 바: relative z-10 으로 QuickReplyPanel 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
+      <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
-          <div className="flex-1 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">
+          <div className="flex-1 min-w-0 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">
             <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {if (e.key === "Enter") send();}}
                 placeholder="메시지를 입력하세요"
-                className="flex-1 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" />
-            
+                className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" />
+
           </div>
+          {/* 전송 버튼: 항상 보이게 — shrink-0 고정폭, 비활성도 흐리게(opacity) 하지 않고 선명한 회색배경+흰 화살표 유지 */}
           <button onClick={() => send()} disabled={!input.trim() || typing}
-            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition active:scale-90 disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg,#5B4DD6,#4A3FB0)" }}>
+            aria-label="전송"
+            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition active:scale-90"
+            style={{ background: input.trim() && !typing ? "linear-gradient(135deg,#5B4DD6,#4A3FB0)" : "#A7AAB8" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h13M13 6l6 6-6 6" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
