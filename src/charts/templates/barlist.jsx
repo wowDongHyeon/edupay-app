@@ -1,0 +1,62 @@
+import React from "react";
+import { num, ChartShell, InsightBox } from "../util";
+/* 제네릭 barlist 템플릿 (N:1) — data {items:[{label,value,pct?,rank?,me?}], avgRow?:{label,value}} + config.
+   options:
+     rank      : 순위번호 표시
+     rankAccent: 1위 골드 + me 보라(랭킹 카드). 미설정이면 순위 회색(가맹점 리스트)
+     me        : 우리(me) 행 강조(보라 배경 + 🦊 + 보라 텍스트 + 보라 바)
+     avgRow    : data.avgRow를 점선 구분 행으로 추가(충북 평균)
+     showPct   : 비율(%) 열 표시
+     unit      : 값 단위("원" 또는 "") */
+
+export function BarListTemplate({ data, config }) {
+  const cfg = config || {};
+  const opt = cfg.options || {};
+  const items = (data && Array.isArray(data.items) ? data.items : []).slice();
+  const avgRow = opt.avgRow ? (data && data.avgRow) : null;
+  const maxV = Math.max(1, ...items.map((r) => r.value || 0), avgRow ? avgRow.value || 0 : 0);
+  const ranked = !!(opt.me || opt.rankAccent); // 랭킹(학교) 변형 vs 가맹점 변형
+
+  const Bar = ({ frac, color }) => (
+    <div className={"flex-1 rounded-full bg-gray-100 overflow-hidden " + (ranked ? "h-3" : "h-2.5")}>
+      <div className="h-full rounded-full" style={{ width: Math.max(frac * 100, ranked ? 5 : 6) + "%", background: color }}></div>
+    </div>
+  );
+
+  return (
+    <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
+      <div className={"flex flex-col " + (ranked ? "mt-3 gap-1.5" : "mt-4 gap-2.5")}>
+        {items.map((m, i) => {
+          const rk = m.rank != null ? m.rank : i + 1;
+          const me = opt.me && m.me;
+          const barColor = me ? "#5B4DD6" : (opt.rankAccent && rk === 1) ? "#F5B83D" : ranked ? "#D7D2F2" : "#5B4DD6";
+          const rankColor = !opt.rankAccent ? "text-gray-400" : me ? "text-violet-600" : rk === 1 ? "text-amber-500" : "text-gray-400";
+          return (
+            <div key={i} className={ranked ? ("flex items-center gap-2 rounded-xl px-2 py-1.5 " + (me ? "bg-violet-50" : "")) : "flex items-center gap-2.5"}>
+              {opt.rank && <span className={"w-5 shrink-0 text-center font-extrabold " + (ranked ? "text-[13px] " : "text-[12px] ") + rankColor}>{rk}</span>}
+              <div className={(ranked ? "w-[92px] flex items-center gap-1 min-w-0" : "w-[96px] shrink-0")}>
+                {me && <span className="shrink-0">🦊</span>}
+                <span className={"truncate text-[12.5px] " + (me ? "font-extrabold text-violet-700" : ranked ? "text-gray-700" : "text-gray-700")}>{m.label}</span>
+              </div>
+              <Bar frac={(m.value || 0) / maxV} color={barColor} />
+              {opt.showPct && <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.pct != null ? m.pct + "%" : Math.round((m.value || 0) / maxV * 100) + "%"}</span>}
+              <span className={"font-bold text-gray-800 tabular-nums text-right shrink-0 " + (ranked ? "text-[12px] w-[58px]" : "text-[12.5px] w-[52px]")}>{num(m.value)}{opt.unit || ""}</span>
+            </div>
+          );
+        })}
+      </div>
+      {avgRow && (
+        <div className="mt-2 pt-2.5 border-t border-dashed border-gray-200 flex items-center gap-2 px-2">
+          <span className="w-5 shrink-0"></span>
+          <div className="w-[92px] shrink-0 text-[12.5px] text-gray-500">{avgRow.label}</div>
+          <div className="flex-1 h-3 rounded-full bg-gray-100 overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: Math.max((avgRow.value || 0) / maxV * 100, 5) + "%", background: "#A99DF6" }}></div>
+          </div>
+          <span className="text-[12px] font-bold text-gray-500 tabular-nums shrink-0 w-[58px] text-right whitespace-nowrap">{num(avgRow.value)}{opt.unit || ""}</span>
+        </div>
+      )}
+      <InsightBox className={ranked ? "mt-3" : "mt-4"} text={cfg.insight ? cfg.insight(data || {}) : ""} />
+    </ChartShell>
+  );
+}
+export default BarListTemplate;

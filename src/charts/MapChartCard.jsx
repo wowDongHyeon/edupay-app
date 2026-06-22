@@ -35,12 +35,12 @@ function loadKakao(key) {
   return kakaoPromise;
 }
 
-export function MapChartCard({ result }) {
+export function MapChartCard({ result, title, subtitle, badge }) {
   const mapRef = React.useRef(null);
   const [mapFailed, setMapFailed] = React.useState(!KAKAO_KEY); // 키 없으면 처음부터 약식 폴백
   const [geo, setGeo] = React.useState({ status: "locating", lat: null, lng: null });
 
-  const merchantsRaw = (result && Array.isArray(result.merchants) ? result.merchants : []).filter((m) => m.lat != null && m.lng != null);
+  const merchantsRaw = (result && Array.isArray(result.items || result.merchants) ? (result.items || result.merchants) : []).filter((m) => m.lat != null && m.lng != null);
   // 지도 중심: result.center → 가맹점 평균 → 청주 기본
   const avg = merchantsRaw.length
     ? { lat: merchantsRaw.reduce((s, m) => s + m.lat, 0) / merchantsRaw.length, lng: merchantsRaw.reduce((s, m) => s + m.lng, 0) / merchantsRaw.length }
@@ -48,7 +48,7 @@ export function MapChartCard({ result }) {
   const center = (result && result.center) || avg || CHEONGJU;
 
   // 약식 폴백용 상대좌표(x/y%)
-  const merchants = (result && Array.isArray(result.merchants) ? result.merchants : []).map((m) => ({
+  const merchants = (result && Array.isArray(result.items || result.merchants) ? (result.items || result.merchants) : []).map((m) => ({
     name: m.name, cat: m.category, lat: m.lat, lng: m.lng, addr: m.addr,
     emoji: CAT_EMOJI[m.category] || "📍",
     x: Math.min(92, Math.max(8, 50 + (m.lng - center.lng) * 4000)),
@@ -137,7 +137,7 @@ export function MapChartCard({ result }) {
   };
 
   return (
-    <ChartShell badge="내 주변" title="사용 가능 가맹점" sub="FOX PAY 학생복지 가맹점 · 가까운 순">
+    <ChartShell badge={badge} title={title} sub={subtitle}>
       <div className={"mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-[12px] font-medium " + statusBar.cls}>
         <span>{statusBar.txt}</span>
         {(geo.status === "denied" || geo.status === "error") && (

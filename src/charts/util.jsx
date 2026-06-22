@@ -35,5 +35,13 @@ export function ChartShell({ title, sub, badge, children }) {
   );
 }
 
+// 💡 인사이트 박스(보라). 카드별 상단 여백이 달라 className로 mt 조정(기본 mt-3). text 없으면 렌더 안 함.
+export function InsightBox({ text, className }) {
+  if (!text) return null;
+  return (
+    <div className={(className || "mt-3") + " rounded-xl bg-violet-50/70 px-3.5 py-3 text-[12.5px] text-violet-900 leading-relaxed"}>💡 {text}</div>
+  );
+}
+
 export const DONUT_COLORS = ["#5B4DD6", "#7C5CD6", "#9A8FE6", "#C2BAEC", "#D7D2F2", "#E5E0F7"];
 export const CAT_EMOJI = { 편의점: "🏪", 식비: "🍱", 학용품: "📚", 교통: "🚌", 문화: "🎮", 매점: "🍫" };
