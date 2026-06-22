@@ -19,12 +19,31 @@ const sumBy = (rows, keyField, valField = "amount") => {
 // 라벨 포매터(데이터 레이어 자급 — charts에 의존하지 않음)
 const mLabel = (ym) => { const mm = +String(ym || "").slice(5, 7); return mm ? mm + "월" : String(ym || ""); };
 const dLabel = (ymd) => { const s = String(ymd || ""); const mm = +s.slice(5, 7), dd = +s.slice(8, 10); return mm && dd ? `${mm}/${dd}` : s; };
+const pad2 = (n) => String(n).padStart(2, "0");
+const ymdOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+// '오늘'(실제 현재일). 미래 날짜 결제는 어떤 차트에도 안 나오게 SQL에서 컷오프(목업 데이터에 미래 결제가 섞여 있어도 방지).
+const TODAY = ymdOf(new Date());
+const NOT_FUTURE = `AND PAY_DT <= '${TODAY} 23:59:59'`;
+// 일별 결제합 rows([{day,amount}])를 '오늘로 끝나는 연속 7일' series로. 결제 없는 날은 value 0, 미래 날짜는 안 나옴.
+// 앵커='오늘'(실제 현재일). 고정 데모일이 필요하면 ymdOf(new Date()) 대신 상수("2026-06-22")로 교체.
+const last7Days = (rows) => {
+  const byDay = new Map(rows.map((r) => [String(r.day), r.amount || 0]));
+  const anchor = new Date(ymdOf(new Date()) + "T00:00:00");
+  const out = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(anchor);
+    d.setDate(anchor.getDate() - i);
+    const ymd = ymdOf(d);
+    out.push({ label: dLabel(ymd), value: byDay.get(ymd) || 0 });
+  }
+  return out;
+};
 const MEANS_LABEL = { VOUCHER: "바우처(지원금)", APPCARD: "부모카드", BEG: "조르기" };
 
 export const QUERIES = {
   // ① report → bar 표준형 { series:[{label,value}], breakdown:[{label,value,pct,key}] }
   report: {
-    sql: `SELECT SUBSTR(PAY_DT,1,7) AS month, PAY_MEANS AS means, SUM(PAY_AMT) AS amount FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' GROUP BY SUBSTR(PAY_DT,1,7), PAY_MEANS ORDER BY month`,
+    sql: `SELECT SUBSTR(PAY_DT,1,7) AS month, PAY_MEANS AS means, SUM(PAY_AMT) AS amount FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' ${NOT_FUTURE} GROUP BY SUBSTR(PAY_DT,1,7), PAY_MEANS ORDER BY month`,
     shape: (rows) => ({
       series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).map((x) => ({ label: mLabel(x.month), value: x.amount })),
       breakdown: withPct(sumBy(rows, "means").sort((a, b) => b.amount - a.amount))
@@ -33,9 +52,10 @@ export const QUERIES = {
   },
 
   // ①-b reportDaily → bar 표준형 { series } (일별, breakdown 없음). report 카드 '일별' 탭 lazy 내부 intent.
+  // ★'달력 기준 연속 최근 7일' = 가장 최근 결제일('오늘')로 끝나는 7일(오늘 포함). 결제 없는 날은 0원으로 채움(띄엄띄엄 방지).
   reportDaily: {
-    sql: `SELECT day, amount FROM (SELECT SUBSTR(PAY_DT,1,10) AS day, SUM(PAY_AMT) AS amount FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' GROUP BY SUBSTR(PAY_DT,1,10) ORDER BY day DESC LIMIT 7) t ORDER BY day`,
-    shape: (rows) => ({ series: rows.map((x) => ({ label: dLabel(x.day), value: x.amount })) }),
+    sql: `SELECT SUBSTR(PAY_DT,1,10) AS day, SUM(PAY_AMT) AS amount FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' ${NOT_FUTURE} GROUP BY SUBSTR(PAY_DT,1,10) ORDER BY day`,
+    shape: (rows) => ({ series: last7Days(rows) }),
   },
 
   // ② catSpend → donut 표준형 { slices:[{label,value,pct,cnt}], total }

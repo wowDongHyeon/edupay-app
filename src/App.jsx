@@ -354,6 +354,21 @@ function MenuScreen({ onPick }) {
 
 }
 
+/* ── webview 빈 채팅 인사 (AI 첫 말풍선처럼) — 실제 메시지는 아님 ───────── */
+function WebviewWelcome() {
+  return (
+    <div className="flex gap-2 items-start edupay-fade">
+      <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
+      style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
+      </div>
+      <div className="max-w-[85%] bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
+        {"안녕! 난 너의 금융친구야 😊\n이번 달 소비, 같이 살펴볼까?\n아래 추천 질문에서 골라보거나 직접 물어봐 👇"}
+      </div>
+    </div>);
+
+}
+
 /* ── 초기 진입 화면 ───────────────────────────────────── */
 function WelcomeScreen({ onPick }) {
   return (
@@ -453,7 +468,8 @@ function FavoritesBar({ onPick }) {
 /* ── 입력창 위 빠른 질문 패널 (접기/펼치기) ──────────── */
 function QuickReplyPanel({ onPick }) {
   const [open, setOpen] = useState(false);
-  const shown = open ? QUICK_QUERIES : QUICK_QUERIES.slice(0, 2);
+  // 기본은 헤더만(질문 0개) → 채팅 가림 방지. 더보기=4개 전부, 접기=전부 숨김.
+  const shown = open ? QUICK_QUERIES : [];
   return (
     <div className="shrink-0 bg-white rounded-t-2xl" style={{ boxShadow: "0 -6px 18px -8px rgba(45,40,112,0.16)" }}>
       {/* 핸들 (탭하면 펼침/접힘) */}
@@ -465,6 +481,7 @@ function QuickReplyPanel({ onPick }) {
         <span className="text-[11.5px] font-bold text-gray-400">자주 묻는 질문</span>
         <button onClick={() => setOpen((o) => !o)} className="text-[11.5px] font-bold text-violet-500 active:opacity-60">{open ? "접기" : "더보기"}</button>
       </div>
+      {open &&
       <div className="px-2 pb-1.5">
         {shown.map((s, i) =>
         <button key={i} onClick={() => onPick(s.text)}
@@ -476,6 +493,7 @@ function QuickReplyPanel({ onPick }) {
           </button>
         )}
       </div>
+      }
     </div>);
 
 }
@@ -486,6 +504,7 @@ function App() {
   const [entered, setEntered] = useState(WEBVIEW); // webview면 인트로 건너뛰고 바로 진입
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [inputFocused, setInputFocused] = useState(false); // 입력 포커스(키보드 올라옴) 시 FAQ 패널 숨김
   const [typing, setTyping] = useState(false);
   const [ledger, setLedger] = useState(() => DATA.ledgerSeed.map((x) => ({ ...x })));
   const [modal, setModal] = useState(null);
@@ -934,13 +953,7 @@ function App() {
       aiFeature={aiFeature} aiEnabled={aiEnabled} onToggleAi={toggleAi} />
       }
 
-      {/* webview 모드: 헤더가 없으므로 채팅 중 메뉴로 돌아갈 작은 back 버튼 */}
-      {WEBVIEW && started &&
-      <button onClick={() => { setMessages([]); setActiveId(null); }} aria-label="메뉴로"
-      className="absolute left-3 top-3 z-40 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center active:scale-90 transition">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#1A1A1A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      </button>
-      }
+      {/* webview 모드: 뒤로가기는 네이티브 앱이 제공하므로 웹 back 버튼은 두지 않음 */}
 
       {tab !== "금융친구" ?
       <ComingSoon tab={tab} onGoChat={() => {setEntered(true);setTab("금융친구");}} /> :
@@ -956,13 +969,14 @@ function App() {
         <WelcomeScreen onPick={send} /> :
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
+          {WEBVIEW && !started && <WebviewWelcome />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} />)}
           {typing && <Typing />}
           <div className="h-1"></div>
         </div>
         }
 
-      {(started || WEBVIEW) && <QuickReplyPanel onPick={send} />}
+      {(started || WEBVIEW) && !inputFocused && <QuickReplyPanel onPick={send} />}
       {/* 입력 바: relative z-10 으로 QuickReplyPanel 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
@@ -970,6 +984,8 @@ function App() {
             <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
                 onKeyDown={(e) => {if (e.key === "Enter") send();}}
                 placeholder="메시지를 입력하세요"
                 className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" />
