@@ -9,6 +9,10 @@ import { TxListTemplate } from "./txList.jsx";
 import { MapTemplate } from "./map.jsx";
 import { ListTemplate } from "./list.jsx";
 import { TableTemplate } from "./table.jsx";
+import { LineTemplate } from "./line.jsx";
+import { AreaTemplate } from "./area.jsx";
+import { PieTemplate } from "./pie.jsx";
+import { KpiCardsTemplate } from "./kpiCards.jsx";
 
 export const TEMPLATES = {
   bar: BarTemplate,
@@ -21,5 +25,10 @@ export const TEMPLATES = {
   map: MapTemplate,
   list: ListTemplate,
   table: TableTemplate,
+  // generic reportPlan 전용(§6-2)
+  line: LineTemplate,
+  area: AreaTemplate,
+  pie: PieTemplate,
+  kpiCards: KpiCardsTemplate,
 };
 export default TEMPLATES;

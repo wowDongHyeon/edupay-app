@@ -49,7 +49,8 @@ function runSql(sql) {
 // ★ §8.4: intent당 SQL은 1문장(UNION ALL 허용). rawRows = 그 단일 rows 한 세트(§9.6).
 // source(§8.8/§9.5): 키 없음·prod에서 처음부터 템플릿이면 "template",
 //   키 있어 Claude 시도했으나 실패해 템플릿으로 떨어진 경우엔 "fallback"으로 구분해 호출한다.
-function runKnown(intent, question, source = "template") {
+// ※ datasource/mock.js(데이터창구 Phase A)가 이 결정적 템플릿 엔진을 직접 재사용한다(env 분기 없이).
+export function runKnown(intent, question, source = "template") {
   const def = QUERIES[intent];
   const rows = runSql(def.sql); // alasql 예외는 상위로 전파 → throw
   return { question: question || intent, sql: def.sql, result: def.shape(rows), rawRows: rows, source };
@@ -118,7 +119,7 @@ function stripFence(t) {
   return String(t || "").trim().replace(/^```(?:sql|json)?/i, "").replace(/```\s*$/i, "").trim();
 }
 
-async function runClaudeSql(question) {
+export async function runClaudeSql(question) {
   // §8.5 키 게이팅: 키 없으면 Claude 호출 없이 친절 안내 반환(에러/throw 아님 — 배포본 안전)
   if (!HAS_KEY) {
     return { unsupported: true, message: "그 질문은 아직 지원하지 않아요. 위의 자주 묻는 질문이나 카드로 물어봐 줘 🙏" };

@@ -4,13 +4,75 @@ import { InlineCard } from "./components/cards";
 import { RecommendModal } from "./components/recommend";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
-import { queryOperia, isOperiaAiMode } from "./api/operia";
+import { isOperiaAiMode } from "./api/operia";
+import { getDataSource } from "./api/datasource";
+import { computeSummaryStats } from "./api/datasource/stats";
 import { OPERIA_KINDS } from "./mock/operia";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
 import { chartTypeForIntent } from "./charts/registry";
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
 const DATA = EDUPAY;
+
+// [데이터창구] context.companyId (§3 — 값은 추후 주입, 없으면 기본)
+const COMPANY_ID = import.meta.env.VITE_OPERIA_COMPANY_ID || "OPERIA";
+
+// 데이터 질문 1건 → 데이터창구 어댑터의 SSE 이벤트(data 청크 → result) 소비.
+// StreamState: data 의 tableData 를 rows 에 누적, isLast 로 종료. 데이터 확정 시 computeSummaryStats 계산(§4.4, §8).
+// ★Phase A 브리지: result 이벤트를 "기존 렌더가 기대하는 입력"{ result, rawRows, sql, source } 로 변환해 resolve.
+//   (Phase B 에서 reportPlan 렌더러로 전환하며 이 브리지를 제거한다.)
+function queryDataSource(userInput, intent, scope) {
+  const ds = getDataSource();
+  return new Promise((resolve, reject) => {
+    const state = { rows: [], columnMetadata: null, done: false };
+    let settled = false;
+    Promise.resolve(
+      ds.query(
+        { userInput, context: { companyId: COMPANY_ID }, hints: { intent, scope } },
+        {
+          onData: (e) => {
+            if (e && Array.isArray(e.tableData)) {
+              if (e.chunkIndex === 0) state.rows = []; // 첫 청크면 초기화(이후 청크는 누적)
+              state.rows = state.rows.concat(e.tableData);
+            }
+            if (e && e.columnMetadata) state.columnMetadata = e.columnMetadata;
+            if (e && e.isLast) state.done = true;
+          },
+          onResult: (e) => {
+            if (settled) return;
+            settled = true;
+            // 데이터 확정 → 클라가 summaryStats 계산(§4.4). ★bridge 제거(§0.2): 표준 계약(tableData+reportPlan)만 소비.
+            const columnMetadata = state.columnMetadata || (e && e.columnMetadata) || [];
+            const summaryStats = computeSummaryStats(state.rows, columnMetadata);
+            const qi = (e && e.queryInfo) || {};
+            resolve({
+              tableData: state.rows,       // 전용 2개(report/map)는 ChartRenderer 가 shape, generic 은 reportPlan 렌더
+              columnMetadata,
+              reportPlan: e && e.reportPlan,
+              summaryStats,
+              answer: (e && e.answer) || "",
+              sql: qi.sql || null,         // §9 SQL 칩
+              source: qi.source || "api",  // 칩 라벨용(mock=template, backend/operia=자기 값)
+              unsupported: !!(e && e.unsupported),
+              message: (e && e.answer) || "",
+              success: !(e && e.success === false),
+              errorMessage: (e && e.errorMessage) || null,
+            });
+          },
+          onError: (err) => {
+            if (settled) return;
+            settled = true;
+            reject(new Error((err && err.message) || "datasource error"));
+          },
+        }
+      )
+    ).catch((err) => {
+      if (settled) return;
+      settled = true;
+      reject(err instanceof Error ? err : new Error(String(err)));
+    });
+  });
+}
 
 // [WebView] ?view=webview 로 로드되면 폭스에듀 네이티브 앱에 임베드된 모드.
 // 자체 헤더/탭(상단바는 네이티브가 그림)을 숨기고, 인트로를 건너뛰어 금융친구 화면부터 시작.
@@ -397,7 +459,7 @@ function WelcomeScreen({ onPick }) {
 /* ── 채팅 말풍선 ──────────────────────────────────────── */
 function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
-  const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, result: msg.result, rawRows: msg.rawRows });
+  const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
   if (msg.role === "user") {
     return (
       <div className="flex justify-end">
@@ -422,12 +484,12 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
             {msg.text}
           </div>
           }
-          {isChart && <ChartRenderer type={msg.chartType} result={msg.result} intent={msg.intent} sql={msg.sql} source={msg.source} rawRows={msg.rawRows} onCardQuery={onCardQuery} onActiveSql={setChip} />}
+          {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} onCardQuery={onCardQuery} onActiveSql={setChip} />}
           {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
         </div>
       </div>
       {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
-      {isChart && <SqlChip sql={chip.sql} source={chip.source} result={chip.result} rawRows={chip.rawRows} />}
+      {isChart && <SqlChip sql={chip.sql} source={chip.source} rawRows={chip.rawRows} />}
     </div>);
 
 }
@@ -862,7 +924,7 @@ function App() {
   async function cardQuery(text, intentHint) {
     const ci = cardIntent(text);
     const intent = intentHint || (ci && ci.kind) || null;
-    return await queryOperia(intent, ci ? ci.scope : null, text); // { result, sql, source, rawRows }
+    return await queryDataSource(text, intent, ci ? ci.scope : null); // { result, sql, source, rawRows }
   }
 
   async function send(text) {
@@ -885,8 +947,8 @@ function App() {
       if (useOperia) {
         showApiToast(`오페리아${isOperiaAiMode() ? "AI" : ""} · ${ci.kind}`, "api");
         try {
-          // ↓↓↓ [DEV MOCK] 모드 분기는 operia.js 한 곳: VITE_OPERIA_API(실서버) > VITE_OPERIA_AI(Claude 시뮬) > 정적 목업 ↓↓↓
-          const resp = await queryOperia(ci.kind, ci.scope, q);
+          // ↓↓↓ [DEV MOCK] 채널 분기는 getDataSource() 한 곳: VITE_DATA_SOURCE(operia|backend|mock, 미설정→mock) ↓↓↓
+          const resp = await queryDataSource(q, ci.kind, ci.scope); // SSE(data→result) 시뮬 소비 → 브리지 resp
           // ↑↑↑ [DEV MOCK] END ↑↑↑
           setTyping(false);
           // §8.5 키 게이팅: 미지원(키 없음) → 차트 대신 친절 텍스트 안내(에러 아님)
@@ -894,14 +956,23 @@ function App() {
             setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.message }]);
             return;
           }
+          // §4.5/§8 오류: 채널이 success=false 로 응답 → errorMessage 표시(backend/operia). mock 은 항상 true.
+          if (resp && resp.success === false) {
+            showApiToast("채널 오류(success=false)", "error");
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.errorMessage || "요청 처리 중 오류가 발생했어. 잠시 후 다시 시도해줘." }]);
+            return;
+          }
           // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
           if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, result: resp.result, rawRows: resp.rawRows, sql: resp.sql, source: resp.source, scope: ci.scope || null }]);
+          // answer 말풍선(§6/§9): 있으면 카드 위 텍스트, 없으면 생략(10개 intent 는 빈 answer → 기존과 동일, 시각 보존).
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.answer || "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats }]);
         } catch (e) {
-          console.error("[operia] 호출 오류:", e);
-          showApiToast("오페리아 오류", "error");
+          console.error("[데이터] 호출 오류:", e);
+          showApiToast("데이터 오류", "error");
           setTyping(false);
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: "데이터를 불러오지 못했어. 잠시 후 다시 시도해줘." }]);
+          // 스트림 전 HTTP 오류(401/422 등)는 채널 errorMessage 를 그대로 표시(§4.5), generic/네트워크는 기본 안내
+          const em = e && e.message;
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: em && em !== "datasource error" ? em : "데이터를 불러오지 못했어. 잠시 후 다시 시도해줘." }]);
         }
         return;
       }

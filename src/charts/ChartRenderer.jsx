@@ -1,6 +1,8 @@
 import React from "react";
 import TEMPLATES from "./templates";
 import { INTENT_CONFIG } from "./intentConfig";
+import { ReportPlanRenderer } from "./reportPlan/ReportPlanRenderer";
+import { shapeForIntent } from "./shapeForIntent";
 /* ChartRenderer : 오페리아 데이터 메시지 렌더 진입점 (TEMPLATE_설계.md §1·§5).
    INTENT_CONFIG[intent] 조회 → template 선택 → <Template data={result} config={cfg}/>. 없으면 table.
    §9: SqlChip은 카드 밖(App.jsx Bubble의 아바타 아래)에서 렌더. 카드 자체엔 칩 없음.
@@ -154,9 +156,13 @@ function reportTabConfig(tab) {
 }
 
 // report(bar) orchestrator — 월/일 토글 + 일별 lazy 로드·양쪽 캐시 + 활성 탭 SQL 상위 전달.
-function ReportToggleCard({ initial, onCardQuery, onActiveSql }) {
+// §6-1: 표준 tableData 를 shapeForIntent 가 카드 입력으로 변환(월=initialShaped, 일별=shapeForIntent("reportDaily")).
+function ReportToggleCard({ initialShaped, initialRows, sql, source, onCardQuery, onActiveSql }) {
   const [tab, setTab] = useState("month");
-  const [cache, setCache] = useState({ month: initial, day: null });
+  const [cache, setCache] = useState(() => ({
+    month: { data: initialShaped, sql, source, rows: initialRows || [] },
+    day: null,
+  }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -165,7 +171,12 @@ function ReportToggleCard({ initial, onCardQuery, onActiveSql }) {
     setError(false);
     setLoading(true);
     Promise.resolve(onCardQuery(DAILY_TEXT, "reportDaily"))
-      .then((resp) => { setCache((c) => ({ ...c, day: resp })); setLoading(false); })
+      .then((resp) => {
+        const rows = (resp && resp.tableData) || [];
+        const data = shapeForIntent("reportDaily", rows, resp && resp.columnMetadata) || { series: [] };
+        setCache((c) => ({ ...c, day: { data, sql: resp && resp.sql, source: resp && resp.source, rows } }));
+        setLoading(false);
+      })
       .catch(() => { setLoading(false); setError(true); });
   };
   const onTab = (next) => {
@@ -176,15 +187,13 @@ function ReportToggleCard({ initial, onCardQuery, onActiveSql }) {
   const active = tab === "month" ? cache.month : cache.day;
   useEffect(() => {
     if (!onActiveSql) return;
-    onActiveSql(active
-      ? { sql: active.sql, source: active.source, result: active.result, rawRows: active.rawRows }
-      : { sql: null });
+    onActiveSql(active ? { sql: active.sql, source: active.source, rawRows: active.rows } : { sql: null });
   }, [active, onActiveSql]);
 
   const Bar = TEMPLATES.bar;
   return (
     <Bar
-      data={active && active.result}
+      data={active && active.data}
       config={reportTabConfig(tab)}
       tab={tab} onTab={onTab}
       loading={tab === "day" && loading}
@@ -194,14 +203,36 @@ function ReportToggleCard({ initial, onCardQuery, onActiveSql }) {
   );
 }
 
-// 카드만 렌더(칩은 Bubble이 아바타 아래에서). config의 template으로 디스패치. 없으면 table.
-export function ChartRenderer({ type, result, intent, question, sql, source, rawRows, onCardQuery, onActiveSql }) {
+// 렌더 모델(§0.2): 프론트가 질문으로 카드를 정하고(intent) tableData 를 shapeForIntent 로 카드 입력 변환 → 전용 템플릿.
+//   shape 실패(역할 부족/미지원 intent) → reportPlan 폴백 → table. 10개 카드 시각은 전용 템플릿 그대로(입력만 tableData).
+export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, onCardQuery, onActiveSql }) {
+  // 전용 1) report 월/일 토글 — shapeForIntent("report") {series,breakdown}, 일별은 lazy
   if (intent === "report") {
-    return <ReportToggleCard initial={{ result, sql, source, rawRows }} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
+    const shaped = shapeForIntent("report", tableData, columnMetadata);
+    if (shaped) return <ReportToggleCard initialShaped={shaped} initialRows={tableData} sql={sql} source={source} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
   }
-  const cfg = INTENT_CONFIG[intent] || null;
-  const Tpl = (cfg && TEMPLATES[cfg.template]) || TEMPLATES.table;
-  return <Tpl data={result} config={cfg} intent={intent} />;
+  // 전용 2) merchantMap 지도 — shapeForIntent("merchantMap") {center,items}. 좌표 없으면 table 폴백(§6-1)
+  else if (intent === "merchantMap") {
+    const shaped = shapeForIntent("merchantMap", tableData, columnMetadata);
+    if (shaped) return <TEMPLATES.map data={shaped} config={INTENT_CONFIG.merchantMap || {}} />;
+    return <TEMPLATES.table data={tableData} intent={intent} />;
+  }
+  // 그 외 전용 카드 — INTENT_CONFIG[intent] + shapeForIntent 성공 시 전용 렌더(bar/donut/compare/trend/statList/txList/barlist/list)
+  else {
+    const cfg = INTENT_CONFIG[intent];
+    if (cfg) {
+      const shaped = shapeForIntent(intent, tableData, columnMetadata);
+      if (shaped) {
+        const Tpl = TEMPLATES[cfg.template] || TEMPLATES.table;
+        return <Tpl data={shaped} config={cfg} intent={intent} />;
+      }
+    }
+  }
+  // 폴백: 미매칭 intent / shape 실패(자유 질문, operia 표준 등) → reportPlan generic → table
+  if (reportPlan && Array.isArray(reportPlan.sections) && reportPlan.sections.length) {
+    return <ReportPlanRenderer reportPlan={reportPlan} tableData={tableData} columnMetadata={columnMetadata} summaryStats={summaryStats} />;
+  }
+  return <TEMPLATES.table data={tableData} intent={intent} />;
 }
 
 export default ChartRenderer;

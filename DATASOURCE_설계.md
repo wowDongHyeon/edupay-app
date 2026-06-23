@@ -14,7 +14,15 @@
 - **summaryStats**: **클라이언트가 tableData로 계산**(sum/avg/median/max/min/null/zero/groups). 채널은 보내도/비워도 무방.
 - **operia 접속정보**: `VITE_OPERIA_API/_TOKEN/_COMPANY_ID`를 env 자리만 만들고 값은 추후 주입. 지금은 `backend`/`mock`으로 진행(구현 안 막힘).
 
-> 한 줄 요약: **"operia 계약을 표준 어댑터 인터페이스로 삼아 3채널이 모두 같은 SSE 이벤트(data→result)를 낸다. 클라이언트는 채널을 모른 채, reportPlan 데이터 + 질문→템플릿 매핑으로 렌더한다."**
+### 0.2 렌더 모델 확정 (Phase C 후 재확정 — '프론트가 카드 결정')
+**근거**: operia·backend 모두 범용 NL2SQL이라 '에듀페이 카드 카탈로그'를 모른다(operia는 과제·재원 도메인 엔진이고, reportPlan도 generic 섹션뿐). 카탈로그를 아는 건 **프론트뿐** → **카드 결정은 프론트가 한다.**
+- **프론트가 질문→카드 결정**(기존 `cardIntent`). 채널은 데이터(`tableData`+`columnMetadata`)만 준다.
+- **프론트 shaper가 tableData → 카드 입력으로 변환**: 컬럼은 `columnMetadata` 타입 역할(범주=varchar / 값=decimal·integer / 시간축=date)로 매핑 + 필요 시 집계. **컬럼 이름 의존 최소.** `bridge` 제거.
+- **reportPlan = 폴백**: 프론트가 못 알아듣는 자유 질문/shape 불가일 때만 채널 reportPlan generic(또는 table) 렌더.
+- **채널 무관 동형**: operia/backend/mock 모두 같은 경로(질문→카드 + tableData shape). **아무도 에듀페이 카드를 알 필요 없음**(backend는 깨끗한 tableData만 잘 주면 됨).
+> 직전 'generic-first(채널이 카드 결정)' 폐기 — operia가 bespoke를 못 한다고 generic으로 내릴 게 아니라, **프론트가 카드를 결정**하면 bespoke 유지 + 채널 동형 둘 다 된다.
+
+> 한 줄 요약: **"3채널이 같은 SSE(data→result) + 표준 tableData를 낸다. 프론트가 질문으로 카드를 정하고 tableData를 그 카드 입력으로 shape한다. reportPlan은 못 알아듣는 질문의 폴백."**
 
 ---
 
@@ -180,15 +188,29 @@ interface DataSource {
 
 ---
 
-## 6. 렌더링 (하이브리드: reportPlan + 질문→템플릿 매핑)
-렌더는 2단계로 결정한다.
+## 6. 렌더링 ('프론트가 카드 결정' + tableData shaper, reportPlan은 폴백)  ★Phase C 후 재확정★
+> 근거(§0.2): operia·backend는 에듀페이 카드를 모른다. 카드 결정은 프론트 몫.
 
-1. **프론트 질문→템플릿 매핑(우선 힌트)**: 기존 `cardIntent`(정규식) 류로 질문에서 intent를 추정하고, intent별 전용 템플릿이 있으면 그것을 선택(특히 `map`처럼 reportPlan으로 표현 못 하는 카드). 데이터는 응답의 `tableData`/`columnMetadata`에서 읽는다.
-2. **reportPlan 섹션 렌더(서버 힌트)**: 전용 매핑이 없으면 `result.reportPlan.sections[]`를 **순서대로** 타입별로 렌더한다.
+렌더 순서:
+1. **프론트가 질문→intent로 카드 선택**(기존 `cardIntent`). 카탈로그는 프론트 소유(§7).
+2. **프론트 shaper로 채널 `tableData`를 그 카드 입력으로 변환**(`shapeForIntent(intent, tableData, columnMetadata)`):
+   - 컬럼을 `columnMetadata` 타입 역할로 매핑(범주=varchar / 값=decimal·integer / 시간축=date), 필요 시 집계. 컬럼 이름 의존 최소.
+   - 기존 `queries.js` shaper 로직을 **tableData 입력으로 재사용**(rows 대신 tableData). `bridge` 제거.
+   - shape 성공 → 전용 카드 렌더(bar/donut/compare/trend/map/statList/txList/barlist/list).
+3. **폴백**: intent 미매칭(자유 질문)이거나 shape 불가(컬럼 부족) → 채널 `reportPlan` generic 렌더(§6-2), 그것도 없으면 `table`.
 
-즉 데이터·answer·통계는 채널 응답에서 오고, **"어떤 모양으로 그릴지"는 (a) 질문 매핑 → (b) reportPlan** 순으로 정한다.
+- **answer**: 채널 응답의 `answer`를 카드 위 말풍선(없으면 생략). **summaryStats**: 클라 계산(§4.4).
+- **채널 무관**: operia/backend/mock 동일 경로. 채널은 깨끗한 tableData만 주면 됨(카드 모름).
 
-섹션 `type`별 컴포넌트 매핑(명세서 §3.3.2):
+### 6-1. shaper 입력 규칙 (이름보다 '역할'로 매핑)
+- 전용 카드별로 필요한 컬럼 '역할'을 `columnMetadata`로 찾는다. 예:
+  - **report**(추이): date/월 컬럼=x축, 수치 컬럼=값 → `{series}`. (일별 토글은 일자 집계 → 연속7일)
+  - **donut/barlist**: 범주 컬럼=label, 수치 컬럼=value(+rank).
+  - **map**: 위경도 역할 컬럼(lat/lng) 있으면 마커, 없으면 `table` 폴백.
+- 역할을 못 찾으면 그 카드 shape 실패 → 폴백(§6 3단계).
+- **컬럼 계약(선택·권장)**: 우리 `backend`/mock은 알려진 질문에 대해 shaper가 기대하는 컬럼을 안정적으로 내주면 전용 카드가 확실히 뜬다. operia는 generic이라 역할 매핑/폴백에 의존.
+
+### 6-2. (폴백용) reportPlan 섹션 `type`별 컴포넌트 매핑 (명세서 §3.3.2):
 
 | reportPlan type | 주요 필드 | 렌더 컴포넌트 | 기존 자산 재사용 |
 |---|---|---|---|
@@ -381,6 +403,34 @@ mock/렌더/상태/화면 전부 불변(채널만 교체). 자유대화 경로.
 
 ## 완료
 WORKFLOW.md §8 "데이터창구 Phase C(backend SSE)" 메모. graphify update 금지.
+```
+
+### Phase B-R — 렌더 모델 개정 (프론트가 카드 결정 + tableData shaper, bridge 제거)  ★Phase C 후 재확정, Phase D 전 선결★
+```
+graphify query "ChartRenderer 렌더 경로(전용 vs reportPlan), App.jsx cardIntent(질문→intent), queries.js shaper(rows→카드 입력), mock.js bridge 생성, ReportPlanRenderer"
+
+## 목적
+렌더 모델 개정(설계서 §0.2·§6·§6-1): '프론트가 질문→카드 결정 + tableData를 카드 입력으로 shape'로 전환. bridge 제거. reportPlan은 폴백. (직전 generic-first 폐기 — operia/backend는 카드를 모름)
+
+## 작업
+설계서: DATASOURCE_설계.md §0.2/§6/§6-1/§7 그대로.
+- 신설 src/charts/shapeForIntent.js — shapeForIntent(intent, tableData, columnMetadata) → 카드 표준 입력. queries.js의 기존 shaper 로직을 'rows' 대신 'tableData' 입력으로 재사용. 컬럼은 columnMetadata 타입 역할(범주/값/시간축)로 매핑 + 집계. 역할 못 찾으면 null 반환(=폴백 신호).
+- ChartRenderer: ① cardIntent로 intent 추정 → 전용 템플릿 + shapeForIntent(tableData) 성공 시 전용 렌더(bar/donut/compare/trend/map/statList/txList/barlist/list). ② intent 미매칭 or shape null → ReportPlanRenderer(폴백) → 그것도 없으면 table. (dev ?render 토글/FORCE 상수 정리)
+- bridge 제거: mock.js가 result.bridge를 싣지 않음. App.jsx의 bridge→기존입력 변환 제거. 전용 카드는 이제 shapeForIntent(tableData)로 입력 생성.
+- mock.js: 10개 intent를 '표준 tableData'(shaper가 역할 매핑·집계 가능한 컬럼) + columnMetadata + answer + queryInfo.sql로 생성. (report=월/일 행, map=lat/lng 포함). reportPlan은 폴백용 최소/선택.
+- report 월/일 토글·일별 연속7일, merchantMap 지도는 shapeForIntent 경로로 보존(map은 lat/lng 없으면 table 폴백).
+- ReportPlanRenderer는 폴백 경로로 유지(Phase B 산출물). line/pie/area/kpi 보강은 선택(폴백 품질용, 우선순위 낮음 — 주 경로는 전용 카드).
+
+## 절대 보존
+10개 카드 시각(전용 템플릿 그대로, 입력만 tableData에서 shape), report 월/일 토글·일별 연속7일, 지도, 자유대화 경로, webview(FAQ 포커스 숨김·첫 인사), SqlChip(queryInfo.sql), 채널 분기는 getDataSource() 한 곳.
+
+## 검증 (Playwright → 이후 Claude in Chrome 라이브, ?view=webview, VITE_DATA_SOURCE=mock)
+- 10개 카드가 Phase A/B와 시각 100% 동일(이제 tableData→shapeForIntent 경로). report 토글·지도 동작. bridge 부재(코드/네트워크 확인).
+- 자유 질문(미매칭) → reportPlan/table 폴백 1건. 콘솔 0 / npm run build 통과. 스크린샷 C:/Users/Public/edupay_ds_BR_*.png.
+- (스텁 backend 가동 시) 같은 질문 backend=mock 동일 렌더(동형) 확인.
+
+## 완료
+WORKFLOW.md §8 "데이터창구 Phase B-R(프론트 카드결정+shaper)" 메모. graphify update 금지.
 ```
 
 ### Phase D — operia 어댑터 마무리 (접속 값 도착 후)
