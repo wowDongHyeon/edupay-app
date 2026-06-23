@@ -5,7 +5,7 @@ import { RecommendModal } from "./components/recommend";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
 import { isOperiaAiMode } from "./api/operia";
-import { getDataSource } from "./api/datasource";
+import { getDataSource, activeChannelName } from "./api/datasource";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { OPERIA_KINDS } from "./mock/operia";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
@@ -528,9 +528,8 @@ function FavoritesBar({ onPick }) {
 }
 
 /* ── 입력창 위 빠른 질문 패널 (접기/펼치기) ──────────── */
-function QuickReplyPanel({ onPick }) {
-  const [open, setOpen] = useState(false);
-  // 기본은 헤더만(질문 0개) → 채팅 가림 방지. 더보기=4개 전부, 접기=전부 숨김.
+function QuickReplyPanel({ onPick, open, setOpen }) {
+  // open/접힘은 App이 소유(컨트롤드): 최초 펼침, 대화 시작·전송·채팅 탭 시 접힘. 더보기/접기로 수동 토글.
   const shown = open ? QUICK_QUERIES : [];
   return (
     <div className="shrink-0 bg-white rounded-t-2xl" style={{ boxShadow: "0 -6px 18px -8px rgba(45,40,112,0.16)" }}>
@@ -567,6 +566,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [inputFocused, setInputFocused] = useState(false); // 입력 포커스(키보드 올라옴) 시 FAQ 패널 숨김
+  const [faqOpen, setFaqOpen] = useState(true); // 자주 묻는 질문 펼침 상태(App이 소유) — 최초 펼침, 대화/탭/전송 시 접힘
   const [typing, setTyping] = useState(false);
   const [ledger, setLedger] = useState(() => DATA.ledgerSeed.map((x) => ({ ...x })));
   const [modal, setModal] = useState(null);
@@ -598,6 +598,9 @@ function App() {
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, typing]);
+
+  // 대화가 시작되면(메시지 존재) FAQ 패널 자동 접힘 — 채팅 가림 방지(최초 빈 화면만 펼침)
+  useEffect(() => { if (started) setFaqOpen(false); }, [started]);
 
   // [WebView] URL ?q= 초기 질문 자동 전송 (네이티브 카드별 진입). StrictMode 중복 방지 위해 1회 가드.
   const qFired = useRef(false);
@@ -930,6 +933,7 @@ function App() {
   async function send(text) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
+    setFaqOpen(false); // 전송 시 FAQ 패널 접힘(펼친 채 질문해도 응답 안 가림)
     setInput("");
     const history = messages;
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
@@ -945,7 +949,7 @@ function App() {
       const NON_OPERIA = ["recommend", "quiz", "ledger", "recorded"];
       const useOperia = OPERIA_KINDS.includes(ci.kind) || (isOperiaAiMode() && !NON_OPERIA.includes(ci.kind));
       if (useOperia) {
-        showApiToast(`오페리아${isOperiaAiMode() ? "AI" : ""} · ${ci.kind}`, "api");
+        showApiToast(`${activeChannelName()} · ${ci.kind}`, "api");
         try {
           // ↓↓↓ [DEV MOCK] 채널 분기는 getDataSource() 한 곳: VITE_DATA_SOURCE(operia|backend|mock, 미설정→mock) ↓↓↓
           const resp = await queryDataSource(q, ci.kind, ci.scope); // SSE(data→result) 시뮬 소비 → 브리지 resp
@@ -1039,7 +1043,7 @@ function App() {
       {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
+        <div ref={scrollRef} onPointerDown={() => faqOpen && setFaqOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {WEBVIEW && !started && <WebviewWelcome />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} />)}
           {typing && <Typing />}
@@ -1047,7 +1051,7 @@ function App() {
         </div>
         }
 
-      {(started || WEBVIEW) && !inputFocused && <QuickReplyPanel onPick={send} />}
+      {(started || WEBVIEW) && !inputFocused && <QuickReplyPanel onPick={send} open={faqOpen} setOpen={setFaqOpen} />}
       {/* 입력 바: relative z-10 으로 QuickReplyPanel 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>

@@ -317,6 +317,18 @@ export function getDataSource() {
 
 **관계**: 본 설계가 데이터 계약·렌더 흐름을 상위 정의. `TEMPLATE_설계.md`의 템플릿 레지스트리는 §6의 reportPlan 섹션/질문 매핑 템플릿의 **구현 자산으로 재사용**. `MOCK_API_설계.md`는 mock 어댑터 내부(alasql/queries.js) 근거로 유지.
 
+### 13.1 실 DB 연동 시 shapeForIntent 적응 목록 (backend 더미 검증 후 도출)
+> backend 채널 플러밍(SSE·companyId·오류·SQL칩)은 더미로 검증 완료. 아래는 **실 DB 응답을 보고** shapeForIntent를 맞춰야 하는 항목(추측 보강은 오구현 위험 → 실 응답 확인 후).
+- **code 라벨 한글화**: `CATEGORY_CD=FOOD/CVS/...`, `CHANNEL_CD=ON/OFF`, `PAY_MEAN_CD` 등 코드값 → 한글. 1순위 backend `columnMetadata.label`/값으로, 안 되면 프론트 코드맵.
+- **channel**: `CHANNEL_CD=ON/OFF` ↔ 기존 shaper의 `ONLINE/OFFLINE` 매핑 정렬.
+- **schoolCompare**: 실 응답에 students(인원) 부재 시 1인당 계산 불가 → 총액 기준으로 조정 or backend가 인원 제공.
+- **nudgeCompare**: 정답SQL은 학교별 집계, mock은 월별 추이 → 어느 형태로 카드 구성할지 실 응답 보고 결정.
+- **balance**: 실 응답 가로 1행(컬럼=항목) ↔ statList 세로 k/v → 행/열 변환 필요할 수 있음.
+- **parentCard / 날짜축**: `DLNG_DT=YYYYMMDD(char8)`는 temporal 미인식 → backend가 추이축을 `YYYY-MM`/`YYYY-MM-DD`+type=date로 보정(연동회신 §3-1) 전제. 그 외 날짜 컬럼 표시 포맷.
+- **merchantMap 좌표**: 실 SELECT에 `LATITUDE/LONGITUDE` 포함 여부 확인 → 있으면 마커, NULL/부재는 제외·목록 폴백(프론트 휴리스틱 구비됨).
+- **USER_ID 격리**: 개발 `DEV_USER_ID`(USR131)로 진행 중. 실사용자 JWT(userId 포함) 발급은 인증 설계 별도 트랙(연동회신 §2-1).
+> 진행: 실 read-only DB 연결 → 질문별 동형성(Playwright + Claude in Chrome) → 위 항목 실 응답 보고 shapeForIntent 미세조정.
+
 ---
 
 ## 14. 구현 프롬프트 (단계별, CLI용)

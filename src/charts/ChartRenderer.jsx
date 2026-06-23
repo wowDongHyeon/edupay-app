@@ -96,6 +96,8 @@ export function SqlChip({ sql, source, result, rawRows }) {
   }, [pinned]);
 
   if (!sql) return null;
+  // mock 계열(고정 템플릿/폴백/정적 목업)은 '실제 쿼리'가 아니라 칩 숨김 — 실 채널(api)·Claude 생성(claude)만 노출
+  if (source === "template" || source === "fallback" || source === "mock") return null;
   const meta = SOURCE_META[source] || SOURCE_META.api;
   const btnClosed = meta.warn ? "bg-amber-50 text-amber-700" : "bg-violet-50 text-violet-600";
   const btnOpen = meta.warn ? "bg-amber-500 text-white" : "bg-violet-600 text-white";

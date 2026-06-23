@@ -41,4 +41,13 @@ export function getDataSource() {
   }
 }
 
+/** 현재 활성 채널명(폴백 반영). dev 표식/로그용. → "operia" | "backend" | "mock" */
+export function activeChannelName() {
+  switch (SOURCE) {
+    case "operia": return import.meta.env.VITE_OPERIA_API ? "operia" : "mock";
+    case "backend": return import.meta.env.VITE_BACKEND_API ? "backend" : "mock";
+    default: return "mock";
+  }
+}
+
 export default getDataSource;
