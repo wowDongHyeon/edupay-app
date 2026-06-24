@@ -222,7 +222,7 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   else if (intent === "merchantMap") {
     const shaped = shapeForIntent("merchantMap", tableData, columnMetadata);
     if (shaped) return <TEMPLATES.map data={shaped} config={INTENT_CONFIG.merchantMap || {}} />;
-    return <TEMPLATES.table data={tableData} intent={intent} />;
+    return <TEMPLATES.table data={tableData} intent={intent} columnMetadata={columnMetadata} />;
   }
   // 그 외 전용 카드 — INTENT_CONFIG[intent] + shapeForIntent 성공 시 전용 렌더(bar/donut/compare/trend/statList/txList/barlist/list)
   else {
@@ -239,7 +239,7 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   if (reportPlan && Array.isArray(reportPlan.sections) && reportPlan.sections.length) {
     return <ReportPlanRenderer reportPlan={reportPlan} tableData={tableData} columnMetadata={columnMetadata} summaryStats={summaryStats} />;
   }
-  return <TEMPLATES.table data={tableData} intent={intent} />;
+  return <TEMPLATES.table data={tableData} intent={intent} columnMetadata={columnMetadata} />;
 }
 
 export default ChartRenderer;

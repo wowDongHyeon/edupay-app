@@ -1,29 +1,31 @@
-# Graph Report - .  (2026-06-23)
+# Graph Report - .  (2026-06-24)
 
 ## Corpus Check
-- 44 files · ~59,416 words
+- 70 files · ~60,932 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 333 nodes · 502 edges · 48 communities (18 shown, 30 thin omitted)
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 49 edges (avg confidence: 0.83)
-- Token cost: 258,647 input · 0 output
+- 358 nodes · 504 edges · 54 communities (19 shown, 35 thin omitted)
+- Extraction: 90% EXTRACTED · 9% INFERRED · 1% AMBIGUOUS · INFERRED: 47 edges (avg confidence: 0.85)
+- Token cost: 110,626 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_지도·차트 셸 유틸|지도·차트 셸 유틸]]
-- [[_COMMUNITY_차트 템플릿·데이터창구 설계|차트 템플릿·데이터창구 설계]]
-- [[_COMMUNITY_레거시 카드 컴포넌트|레거시 카드 컴포넌트]]
-- [[_COMMUNITY_datasource 계약·backend 어댑터|datasource 계약·backend 어댑터]]
-- [[_COMMUNITY_패키지 의존성|패키지 의존성]]
-- [[_COMMUNITY_ChartRenderer·shapeForIntent|ChartRenderer·shapeForIntent]]
-- [[_COMMUNITY_App SSE 소비·SSE 계약|App SSE 소비·SSE 계약]]
-- [[_COMMUNITY_SqlChip·표 렌더 유틸|SqlChip·표 렌더 유틸]]
+- [[_COMMUNITY_차트 공용 유틸|차트 공용 유틸]]
+- [[_COMMUNITY_App·ChartRenderer 진입|App·ChartRenderer 진입]]
+- [[_COMMUNITY_차트 템플릿·레거시 카드|차트 템플릿·레거시 카드]]
 - [[_COMMUNITY_operia NL2SQL 엔진|operia NL2SQL 엔진]]
-- [[_COMMUNITY_채팅 렌더·intent 분류|채팅 렌더·intent 분류]]
-- [[_COMMUNITY_reportPlan 렌더·집계 유틸|reportPlan 렌더·집계 유틸]]
-- [[_COMMUNITY_레거시 폴백 모델|레거시 폴백 모델]]
+- [[_COMMUNITY_채팅 렌더·intent·질의|채팅 렌더·intent·질의]]
+- [[_COMMUNITY_패키지 의존성|패키지 의존성]]
+- [[_COMMUNITY_코드→한글 라벨(codeLabels)|코드→한글 라벨(codeLabels)]]
+- [[_COMMUNITY_데이터창구 채널·SSE|데이터창구 채널·SSE]]
+- [[_COMMUNITY_카카오 지도 카드|카카오 지도 카드]]
+- [[_COMMUNITY_요약통계·타입추론|요약통계·타입추론]]
+- [[_COMMUNITY_intent 설정·템플릿 매핑|intent 설정·템플릿 매핑]]
+- [[_COMMUNITY_레거시 카드 컴포넌트|레거시 카드 컴포넌트]]
 - [[_COMMUNITY_비교 카드 목업|비교 카드 목업]]
 - [[_COMMUNITY_도넛 목업|도넛 목업]]
+- [[_COMMUNITY_제네릭 폴백 템플릿|제네릭 폴백 템플릿]]
+- [[_COMMUNITY_프론트 카드결정 원칙|프론트 카드결정 원칙]]
 - [[_COMMUNITY_퀴즈·추천 카드|퀴즈·추천 카드]]
 - [[_COMMUNITY_월별 리포트 목업|월별 리포트 목업]]
 - [[_COMMUNITY_가맹점별 목업|가맹점별 목업]]
@@ -32,6 +34,7 @@
 - [[_COMMUNITY_스타일 설정(Tailwind)|스타일 설정(Tailwind)]]
 - [[_COMMUNITY_프로젝트 문서|프로젝트 문서]]
 - [[_COMMUNITY_DB 스키마|DB 스키마]]
+- [[_COMMUNITY_가맹점 데이터·지도|가맹점 데이터·지도]]
 - [[_COMMUNITY_카테고리 소비 카드|카테고리 소비 카드]]
 - [[_COMMUNITY_Anthropic 호출|Anthropic 호출]]
 - [[_COMMUNITY_backend 스켈레톤(REST)|backend 스켈레톤(REST)]]
@@ -55,87 +58,78 @@
 - [[_COMMUNITY_가맹점지도 목업|가맹점지도 목업]]
 - [[_COMMUNITY_범용 표 카드|범용 표 카드]]
 - [[_COMMUNITY_목업 매핑·OPERIA_KINDS|목업 매핑·OPERIA_KINDS]]
+- [[_COMMUNITY_graphify 규칙|graphify 규칙]]
+- [[_COMMUNITY_역할 분리(Cowork↔CLI)|역할 분리(Cowork↔CLI)]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `num()` - 18 edges
 2. `ChartShell()` - 14 edges
-3. `TEMPLATES 레지스트리` - 14 edges
+3. `TEMPLATES 레지스트리` - 13 edges
 4. `InsightBox()` - 11 edges
 5. `ChartShell / InsightBox / num (charts util)` - 9 edges
-6. `DATASOURCE_설계.md (데이터 창구 추상화)` - 9 edges
-7. `QUERIES — 10 intent 고정 SQL + shaper` - 8 edges
-8. `제네릭 (data, config) 템플릿 계약` - 7 edges
-9. `MOCK_API_설계.md (오페리아 목업 연동)` - 7 edges
-10. `runSql()` - 6 edges
+6. `DATASOURCE_설계.md (데이터 창구 추상화)` - 8 edges
+7. `제네릭 (data, config) 템플릿 계약` - 7 edges
+8. `shapeForIntent (tableData→카드 입력)` - 7 edges
+9. `runSql()` - 6 edges
+10. `runKnownClaude()` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `SQL 칩 노출 + 결과(result) 투명화` --conceptually_related_to--> `InlineCard (비데이터 UI 카드 디스패처)`  [AMBIGUOUS]
-  MOCK_API_설계.md → src/components/cards.jsx
-- `Playwright 검증 규격 (모바일·스크린샷·10개 회귀)` --references--> `TEMPLATES 레지스트리`  [INFERRED]
-  WORKFLOW.md → src/charts/templates/index.js
-- `queries_nl2sql_10.reference.sql (정답 SQL 10종)` --conceptually_related_to--> `shapeForIntent(intent, tableData, columnMetadata)`  [INFERRED]
-  src/mock/operia/queries_nl2sql_10.reference.sql → DATASOURCE_설계.md
-- `runSql()` --calls--> `alasql`  [INFERRED]
-  src/api/operia.js → package.json
-- `질의↔템플릿 N:1 + config 단일 편집 지점` --rationale_for--> `BarListTemplate (가로 바 리스트)`  [INFERRED]
-  TEMPLATE_설계.md → src/charts/templates/barlist.jsx
+- `InlineCard (비데이터 UI 카드 디스패처)` --conceptually_related_to--> `SQL 칩 노출 + 결과(result) 투명화`  [AMBIGUOUS]
+  src/components/cards.jsx → MOCK_API_설계.md
+- `shapeForIntent (tableData→카드 입력)` --implements--> `표준 tableData+columnMetadata 계약`  [INFERRED]
+  src/charts/shapeForIntent.js → WORKFLOW.md
+- `alasql` --calls--> `runSql()`  [INFERRED]
+  package.json → src/api/operia.js
+- `BarListTemplate (가로 바 리스트)` --rationale_for--> `질의↔템플릿 N:1 + config 단일 편집 지점`  [INFERRED]
+  src/charts/templates/barlist.jsx → TEMPLATE_설계.md
+- `TEMPLATES 레지스트리` --rationale_for--> `3계층 분리 (queries.js shaper / intentConfig / templates)`  [INFERRED]
+  src/charts/templates/index.js → TEMPLATE_설계.md
 
 ## Hyperedges (group relationships)
-- **** — datasource_contract, datasource_mockSource, datasource_backendSource, datasource_operiaSource [EXTRACTED 1.00]
-- **** — charts_ChartRenderer, charts_shapeForIntent, charts_INTENT_CONFIG, charts_ReportPlanRenderer [INFERRED 0.85]
-- **3계층 카드 파이프라인: shaper → intentConfig → 제네릭 템플릿** —  [INFERRED 0.85]
-- **데이터 창구 동형 계약: 3채널 + 프론트 카드결정 + shapeForIntent + reportPlan 폴백** —  [INFERRED 0.85]
-- **10개 intent 데이터 흐름: 정답SQL ↔ 목업 alasql+fixture ↔ 카드 템플릿** —  [INFERRED 0.75]
+- **데이터 질문 렌더 흐름 (질문→intent→shape→템플릿)** — App_cardIntent, App_queryDataSource, ChartRenderer_ChartRenderer, shapeForIntent_shapeForIntent, queries_QUERIES [INFERRED 0.85]
+- **백엔드 코드값 한글 라벨 적응** — codeLabels_labelOfCode, queries_channel_shape, queries_balance_shape, shapeForIntent_roleOf [INFERRED 0.75]
 
-## Communities (48 total, 30 thin omitted)
+## Communities (54 total, 35 thin omitted)
 
-### Community 0 - "지도·차트 셸 유틸"
-Cohesion: 0.11
-Nodes (27): CHEONGJU, distM(), MapChartCard(), CAT_EMOJI, ChartShell(), DONUT_COLORS, InsightBox(), num() (+19 more)
+### Community 0 - "차트 공용 유틸"
+Cohesion: 0.10
+Nodes (32): ChartShell(), dayLabel(), DONUT_COLORS, InsightBox(), monthLabel(), num(), won(), aggBy() (+24 more)
 
-### Community 1 - "차트 템플릿·데이터창구 설계"
-Cohesion: 0.08
-Nodes (44): BarListTemplate (가로 바 리스트), CompareTemplate (나 vs 평균 비교), dataset.json (alasql 4+2 테이블 fixture), DonutTemplate (비중 도넛), DATASOURCE_설계.md (데이터 창구 추상화), 프론트가 카드 결정 + tableData shaper (§0.2 재확정), getDataSource() 팩토리 (VITE_DATA_SOURCE 분기), reportPlan = 폴백 렌더 경로 (+36 more)
-
-### Community 2 - "레거시 카드 컴포넌트"
+### Community 1 - "App·ChartRenderer 진입"
 Cohesion: 0.06
-Nodes (10): InlineCard(), REPORT_INSIGHT, computeSummaryStats(), inferColumnMetadata(), GRADE_LABELS, GRADES, MenuIcons, QUICK_QUERIES (+2 more)
+Nodes (25): ChartRenderer(), isRows(), jsonPre(), prettyJson(), RawRowsView(), reportTabConfig(), ReportToggleCard(), ResultView() (+17 more)
 
-### Community 3 - "datasource 계약·backend 어댑터"
-Cohesion: 0.15
-Nodes (14): backendSource, EVT, makeDataEvent(), makeResultEvent(), STATUS, activeChannelName(), getDataSource(), warnFallback() (+6 more)
+### Community 2 - "차트 템플릿·레거시 카드"
+Cohesion: 0.08
+Nodes (41): BarListTemplate (가로 바 리스트), BarCard (레거시 소비 리포트), DonutCard (레거시 카테고리 도넛), EDUPAY 데이터 모델 (레거시 폴백), InlineCard (비데이터 UI 카드 디스패처), CompareTemplate (나 vs 평균 비교), dataset.json (alasql 4+2 테이블 fixture), DonutTemplate (비중 도넛) (+33 more)
 
-### Community 4 - "패키지 의존성"
+### Community 3 - "operia NL2SQL 엔진"
+Cohesion: 0.09
+Nodes (26): ensureTables(), extractAliases(), knownPrompt(), parseSingleSql(), queryOperia(), runClaudeSql(), runKnown(), runKnownClaude() (+18 more)
+
+### Community 4 - "채팅 렌더·intent·질의"
+Cohesion: 0.10
+Nodes (27): Bubble (말풍선/카드 렌더), cardIntent (질문→카드 결정), cardQuery (카드 내부 lazy 질의), fallback (로컬 응답), periodScope (기간 파싱), queryDataSource (App), send (채팅 전송 오케스트레이터), ChartRenderer (데이터 카드 렌더 진입점) (+19 more)
+
+### Community 5 - "패키지 의존성"
 Cohesion: 0.09
 Nodes (21): dependencies, alasql, prop-types, react, react-dom, recharts, description, devDependencies (+13 more)
 
-### Community 5 - "ChartRenderer·shapeForIntent"
-Cohesion: 0.13
-Nodes (13): ChartRenderer(), isValidShape(), normalizeColumns(), roleOf(), shapeForIntent(), SLOTS, dLabel(), last7Days() (+5 more)
-
-### Community 6 - "App SSE 소비·SSE 계약"
-Cohesion: 0.15
-Nodes (20): queryDataSource (App SSE consumer), WebView embed mode (?view=webview / ?q=), backendSource adapter, computeSummaryStats (client-side stats), consumeEventStream (SSE parser), Data Source SSE contract (data/result events), getDataSource (channel factory), mockSource adapter (+12 more)
-
-### Community 7 - "SqlChip·표 렌더 유틸"
-Cohesion: 0.18
-Nodes (13): isRows(), jsonPre(), prettyJson(), RawRowsView(), reportTabConfig(), ReportToggleCard(), ResultView(), SOURCE_META (+5 more)
-
-### Community 8 - "operia NL2SQL 엔진"
-Cohesion: 0.21
-Nodes (15): ensureTables(), extractAliases(), isOperiaAiMode(), knownPrompt(), parseSingleSql(), queryOperia(), runClaudeSql(), runKnown() (+7 more)
-
-### Community 9 - "채팅 렌더·intent 분류"
+### Community 6 - "코드→한글 라벨(codeLabels)"
 Cohesion: 0.16
-Nodes (15): Bubble (chat message renderer), cardIntent (NL intent classifier), AreaTemplate (generic area), BarTemplate (generic bar), ChartRenderer (data message render entry), INTENT_CONFIG (intent presentation config), MapChartCard (Kakao map merchants), ReportPlanRenderer (generic fallback renderer) (+7 more)
+Nodes (14): CHANNEL_CANON, CODE_LABELS, hasKorean(), labelFor(), labelOfCode(), digits(), dLabel(), last7Days() (+6 more)
 
-### Community 10 - "reportPlan 렌더·집계 유틸"
-Cohesion: 0.24
-Nodes (11): dayLabel(), monthLabel(), aggBy(), ChartSection(), CODE_LABEL, fmtLabel(), KpiCards(), KpiGrid() (+3 more)
+### Community 7 - "데이터창구 채널·SSE"
+Cohesion: 0.16
+Nodes (19): backendSource adapter, computeSummaryStats (client-side stats), consumeEventStream (SSE parser), Data Source SSE contract (data/result events), getDataSource (channel factory), mockSource adapter, operiaSource adapter, 3-channel single-contract architecture (+11 more)
 
-### Community 11 - "레거시 폴백 모델"
-Cohesion: 0.50
-Nodes (4): BarCard (레거시 소비 리포트), DonutCard (레거시 카테고리 도넛), EDUPAY 데이터 모델 (레거시 폴백), InlineCard (비데이터 UI 카드 디스패처)
+### Community 8 - "카카오 지도 카드"
+Cohesion: 0.32
+Nodes (5): CHEONGJU, distM(), MapChartCard(), CAT_EMOJI, MapTemplate()
+
+### Community 10 - "intent 설정·템플릿 매핑"
+Cohesion: 0.43
+Nodes (4): INTENT_CONFIG, templateFor(), chartTypeForIntent(), INTENT_CHART
 
 ### Community 12 - "비교 카드 목업"
 Cohesion: 0.50
@@ -145,7 +139,15 @@ Nodes (4): CompareChartCard, mock: friendCompare (compare), mock: nudgeCompare (
 Cohesion: 0.67
 Nodes (3): DonutChartCard, mock: catSpend (donut), mock: channel (donut)
 
-### Community 14 - "퀴즈·추천 카드"
+### Community 14 - "제네릭 폴백 템플릿"
+Cohesion: 0.67
+Nodes (3): AreaTemplate (generic area), BarTemplate (generic bar), ReportPlanRenderer (generic fallback renderer)
+
+### Community 15 - "프론트 카드결정 원칙"
+Cohesion: 0.67
+Nodes (3): INTENT_CONFIG (intent presentation config), Front decides viz, not response, chartTypeForIntent registry
+
+### Community 16 - "퀴즈·추천 카드"
 Cohesion: 0.67
 Nodes (3): QuizCard (맞춤 금융 퀴즈), RecommendCard (금융교육 추천 리스트), RecommendModal (계산기/퀴즈 모달)
 
@@ -154,11 +156,13 @@ Nodes (3): QuizCard (맞춤 금융 퀴즈), RecommendCard (금융교육 추천 �
   MOCK_API_설계.md · relation: conceptually_related_to
 - `배포 보안 프로파일 (Claude off 빌드·키 번들 제외)` → `index.html (Vite 엔트리 · Pretendard · viewport-fit)`  [AMBIGUOUS]
   index.html · relation: conceptually_related_to
+- `SqlChip (SQL 칩)` → `CHANNEL_CANON (채널 표준키)`  [AMBIGUOUS]
+  src/charts/ChartRenderer.jsx · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **91 isolated node(s):** `PostCSS Config`, `Tailwind Config (violet palette)`, `complete (저수준 Anthropic 호출)`, `client.api — backend skeleton (10 queries)`, `BarChartCard` (+86 more)
+- **103 isolated node(s):** `PostCSS Config`, `Tailwind Config (violet palette)`, `complete (저수준 Anthropic 호출)`, `client.api — backend skeleton (10 queries)`, `BarChartCard` (+98 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -167,13 +171,13 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `배포 보안 프로파일 (Claude off 빌드·키 번들 제외)` and `index.html (Vite 엔트리 · Pretendard · viewport-fit)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
+- **What is the exact relationship between `SqlChip (SQL 칩)` and `CHANNEL_CANON (채널 표준키)`?**
+  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `runSql()` connect `operia NL2SQL 엔진` to `패키지 의존성`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `alasql` connect `패키지 의존성` to `operia NL2SQL 엔진`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `TEMPLATES 레지스트리` (e.g. with `3계층 분리 (queries.js shaper / intentConfig / templates)` and `Playwright 검증 규격 (모바일·스크린샷·10개 회귀)`) actually correct?**
-  _`TEMPLATES 레지스트리` has 2 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **What connects `PostCSS Config`, `Tailwind Config (violet palette)`, `complete (저수준 Anthropic 호출)` to the rest of the system?**
-  _98 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `지도·차트 셸 유틸` be split into smaller, more focused modules?**
-  _Cohesion score 0.11400966183574879 - nodes in this community are weakly interconnected._
+  _110 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `차트 공용 유틸` be split into smaller, more focused modules?**
+  _Cohesion score 0.09879336349924585 - nodes in this community are weakly interconnected._

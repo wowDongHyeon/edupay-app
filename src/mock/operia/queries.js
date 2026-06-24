@@ -87,22 +87,36 @@ export const QUERIES = {
     sql: `SELECT 'me' AS k, SUM(PAY_AMT) AS v FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' ` +
       `UNION ALL SELECT 'school' AS k, s AS v FROM (SELECT SUM(p.PAY_AMT) AS s FROM TB_PAY_DTL p JOIN TB_COM_USER u ON u.USER_ID=p.USER_ID WHERE u.USER_TYPE='STUDENT' AND u.SCH_NM='흥덕중' AND u.GRADE='2' AND p.PAY_STTS='APPROVED' GROUP BY p.USER_ID) sc ` +
       `UNION ALL SELECT 'province' AS k, s AS v FROM (SELECT SUM(p.PAY_AMT) AS s FROM TB_PAY_DTL p JOIN TB_COM_USER u ON u.USER_ID=p.USER_ID WHERE u.USER_TYPE='STUDENT' AND p.PAY_STTS='APPROVED' GROUP BY p.USER_ID) pv`,
+    // 두 형태 처리:
+    //  · (mock) 분포 행 {k:'me'/'school'/'province', v} → 학교/충북 평균 + 백분위 계산
+    //  · (2차요청 backend B-2) 직접 비교 행 {label, amount} = 나/또래/충북 3행 → 그대로 막대(백분위 없음)
+    //  · 그 외(구형 #3=학교별 {sch_nm, avg} 등) → null 반환 → table 폴백(정상, 회귀 아님)
     shape: (rows) => {
-      const me = (rows.find((r) => r.k === "me") || {}).v || 0;
-      const school = rows.filter((r) => r.k === "school").map((r) => r.v || 0);
-      const province = rows.filter((r) => r.k === "province").map((r) => r.v || 0);
-      const sAvg = round(mean(school));
-      const pAvg = round(mean(province));
-      const le = province.filter((x) => x <= me).length;
-      const percentile = province.length ? round((le / province.length) * 100) : 0;
-      return {
-        percentile,
-        bars: [
-          { label: "나", value: me, me: true },
-          { label: "우리학교 같은학년", value: sAvg },
-          { label: "충북 평균", value: pAvg },
-        ],
-      };
+      if (rows.some((r) => r.k === "me" || r.k === "school" || r.k === "province")) {
+        const me = (rows.find((r) => r.k === "me") || {}).v || 0;
+        const school = rows.filter((r) => r.k === "school").map((r) => r.v || 0);
+        const province = rows.filter((r) => r.k === "province").map((r) => r.v || 0);
+        const sAvg = round(mean(school));
+        const pAvg = round(mean(province));
+        const le = province.filter((x) => x <= me).length;
+        const percentile = province.length ? round((le / province.length) * 100) : 0;
+        return {
+          percentile,
+          bars: [
+            { label: "나", value: me, me: true },
+            { label: "우리학교 같은학년", value: sAvg },
+            { label: "충북 평균", value: pAvg },
+          ],
+        };
+      }
+      // 2차요청 직접 비교형: 라벨이 나/또래/충북류일 때만 compare(학교명 등 구형은 table 폴백)
+      const KNOWN = /나|본인|내|또래|친구|학년|우리학교|충북|도\s*평균|평균|^me$|peer|school|province/i;
+      if (rows.length >= 2 && rows.length <= 4 && rows.every((r) => KNOWN.test(String(r.k)))) {
+        const bars = rows.map((r) => ({ label: String(r.k), value: r.v || 0, me: /나|본인|내|^me$/i.test(String(r.k)) }));
+        if (!bars.some((b) => b.me)) bars[0].me = true;
+        return { percentile: null, bars };
+      }
+      return null;
     },
   },
 
@@ -130,17 +144,61 @@ export const QUERIES = {
       `UNION ALL SELECT 'charge_recv' AS k, SUM(RECV_AMT) AS v FROM TB_BEG WHERE STUDENT_USER_ID='${UID}' AND REQ_STTS='ACCEPT' ` +
       `UNION ALL SELECT 'charge_used' AS k, SUM(PAY_AMT) AS v FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_MEANS='BEG' AND PAY_STTS='APPROVED' ` +
       `UNION ALL SELECT 'points' AS k, POINT_BAL AS v FROM TB_COM_USER WHERE USER_ID='${UID}'`,
+    // ★ 3가지 입력 형태 모두 처리(shapeForIntent 가 balance 는 raw tableData 를 그대로 넘김):
+    //   A) mock 계산형 {k,v} (k=voucher_used/charge_recv/charge_used/points) → 한도·수령 기준 잔액 계산
+    //   B) backend 가로 단일행 {voucher_balance, charge_balance, edu_point}(또는 한글 라벨) → 3항목 피벗
+    //   C) backend 세로 {item, balance}(2차요청 후) → 행별 항목 매핑
+    //   합산하지 않음(항목별 표시). 컬럼명(영문 코드)·한글 라벨 둘 다 인식.
     shape: (rows) => {
-      const by = Object.fromEntries(rows.map((r) => [r.k, r.v || 0]));
+      if (!rows || !rows.length) return null;
       const pos = (n) => (n > 0 ? n : 0);
-      const vUsed = by.voucher_used || 0, recv = by.charge_recv || 0, cUsed = by.charge_used || 0, pts = by.points || 0;
-      return {
-        items: [
-          { label: "바우처(지원금)", sub: "학생 복지 지원금", value: pos(VOUCHER_LIMIT - vUsed), unit: "원" },
-          { label: "용돈 충전금", sub: "보호자가 충전한 용돈", value: pos(recv - cUsed), unit: "원" },
-          { label: "에듀포인트", sub: "질문·퀴즈로 모은 포인트", value: pos(pts), unit: "P" },
-        ],
+      const META = {
+        voucher: { label: "바우처(지원금)", sub: "학생 복지 지원금", unit: "원" },
+        charge: { label: "용돈 충전금", sub: "보호자가 충전한 용돈", unit: "원" },
+        point: { label: "에듀포인트", sub: "질문·퀴즈로 모은 포인트", unit: "P" },
       };
+      // 항목 식별 규칙(영문 코드/한글 라벨 공통)
+      const KIND = [
+        { re: /voucher.*bal|바우처|지원금/i, meta: META.voucher },
+        { re: /charge.*bal|충전|용돈/i, meta: META.charge },
+        { re: /edu.*point|^point|포인트|에듀포인트/i, meta: META.point },
+      ];
+      const keys = Object.keys(rows[0]);
+
+      // A) 계산형 {k,v} — used/recv/points 원시값으로 잔액 계산(mock)
+      if (keys.includes("k") && keys.includes("v") && rows.some((r) => /used|recv|points/i.test(String(r.k)))) {
+        const by = Object.fromEntries(rows.map((r) => [r.k, r.v || 0]));
+        const vUsed = by.voucher_used || 0, recv = by.charge_recv || 0, cUsed = by.charge_used || 0, pts = by.points || 0;
+        return { items: [
+          { ...META.voucher, value: pos(VOUCHER_LIMIT - vUsed) },
+          { ...META.charge, value: pos(recv - cUsed) },
+          { ...META.point, value: pos(pts) },
+        ] };
+      }
+
+      // B) 가로 단일행 — 컬럼이 곧 항목(이미 계산된 잔액). user_id 등 비수치 컬럼은 무시.
+      if (rows.length === 1) {
+        const row = rows[0];
+        const items = [];
+        for (const { re, meta } of KIND) {
+          const col = keys.find((c) => re.test(c) && typeof row[c] === "number");
+          if (col) items.push({ ...meta, value: pos(row[col]) });
+        }
+        if (items.length) return { items };
+      }
+
+      // C) 세로 {item, balance} — 행별 라벨→항목 매핑(모르는 라벨은 원문 표시)
+      const labelKey = keys.find((c) => /item|^k$|label|구분|항목|종류/i.test(c)) || keys[0];
+      const valKey = keys.find((c) => /bal|amount|^v$|value|금액|잔액|포인트/i.test(c) && typeof rows[0][c] === "number") || keys[1];
+      if (labelKey && valKey) {
+        const items = rows.map((r) => {
+          const raw = String(r[labelKey]);
+          const k = KIND.find((x) => x.re.test(raw));
+          return k ? { ...k.meta, value: pos(r[valKey] || 0) } : { label: raw, sub: "", value: pos(r[valKey] || 0), unit: "원" };
+        });
+        if (items.length) return { items };
+      }
+      return null;
     },
   },
 

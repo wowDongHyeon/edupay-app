@@ -49,11 +49,11 @@ function aggScalar(rows, col, agg = "sum") {
 
 const metaOf = (section) => ({ title: section.title, subtitle: section.subtitle, badge: section.badge });
 
-function ChartSection({ section, rows }) {
+function ChartSection({ section, rows, cm }) {
   const cfg = section.config || {};
   const { viz, x, y } = cfg;
   const meta = metaOf(section);
-  if (!x || !y || !Array.isArray(rows) || !rows.length) return <TableCard result={rows} />;
+  if (!x || !y || !Array.isArray(rows) || !rows.length) return <TableCard result={rows} columnMetadata={cm} />;
   const series = aggBy(rows, x, y);
   if (viz === "bar_vertical") return <TEMPLATES.bar data={{ series }} config={meta} />;
   if (viz === "line") return <TEMPLATES.line data={{ series }} config={meta} />;
@@ -61,43 +61,44 @@ function ChartSection({ section, rows }) {
   if (viz === "bar_horizontal") return <TEMPLATES.barlist data={{ items: withPct(series).sort((a, b) => b.value - a.value) }} config={{ ...meta, options: { showPct: true } }} />;
   if (viz === "donut") { const it = withPct(series); return <TEMPLATES.donut data={{ slices: it, total: it.reduce((s, e) => s + e.value, 0) }} config={meta} />; }
   if (viz === "pie") return <TEMPLATES.pie data={{ slices: withPct(series) }} config={meta} />;
-  return <TableCard result={rows} />; // 모르는 viz → table 폴백
+  return <TableCard result={rows} columnMetadata={cm} />; // 모르는 viz → table 폴백
 }
 
-function KpiGrid({ section, rows }) {
+function KpiGrid({ section, rows, cm }) {
   const g = section.kpiGrid || {};
-  if (!g.groupBy || !g.valueColumn) return <TableCard result={rows} />;
+  if (!g.groupBy || !g.valueColumn) return <TableCard result={rows} columnMetadata={cm} />;
   const items = withPct(aggBy(rows, g.groupBy, g.valueColumn, g.agg || "sum")).sort((a, b) => b.value - a.value).slice(0, g.topN || 6);
-  if (!items.length) return <TableCard result={rows} />;
+  if (!items.length) return <TableCard result={rows} columnMetadata={cm} />;
   return <TEMPLATES.barlist data={{ items }} config={{ ...metaOf(section), options: { rank: true, showPct: true } }} />;
 }
 
-function KpiCards({ section, rows }) {
+function KpiCards({ section, rows, cm }) {
   const metrics = section.metrics || [];
   // metrics 있으면 컬럼 집계, 없으면 tableData 행을 직접 카드화(예: balance 잔액 items {label,value,unit,sub})
   const items = metrics.length
     ? metrics.map((m) => ({ label: m.label, value: aggScalar(rows, m.column, m.agg || "sum"), unit: m.unit || "", sub: m.sub || "" }))
     : (rows || []).filter((r) => r && r.label != null).map((r) => ({ label: r.label, value: r.value, unit: r.unit || "", sub: r.sub || "" }));
-  if (!items.length) return <TableCard result={rows} />;
+  if (!items.length) return <TableCard result={rows} columnMetadata={cm} />;
   return <TEMPLATES.kpiCards data={{ items }} config={metaOf(section)} />;
 }
 
 function Section({ section, ctx }) {
   const t = section && section.type;
   const rows = ctx.tableData || [];
+  const cm = ctx.columnMetadata;
   if (t === "heading") return <div className="text-[16px] font-extrabold text-gray-900 px-1 pt-1">{section.content || ""}</div>;
   if (t === "insight" || t === "report") return <InsightBox text={section.narrative || ""} />;
-  if (t === "table") return <TableCard result={rows} />;
-  if (t === "chart") return <ChartSection section={section} rows={rows} />;
-  if (t === "kpi_grid") return <KpiGrid section={section} rows={rows} />;
-  if (t === "kpi_cards") return <KpiCards section={section} rows={rows} />;
-  return <TableCard result={rows} />; // 모르는 type → table 폴백(§6-2)
+  if (t === "table") return <TableCard result={rows} columnMetadata={cm} />;
+  if (t === "chart") return <ChartSection section={section} rows={rows} cm={cm} />;
+  if (t === "kpi_grid") return <KpiGrid section={section} rows={rows} cm={cm} />;
+  if (t === "kpi_cards") return <KpiCards section={section} rows={rows} cm={cm} />;
+  return <TableCard result={rows} columnMetadata={cm} />; // 모르는 type → table 폴백(§6-2)
 }
 
 export function ReportPlanRenderer({ reportPlan, tableData, columnMetadata, summaryStats }) {
   const sections = reportPlan && Array.isArray(reportPlan.sections) ? reportPlan.sections : [];
   const ctx = { tableData: tableData || [], columnMetadata: columnMetadata || [], summaryStats };
-  if (!sections.length) return <TableCard result={tableData || []} />;
+  if (!sections.length) return <TableCard result={tableData || []} columnMetadata={columnMetadata} />;
   return (
     <div className="flex flex-col gap-2.5">
       {sections.map((s, i) => <Section key={i} section={s} ctx={ctx} />)}

@@ -16,7 +16,7 @@ const SLOTS = {
   catSpend:          [{ n: "category", role: "category" }, { n: "amount", role: "value" }, { n: "cnt", role: "value", opt: true }],
   friendCompare:     [{ n: "k", role: "category" }, { n: "v", role: "value" }],
   nudgeCompare:      [{ n: "month", role: "temporal" }, { n: "cnt", role: "value" }, { n: "amount", role: "value" }],
-  balance:           [{ n: "k", role: "category" }, { n: "v", role: "value" }],
+  // balance 는 SLOTS 미사용 — 입력 형태가 이질적(가로 단일행 피벗/세로/계산형)이라 shapeForIntent 가 raw 를 그대로 넘기고 shape 가 형태를 판별한다.
   channel:           [{ n: "channel", role: "category" }, { n: "amount", role: "value" }, { n: "cnt", role: "value", opt: true }, { n: "item", role: "category", opt: true }, { n: "cat", role: "category", opt: true }, { n: "dt", role: "temporal", opt: true }],
   merchantBreakdown: [{ n: "merchant", role: "category" }, { n: "amount", role: "value" }],
   schoolCompare:     [{ n: "school", role: "category" }, { n: "tot", role: "value" }, { n: "students", role: "value", opt: true }],
@@ -131,7 +131,8 @@ export function shapeForIntent(intent, tableData, columnMetadata) {
   if (!def || typeof def.shape !== "function") return null;
   const rows = Array.isArray(tableData) ? tableData : [];
   if (!rows.length) return null;
-  const normalized = normalizeColumns(intent, rows, columnMetadata);
+  // balance 는 입력 형태가 이질적(가로 단일행 피벗/세로/계산형) → 역할 정규화 없이 raw 전달, shape 가 형태 판별.
+  const normalized = intent === "balance" ? rows : normalizeColumns(intent, rows, columnMetadata);
   if (!normalized) return null;
   let shaped;
   try { shaped = def.shape(normalized); } catch (e) { return null; }
