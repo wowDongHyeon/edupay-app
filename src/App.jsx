@@ -6,6 +6,8 @@ import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
 import { isOperiaAiMode } from "./api/operia";
 import { getDataSource, activeChannelName } from "./api/datasource";
+import { getUserId } from "./api/session";
+import { copyText } from "./util/clipboard";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { OPERIA_KINDS } from "./mock/operia";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
@@ -26,9 +28,11 @@ function queryDataSource(userInput, intent, scope) {
   return new Promise((resolve, reject) => {
     const state = { rows: [], columnMetadata: null, done: false };
     let settled = false;
-    Promise.resolve(
+    // [세션] userId 는 이 경로에서 1회 조회(session.getUserId 가 캐시) → context 에 주입.
+    // 어댑터(operia/backend)는 context 를 스프레드로 그대로 실어 보낸다(companyId 만 채널값으로 덮음). mock 은 context 무시.
+    getUserId().then((userId) =>
       ds.query(
-        { userInput, context: { companyId: COMPANY_ID }, hints: { intent, scope } },
+        { userInput, context: { companyId: COMPANY_ID, userId }, hints: { intent, scope } },
         {
           onData: (e) => {
             if (e && Array.isArray(e.tableData)) {
@@ -457,13 +461,38 @@ function WelcomeScreen({ onPick }) {
 }
 
 /* ── 채팅 말풍선 ──────────────────────────────────────── */
-function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery }) {
+function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery, onCopy }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
   const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
+  // long-press(꾹 누르기) 복사: 500ms 유지 시 그 말풍선 텍스트 복사 + "복사됨" 토스트. 이동(스크롤)·뗌·취소 시 취소.
+  const lp = React.useRef({ timer: null, x: 0, y: 0 });
+  function longPress(text) {
+    const clear = () => { if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = null; } };
+    return {
+      onContextMenu: (e) => e.preventDefault(), // 네이티브 메뉴/콜아웃 억제(꾹 누름)
+      onPointerDown: (e) => {
+        if (!text) return;
+        lp.current.x = e.clientX; lp.current.y = e.clientY;
+        clear();
+        lp.current.timer = setTimeout(() => {
+          lp.current.timer = null;
+          try { window.getSelection && window.getSelection().removeAllRanges(); } catch (err) {} // 선택 해제
+          onCopy && onCopy(text);
+        }, 500);
+      },
+      onPointerMove: (e) => {
+        if (!lp.current.timer) return;
+        if (Math.abs(e.clientX - lp.current.x) > 10 || Math.abs(e.clientY - lp.current.y) > 10) clear(); // 스크롤/드래그 → 취소
+      },
+      onPointerUp: clear,
+      onPointerLeave: clear,
+      onPointerCancel: clear,
+    };
+  }
   if (msg.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-[14px] leading-relaxed whitespace-pre-line shadow-sm" style={{ background: "#E0E2FA", color: "#2D2870" }}>
+        <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-[14px] leading-relaxed whitespace-pre-line shadow-sm select-none" style={{ background: "#E0E2FA", color: "#2D2870", WebkitTouchCallout: "none" }} {...longPress(msg.text)}>
           {msg.text}
         </div>
       </div>);
@@ -480,7 +509,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
         </div>
         <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
           {msg.text &&
-          <div className="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
+          <div className="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm select-none" style={{ WebkitTouchCallout: "none" }} {...longPress(msg.text)}>
             {msg.text}
           </div>
           }
@@ -587,6 +616,16 @@ function App() {
     const id = Date.now();
     setApiToast({ msg, kind, id });
     setTimeout(() => setApiToast((cur) => (cur && cur.id === id ? null : cur)), 2600);
+  };
+  // [사용자] 말풍선 long-press 복사 토스트 — apiToast(dev 전용)와 별개로 prod 에서도 노출. 1.2초.
+  const [copyToast, setCopyToast] = useState(false);
+  const copyTimerRef = useRef(null);
+  const onCopyMessage = async (text) => {
+    const ok = await copyText(text);
+    if (!ok) return;
+    setCopyToast(true);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopyToast(false), 1200);
   };
   const scrollRef = useRef(null);
   const started = messages.length > 0;
@@ -1045,7 +1084,7 @@ function App() {
 
         <div ref={scrollRef} onPointerDown={() => faqOpen && setFaqOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {WEBVIEW && !started && <WebviewWelcome />}
-          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} />)}
+          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onCopy={onCopyMessage} />)}
           {typing && <Typing />}
           <div className="h-1"></div>
         </div>
@@ -1091,6 +1130,15 @@ function App() {
       <div className="absolute left-1/2 -translate-x-1/2 top-16 z-50 px-3.5 py-2 rounded-full text-[12px] font-bold text-white shadow-lg edupay-fade pointer-events-none"
       style={{ background: apiToast.kind === "api" ? "#5B4DD6" : apiToast.kind === "error" ? "#CF5A5A" : "#3A3A3C" }}>
         {apiToast.msg}
+      </div>
+      }
+
+      {/* [사용자] 말풍선 복사됨 토스트 (long-press) — prod 포함 노출, 1.2초 */}
+      {copyToast &&
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-24 z-50 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12.5px] font-bold text-white shadow-lg edupay-fade pointer-events-none"
+      style={{ background: "#2D2870" }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        복사됨
       </div>
       }
     </div>);
