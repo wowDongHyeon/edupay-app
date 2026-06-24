@@ -1,6 +1,8 @@
 // 알려진 10개 intent — 고정 SQL 템플릿 + shaper (MOCK_API_설계.md §8.4 / TEMPLATE_설계.md §4)
 // ★ 실 오페리아 계약 = 한 요청 = SQL 1문장 = 결과셋 1개(rows). intent당 sql은 '정확히 1문장'(UNION ALL 허용).
 //   shape(rows)는 그 단일 rows를 '템플릿 표준 데이터'(§2)로 정규화한다(표현/필드는 charts/intentConfig·templates 담당).
+import { labelOfCode, CHANNEL_CANON } from "../../charts/codeLabels";
+
 const UID = "stu_demo";
 const VOUCHER_LIMIT = 100000;
 
@@ -17,8 +19,13 @@ const sumBy = (rows, keyField, valField = "amount") => {
   return [...m.entries()].map(([k, amount]) => ({ [keyField]: k, amount }));
 };
 // 라벨 포매터(데이터 레이어 자급 — charts에 의존하지 않음)
-const mLabel = (ym) => { const mm = +String(ym || "").slice(5, 7); return mm ? mm + "월" : String(ym || ""); };
-const dLabel = (ymd) => { const s = String(ymd || ""); const mm = +s.slice(5, 7), dd = +s.slice(8, 10); return mm && dd ? `${mm}/${dd}` : s; };
+// ★ 실 backend 월/일축은 'YYYY-MM'(Claude CONCAT) 또는 'YYYYMM'(LEFT) / 'YYYY-MM-DD'·'YYYYMMDD' 둘 다 올 수 있다.
+//   구분자에 의존하지 말고 숫자만 추출해 위치로 파싱(작업A). mock('YYYY-MM','YYYY-MM-DD')도 동일 결과(회귀 0).
+const digits = (v) => String(v == null ? "" : v).replace(/[^0-9]/g, "");
+const mLabel = (ym) => { const d = digits(ym); const mm = d.length >= 6 ? +d.slice(4, 6) : 0; return mm ? mm + "월" : String(ym || ""); };
+const dLabel = (ymd) => { const d = digits(ymd); if (d.length < 8) return String(ymd || ""); const mm = +d.slice(4, 6), dd = +d.slice(6, 8); return mm && dd ? `${mm}/${dd}` : String(ymd || ""); };
+// 일자 → ISO 'YYYY-MM-DD'(list/연속7일 키 표준화). 'YYYYMMDD'·'YYYY-MM-DD' 모두 수용.
+const toIsoDate = (v) => { const d = digits(v); return d.length >= 8 ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : String(v == null ? "" : v); };
 const pad2 = (n) => String(n).padStart(2, "0");
 const ymdOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 // '오늘'(실제 현재일). 미래 날짜 결제는 어떤 차트에도 안 나오게 SQL에서 컷오프(목업 데이터에 미래 결제가 섞여 있어도 방지).
@@ -27,7 +34,7 @@ const NOT_FUTURE = `AND PAY_DT <= '${TODAY} 23:59:59'`;
 // 일별 결제합 rows([{day,amount}])를 '오늘로 끝나는 연속 7일' series로. 결제 없는 날은 value 0, 미래 날짜는 안 나옴.
 // 앵커='오늘'(실제 현재일). 고정 데모일이 필요하면 ymdOf(new Date()) 대신 상수("2026-06-22")로 교체.
 const last7Days = (rows) => {
-  const byDay = new Map(rows.map((r) => [String(r.day), r.amount || 0]));
+  const byDay = new Map(rows.map((r) => [toIsoDate(r.day), r.amount || 0]));
   const anchor = new Date(ymdOf(new Date()) + "T00:00:00");
   const out = [];
   for (let i = 6; i >= 0; i--) {
@@ -38,17 +45,24 @@ const last7Days = (rows) => {
   }
   return out;
 };
-const MEANS_LABEL = { VOUCHER: "바우처(지원금)", APPCARD: "부모카드", BEG: "조르기" };
+// 결제수단 코드 → 한글: backend(PARENT_CARD/JORUGI)·mock(APPCARD/BEG) 모두 codeLabels 가 수용.
+const meansLabel = (code) => labelOfCode(code, "PAY_MEAN_CD");
 
 export const QUERIES = {
   // ① report → bar 표준형 { series:[{label,value}], breakdown:[{label,value,pct,key}] }
   report: {
     sql: `SELECT SUBSTR(PAY_DT,1,7) AS month, PAY_MEANS AS means, SUM(PAY_AMT) AS amount FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' ${NOT_FUTURE} GROUP BY SUBSTR(PAY_DT,1,7), PAY_MEANS ORDER BY month`,
-    shape: (rows) => ({
-      series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).map((x) => ({ label: mLabel(x.month), value: x.amount })),
-      breakdown: withPct(sumBy(rows, "means").sort((a, b) => b.amount - a.amount))
-        .map((x) => ({ label: MEANS_LABEL[x.means] || x.means, value: x.amount, pct: x.pct, key: x.means })),
-    }),
+    // ★ backend 월별은 breakdown(means) 컬럼이 없을 수 있다 → 그 경우 막대만(§6-1·작업D). means 있으면 결제수단 분해.
+    shape: (rows) => {
+      const hasMeans = rows.some((r) => r.means != null);
+      return {
+        series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).map((x) => ({ label: mLabel(x.month), value: x.amount })),
+        breakdown: hasMeans
+          ? withPct(sumBy(rows, "means").sort((a, b) => b.amount - a.amount))
+              .map((x) => ({ label: meansLabel(x.means), value: x.amount, pct: x.pct, key: x.means }))
+          : [],
+      };
+    },
   },
 
   // ①-b reportDaily → bar 표준형 { series } (일별, breakdown 없음). report 카드 '일별' 탭 lazy 내부 intent.
@@ -63,7 +77,8 @@ export const QUERIES = {
     sql: `SELECT v.BIZ_ITEM_NM AS category, SUM(p.PAY_AMT) AS amount, COUNT(*) AS cnt FROM TB_PAY_DTL p JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO WHERE p.USER_ID='${UID}' AND p.PAY_STTS='APPROVED' GROUP BY v.BIZ_ITEM_NM ORDER BY amount DESC`,
     shape: (rows) => {
       const total = rows.reduce((s, x) => s + (x.amount || 0), 0) || 1;
-      return { total, slices: rows.map((x) => ({ label: x.category, value: x.amount, cnt: x.cnt, pct: round((x.amount / total) * 100) })) };
+      // 범주가 코드값(CATEGORY_CD)이면 한글 라벨, mock 의 한글 업종명(BIZ_ITEM_NM)은 원문 통과.
+      return { total, slices: rows.map((x) => ({ label: labelOfCode(x.category, "CATEGORY_CD"), value: x.amount, cnt: x.cnt, pct: round((x.amount / total) * 100) })) };
     },
   },
 
@@ -133,15 +148,21 @@ export const QUERIES = {
   channel: {
     sql: `SELECT p.PAY_CHANNEL AS channel, v.MERCHANT_NM AS item, v.BIZ_ITEM_NM AS cat, p.PAY_AMT AS amount, p.PAY_DT AS dt FROM TB_PAY_DTL p JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO WHERE p.USER_ID='${UID}' AND p.PAY_STTS='APPROVED' ORDER BY p.PAY_DT DESC`,
     shape: (rows) => {
+      // backend CHANNEL_CD 는 'ON'/'OFF', mock 은 'ONLINE'/'OFFLINE' → 표준키로 정규화(템플릿 groupStyles 와 정렬).
+      const canon = (c) => CHANNEL_CANON[c] || c;
       const total = rows.reduce((s, r) => s + (r.amount || 0), 0) || 1;
+      // backend 집계행은 cnt(cnt_pay)로 건수를 주고, mock 은 거래 1건=1행. count 는 cnt 있으면 합, 없으면 행 수.
       const group = (ch, label) => {
-        const rs = rows.filter((r) => r.channel === ch);
+        const rs = rows.filter((r) => canon(r.channel) === ch);
         const amount = rs.reduce((s, r) => s + (r.amount || 0), 0);
-        return { key: ch, label, amount, count: rs.length, pct: round((amount / total) * 100) };
+        const count = rs.reduce((s, r) => s + (r.cnt != null ? r.cnt : 1), 0);
+        return { key: ch, label, amount, count, pct: round((amount / total) * 100) };
       };
+      // 거래 단위 컬럼(item)이 있을 때만 tx 리스트 구성. backend 집계행(채널별 합계)엔 item 이 없어 리스트 생략(스택바+요약만).
+      const hasItem = rows.some((r) => r.item != null);
       return {
         groups: [group("OFFLINE", "오프라인"), group("ONLINE", "온라인")],
-        rows: rows.map((r) => ({ group: r.channel, item: r.item, amount: r.amount, date: r.dt })),
+        rows: hasItem ? rows.map((r) => ({ group: canon(r.channel), item: r.item, amount: r.amount, date: r.dt })) : [],
       };
     },
   },
@@ -155,10 +176,11 @@ export const QUERIES = {
   // ⑨ parentCard → list 표준형 { rows:[{date,merchant,amount}], total, count }
   parentCard: {
     sql: `SELECT SUBSTR(p.PAY_DT,1,10) AS date, v.MERCHANT_NM AS merchant, p.PAY_AMT AS amount FROM TB_PAY_DTL p JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO WHERE p.USER_ID='${UID}' AND p.PAY_MEANS='APPCARD' AND p.PAY_STTS='APPROVED' ORDER BY p.PAY_DT DESC`,
+    // date 는 ISO 'YYYY-MM-DD'로 정규화(backend dlng_dt='YYYYMMDD' → 표시/정렬용). mock(SUBSTR 1~10)도 동일 결과.
     shape: (rows) => ({
       total: rows.reduce((s, x) => s + (x.amount || 0), 0),
       count: rows.length,
-      rows: rows.map((x) => ({ date: x.date, merchant: x.merchant, amount: x.amount })),
+      rows: rows.map((x) => ({ date: toIsoDate(x.date), merchant: x.merchant, amount: x.amount })),
     }),
   },
 
@@ -172,8 +194,9 @@ export const QUERIES = {
         .sort((a, b) => b.value - a.value);
       ranked.forEach((e, i) => (e.rank = i + 1));
       const totSum = rows.reduce((s, x) => s + (x.tot || 0), 0);
-      const totStu = rows.reduce((s, x) => s + (x.students || 0), 0) || 1;
-      const provinceAvg = round(totSum / totStu);
+      const totStu = rows.reduce((s, x) => s + (x.students || 0), 0);
+      // students 있으면 1인당(총합/총인원), 없으면(backend 학교별=총액만) 학교 총액의 단순평균.
+      const provinceAvg = totStu ? round(totSum / totStu) : round(mean(ranked.map((e) => e.value)));
       const mine = ranked.find((e) => e.me);
       return {
         items: ranked.slice(0, 5),

@@ -3,6 +3,7 @@ import TEMPLATES from "./templates";
 import { INTENT_CONFIG } from "./intentConfig";
 import { ReportPlanRenderer } from "./reportPlan/ReportPlanRenderer";
 import { shapeForIntent } from "./shapeForIntent";
+import { activeChannelName } from "../api/datasource";
 /* ChartRenderer : 오페리아 데이터 메시지 렌더 진입점 (TEMPLATE_설계.md §1·§5).
    INTENT_CONFIG[intent] 조회 → template 선택 → <Template data={result} config={cfg}/>. 없으면 table.
    §9: SqlChip은 카드 밖(App.jsx Bubble의 아바타 아래)에서 렌더. 카드 자체엔 칩 없음.
@@ -99,6 +100,10 @@ export function SqlChip({ sql, source, result, rawRows }) {
   // mock 계열(고정 템플릿/폴백/정적 목업)은 '실제 쿼리'가 아니라 칩 숨김 — 실 채널(api)·Claude 생성(claude)만 노출
   if (source === "template" || source === "fallback" || source === "mock") return null;
   const meta = SOURCE_META[source] || SOURCE_META.api;
+  // source=api 는 실 서버 채널(backend/operia 공통) → 활성 채널명으로 헤더 구분
+  const headerText = source === "api"
+    ? (activeChannelName() === "backend" ? "출처: 임시 백엔드 서버" : "출처: 오페리아 서버")
+    : meta.header;
   const btnClosed = meta.warn ? "bg-amber-50 text-amber-700" : "bg-violet-50 text-violet-600";
   const btnOpen = meta.warn ? "bg-amber-500 text-white" : "bg-violet-600 text-white";
   const hasRaw = rawRows !== undefined && rawRows !== null;
@@ -121,7 +126,7 @@ export function SqlChip({ sql, source, result, rawRows }) {
           style={{ background: "#1E1B2E" }}>
           <div className={"px-3 py-1.5 text-[10.5px] font-bold border-b border-white/10 flex items-center justify-between " +
             (meta.warn ? "text-amber-300" : "text-violet-200/80")}>
-            <span>{meta.header}</span>
+            <span>{headerText}</span>
             <button onClick={() => setPinned(false)} className="text-white/50 hover:text-white text-[13px] leading-none">×</button>
           </div>
           {hasResult && (
