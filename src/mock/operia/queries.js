@@ -23,6 +23,8 @@ const sumBy = (rows, keyField, valField = "amount") => {
 //   구분자에 의존하지 말고 숫자만 추출해 위치로 파싱(작업A). mock('YYYY-MM','YYYY-MM-DD')도 동일 결과(회귀 0).
 const digits = (v) => String(v == null ? "" : v).replace(/[^0-9]/g, "");
 const mLabel = (ym) => { const d = digits(ym); const mm = d.length >= 6 ? +d.slice(4, 6) : 0; return mm ? mm + "월" : String(ym || ""); };
+// 월 → 정규 'YYYY-MM'(현재월 비교용). 'YYYY-MM'/'YYYYMM' 모두 수용.
+const monthKey = (v) => { const d = digits(v); return d.length >= 6 ? `${d.slice(0, 4)}-${d.slice(4, 6)}` : String(v == null ? "" : v); };
 const dLabel = (ymd) => { const d = digits(ymd); if (d.length < 8) return String(ymd || ""); const mm = +d.slice(4, 6), dd = +d.slice(6, 8); return mm && dd ? `${mm}/${dd}` : String(ymd || ""); };
 // 일자 → ISO 'YYYY-MM-DD'(list/연속7일 키 표준화). 'YYYYMMDD'·'YYYY-MM-DD' 모두 수용.
 const toIsoDate = (v) => { const d = digits(v); return d.length >= 8 ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : String(v == null ? "" : v); };
@@ -120,15 +122,20 @@ export const QUERIES = {
     },
   },
 
-  // ④ nudgeCompare → trend 표준형 { current:{count,value}, prev:{value}, delta, monthly:[{label,count,value}] }
+  // ④ nudgeCompare → trend 표준형 { current:{label,count,value,month,isCurrentMonth}, prev:{label,count,value}|null, delta:number|null, monthly:[{label,count,value}] }
+  // ★ 정직 표시: 이전 달 행이 실제로 있을 때만 prev/delta. 단일월이면 prev=null·delta=null(없는 지난달을 0으로 지어내지 않음).
   nudgeCompare: {
     sql: `SELECT SUBSTR(REQ_DT,1,7) AS month, COUNT(*) AS cnt, SUM(RECV_AMT) AS amount FROM TB_BEG WHERE STUDENT_USER_ID='${UID}' AND REQ_STTS='ACCEPT' GROUP BY SUBSTR(REQ_DT,1,7) ORDER BY month`,
     shape: (rows) => {
       const monthly = rows.map((r) => ({ label: mLabel(r.month), count: r.cnt || 0, value: r.amount || 0 }));
+      const months = rows.map((r) => monthKey(r.month));
       const n = monthly.length;
-      const cur = n ? monthly[n - 1] : { count: 0, value: 0 };
-      const prv = n > 1 ? monthly[n - 2] : { count: 0, value: 0 };
-      return { current: { count: cur.count, value: cur.value }, prev: { value: prv.value }, delta: cur.count - prv.count, monthly };
+      if (!n) return { current: { label: "", count: 0, value: 0, month: "", isCurrentMonth: false }, prev: null, delta: null, monthly };
+      const i = n - 1;
+      const current = { label: monthly[i].label, count: monthly[i].count, value: monthly[i].value, month: months[i], isCurrentMonth: months[i] === monthKey(TODAY) };
+      const prev = n > 1 ? { label: monthly[i - 1].label, count: monthly[i - 1].count, value: monthly[i - 1].value } : null;
+      const delta = prev ? current.count - prev.count : null;
+      return { current, prev, delta, monthly };
     },
   },
 

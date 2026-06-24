@@ -6,16 +6,24 @@ import { num, ChartShell, InsightBox } from "../util";
 export function TrendTemplate({ data, config }) {
   const cfg = config || {};
   const L = (cfg.options && cfg.options.labels) || {};
-  const countBox = L.countBox || "이번 달 충전 요청";
-  const valueBox = L.valueBox || "이번 달 충전 금액";
-  const monthlyHeader = L.monthlyHeader || "월별 충전 요청";
   const cu = L.countUnit || "회";
   const cur = (data && data.current) || { count: 0, value: 0 };
-  const prev = (data && data.prev) || { value: 0 };
+  const prev = (data && data.prev) || null; // ★ 정직: 이전 달 없으면 null(0 지어내기 금지)
   const monthly = (data && Array.isArray(data.monthly) ? data.monthly : []);
-  const delta = data && data.delta != null ? data.delta : 0;
+  const delta = data && data.delta != null ? data.delta : null;
   const maxAmt = Math.max(1, ...monthly.map((m) => m.value || 0));
-  const diffLabel = L.deltaLabel ? L.deltaLabel(delta, cu) : (delta > 0 ? `지난달보다 +${delta}${cu}` : delta < 0 ? `지난달보다 ${delta}${cu}` : "지난달과 같음");
+  // 박스 제목 접두: 최신월이 실제 '이번 달'이면 "이번 달", 아니면 그 달 라벨(예 "2월"). countBox/valueBox 는 폴백.
+  const head = cur.isCurrentMonth ? "이번 달" : (cur.label || "");
+  const countNoun = L.countNoun || "충전 요청";
+  const valueNoun = L.valueNoun || "충전 금액";
+  const countBox = head ? `${head} ${countNoun}` : (L.countBox || "이번 달 충전 요청");
+  const valueBox = head ? `${head} ${valueNoun}` : (L.valueBox || "이번 달 충전 금액");
+  const monthlyHeader = L.monthlyHeader || "월별 충전 요청";
+  // 비교줄: 이전 달 행이 있을 때만(없으면 "이전 달 데이터 없음"). prev.label 기준으로 비교.
+  const diffLabel = prev
+    ? (delta > 0 ? `${prev.label}보다 +${delta}${cu}` : delta < 0 ? `${prev.label}보다 ${delta}${cu}` : `${prev.label}과 같음`)
+    : "이전 달 데이터 없음";
+  const valueCompare = prev ? `${prev.label} ${num(prev.value)}원` : "이전 달 데이터 없음";
   return (
     <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
       <div className="mt-3 flex gap-2.5">
@@ -27,7 +35,7 @@ export function TrendTemplate({ data, config }) {
         <div className="flex-1 rounded-2xl px-3.5 py-3 bg-emerald-50">
           <div className="text-[12px] font-bold text-emerald-700">{valueBox}</div>
           <div className="mt-1 text-[18px] font-extrabold text-gray-900 tabular-nums">{num(cur.value)}<span className="text-[12px] font-bold text-gray-400">원</span></div>
-          <div className="text-[11px] text-gray-400">지난달 {num(prev.value)}원</div>
+          <div className="text-[11px] text-gray-400">{valueCompare}</div>
         </div>
       </div>
       <div className="mt-3.5">

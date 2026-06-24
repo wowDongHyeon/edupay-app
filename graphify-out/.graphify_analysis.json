@@ -1,25 +1,17 @@
 {
   "communities": {
     "0": [
+      "charts_mapchartcard_cheongju",
+      "charts_mapchartcard_distm",
+      "charts_mapchartcard_loadkakao",
+      "charts_mapchartcard_mapchartcard",
+      "charts_util_cat_emoji",
       "charts_util_chartshell",
-      "charts_util_daylabel",
       "charts_util_donut_colors",
       "charts_util_insightbox",
-      "charts_util_monthlabel",
       "charts_util_num",
       "charts_util_won",
-      "reportplan_reportplanrenderer_aggby",
-      "reportplan_reportplanrenderer_aggscalar",
-      "reportplan_reportplanrenderer_chartsection",
-      "reportplan_reportplanrenderer_code_label",
-      "reportplan_reportplanrenderer_fmtlabel",
-      "reportplan_reportplanrenderer_kpicards",
-      "reportplan_reportplanrenderer_kpigrid",
-      "reportplan_reportplanrenderer_metaof",
-      "reportplan_reportplanrenderer_reportplanrenderer",
-      "reportplan_reportplanrenderer_section",
-      "reportplan_reportplanrenderer_withpct",
-      "src_charts_reportplan_reportplanrenderer_jsx",
+      "src_charts_mapchartcard_jsx",
       "src_charts_templates_area_jsx",
       "src_charts_templates_bar_jsx",
       "src_charts_templates_barlist_jsx",
@@ -29,6 +21,7 @@
       "src_charts_templates_kpicards_jsx",
       "src_charts_templates_line_jsx",
       "src_charts_templates_list_jsx",
+      "src_charts_templates_map_jsx",
       "src_charts_templates_pie_jsx",
       "src_charts_templates_statlist_jsx",
       "src_charts_templates_table_jsx",
@@ -47,6 +40,7 @@
       "templates_kpicards_tints",
       "templates_line_linetemplate",
       "templates_list_listtemplate",
+      "templates_map_maptemplate",
       "templates_pie_pietemplate",
       "templates_statlist_statlisttemplate",
       "templates_table_tabletemplate",
@@ -79,7 +73,6 @@
       "charts_shapeforintent_slots",
       "charts_shapeforintent_temporal_re",
       "charts_shapeforintent_value_pref",
-      "operia_queries_queries",
       "src_app_aiorb",
       "src_app_app",
       "src_app_bubble",
@@ -187,33 +180,39 @@
       "src_mock_operia_dataset_json"
     ],
     "4": [
-      "App_Bubble",
-      "App_cardIntent",
-      "App_cardQuery",
-      "App_fallback",
-      "App_periodScope",
-      "App_queryDataSource",
-      "App_send",
-      "ChartRenderer_ChartRenderer",
-      "ChartRenderer_ReportToggleCard",
-      "ChartRenderer_SqlChip",
-      "WORKFLOW_milestone8",
       "codeLabels_CHANNEL_CANON",
-      "codeLabels_CODE_LABELS",
       "codeLabels_labelOfCode",
-      "concept_column_role_mapping",
-      "concept_datasource_channel",
-      "concept_dedicated_first_fallback",
-      "concept_single_sql_contract",
-      "concept_standard_tableData_contract",
+      "queries_NOT_FUTURE",
       "queries_QUERIES",
-      "queries_balance_shape",
-      "queries_channel_shape",
+      "queries_balance",
+      "queries_catSpend",
+      "queries_channel",
+      "queries_dLabel",
+      "queries_digits",
+      "queries_friendCompare",
+      "queries_last7Days",
+      "queries_mLabel",
+      "queries_mean",
       "queries_meansLabel",
-      "shapeForIntent_SLOTS",
-      "shapeForIntent_normalizeColumns",
-      "shapeForIntent_roleOf",
-      "shapeForIntent_shapeForIntent"
+      "queries_merchantBreakdown",
+      "queries_merchantMap",
+      "queries_nudgeCompare",
+      "queries_parentCard",
+      "queries_report",
+      "queries_reportDaily",
+      "queries_round",
+      "queries_schoolCompare",
+      "queries_separatorAgnosticParse",
+      "queries_singleSqlContract",
+      "queries_sumBy",
+      "queries_toIsoDate",
+      "queries_withPct",
+      "workflow_balancePivotDecision",
+      "workflow_codeLabelsMilestone",
+      "workflow_datasourcePhaseBR",
+      "workflow_shapeForIntent",
+      "workflow_singleSqlMilestone",
+      "workflow_templateRegistry"
     ],
     "5": [
       "edupay_app_package_dependencies",
@@ -240,28 +239,6 @@
       "package_json"
     ],
     "6": [
-      "charts_codelabels_channel_canon",
-      "charts_codelabels_code_labels",
-      "charts_codelabels_haskorean",
-      "charts_codelabels_js",
-      "charts_codelabels_labelfor",
-      "charts_codelabels_labelofcode",
-      "mock_operia_queries_js",
-      "operia_queries_digits",
-      "operia_queries_dlabel",
-      "operia_queries_last7days",
-      "operia_queries_mean",
-      "operia_queries_meanslabel",
-      "operia_queries_mlabel",
-      "operia_queries_pad2",
-      "operia_queries_round",
-      "operia_queries_sumby",
-      "operia_queries_today",
-      "operia_queries_toisodate",
-      "operia_queries_withpct",
-      "operia_queries_ymdof"
-    ],
-    "7": [
       "datasource_backendSource",
       "datasource_computeSummaryStats",
       "datasource_consumeEventStream",
@@ -282,26 +259,63 @@
       "schema_TB_COM_POCKET",
       "schema_TB_COM_USER"
     ],
+    "7": [
+      "operia_queries_digits",
+      "operia_queries_dlabel",
+      "operia_queries_last7days",
+      "operia_queries_mean",
+      "operia_queries_meanslabel",
+      "operia_queries_mlabel",
+      "operia_queries_pad2",
+      "operia_queries_queries",
+      "operia_queries_round",
+      "operia_queries_sumby",
+      "operia_queries_today",
+      "operia_queries_toisodate",
+      "operia_queries_withpct",
+      "operia_queries_ymdof",
+      "queries_js"
+    ],
     "8": [
-      "charts_mapchartcard_cheongju",
-      "charts_mapchartcard_distm",
-      "charts_mapchartcard_loadkakao",
-      "charts_mapchartcard_mapchartcard",
-      "charts_util_cat_emoji",
-      "src_charts_mapchartcard_jsx",
-      "src_charts_templates_map_jsx",
-      "templates_map_maptemplate"
+      "charts_util_daylabel",
+      "charts_util_monthlabel",
+      "reportplan_reportplanrenderer_aggby",
+      "reportplan_reportplanrenderer_aggscalar",
+      "reportplan_reportplanrenderer_chartsection",
+      "reportplan_reportplanrenderer_code_label",
+      "reportplan_reportplanrenderer_fmtlabel",
+      "reportplan_reportplanrenderer_kpicards",
+      "reportplan_reportplanrenderer_kpigrid",
+      "reportplan_reportplanrenderer_metaof",
+      "reportplan_reportplanrenderer_reportplanrenderer",
+      "reportplan_reportplanrenderer_section",
+      "reportplan_reportplanrenderer_withpct",
+      "src_charts_reportplan_reportplanrenderer_jsx"
     ],
     "9": [
-      "datasource_stats_computesummarystats",
-      "datasource_stats_infercolumnmetadata",
-      "datasource_stats_infertype",
-      "datasource_stats_isdatetype",
-      "datasource_stats_isnumtype",
-      "datasource_stats_round1",
-      "src_api_datasource_stats_js"
+      "App_Bubble",
+      "App_cardIntent",
+      "App_cardQuery",
+      "App_fallback",
+      "App_periodScope",
+      "App_queryDataSource",
+      "App_send",
+      "ChartRenderer_ChartRenderer",
+      "ChartRenderer_ReportToggleCard",
+      "ChartRenderer_SqlChip",
+      "concept_dedicated_first_fallback"
     ],
     "10": [
+      "workflow_cliPromptTemplate",
+      "workflow_devMockPattern",
+      "workflow_doc",
+      "workflow_graphifyRule",
+      "workflow_playwrightSpec",
+      "workflow_roleSeparation",
+      "workflow_simModeOptionB",
+      "workflow_standardLoop"
+    ],
+    "11": [
       "charts_intentconfig_configfor",
       "charts_intentconfig_intent_config",
       "charts_intentconfig_templatefor",
@@ -310,7 +324,16 @@
       "src_charts_intentconfig_js",
       "src_charts_registry_js"
     ],
-    "11": [
+    "12": [
+      "datasource_stats_computesummarystats",
+      "datasource_stats_infercolumnmetadata",
+      "datasource_stats_infertype",
+      "datasource_stats_isdatetype",
+      "datasource_stats_isnumtype",
+      "datasource_stats_round1",
+      "src_api_datasource_stats_js"
+    ],
+    "13": [
       "components_cards_barcard",
       "components_cards_cardshell",
       "components_cards_donutcard",
@@ -319,175 +342,177 @@
       "components_cards_report_insight",
       "src_components_cards_jsx"
     ],
-    "12": [
+    "14": [
+      "charts_codelabels_channel_canon",
+      "charts_codelabels_code_labels",
+      "charts_codelabels_haskorean",
+      "charts_codelabels_js",
+      "charts_codelabels_labelfor",
+      "charts_codelabels_labelofcode"
+    ],
+    "15": [
       "cards_CompareChartCard",
       "mock_friendCompare",
       "mock_nudgeCompare",
       "mock_schoolCompare"
     ],
-    "13": [
-      "cards_DonutChartCard",
-      "mock_catSpend",
-      "mock_channel"
-    ],
-    "14": [
+    "16": [
       "charts_AreaTemplate",
       "charts_BarTemplate",
       "charts_ReportPlanRenderer"
     ],
-    "15": [
+    "17": [
       "charts_INTENT_CONFIG",
       "charts_frontDecidesViz",
       "charts_registry"
     ],
-    "16": [
+    "18": [
+      "cards_DonutChartCard",
+      "mock_catSpend",
+      "mock_channel"
+    ],
+    "19": [
       "quiz_QuizCard",
       "recommend_RecommendCard",
       "recommend_RecommendModal"
     ],
-    "17": [
+    "20": [
       "cards_BarChartCard",
       "mock_monthlyUsage"
     ],
-    "18": [
-      "cards_BarListChartCard",
-      "mock_merchantBreakdown"
-    ],
-    "19": [
-      "config_getAiEnabled",
-      "config_isAiFeatureOn"
-    ],
-    "20": [
+    "21": [
       "cards_GaugeChartCard",
       "mock_balance"
     ],
-    "21": [
+    "22": [
       "cards_ListChartCard",
       "mock_parentCard"
     ],
-    "22": [
-      "postcss_config",
-      "tailwind_config"
-    ],
     "23": [
-      "plan_conversion",
-      "readme_edupayapp"
-    ],
-    "24": [
-      "schema_TB_COM_PAY_API_LOG",
-      "schema_edupay_db"
-    ],
-    "25": [
       "charts_MapChartCard",
       "schema_TB_COM_VOUCHER_concept"
     ],
+    "24": [
+      "config_getAiEnabled",
+      "config_isAiFeatureOn"
+    ],
+    "25": [
+      "cards_BarListChartCard",
+      "mock_merchantBreakdown"
+    ],
     "26": [
+      "postcss_config",
+      "tailwind_config"
+    ],
+    "27": [
+      "plan_conversion",
+      "readme_edupayapp"
+    ],
+    "28": [
+      "schema_TB_COM_PAY_API_LOG",
+      "schema_edupay_db"
+    ],
+    "29": [
       "spendcards_CategoryDonut",
       "spendcards_CategorySpendCard"
     ],
-    "27": [
+    "30": [
       "config_setAiEnabled"
     ],
-    "28": [
+    "31": [
       "claude_complete"
     ],
-    "29": [
+    "32": [
       "client_api"
     ],
-    "30": [
+    "33": [
       "extras_FriendCompareCard"
     ],
-    "31": [
+    "34": [
       "extras_NudgeListCard"
     ],
-    "32": [
+    "35": [
       "extras_NudgeCompareCard"
     ],
-    "33": [
+    "36": [
       "extras_MerchantMapCard"
     ],
-    "34": [
+    "37": [
       "extras_BalanceCard"
     ],
-    "35": [
+    "38": [
       "extras_ChannelCard"
     ],
-    "36": [
+    "39": [
       "extras_MerchantBreakdownCard"
     ],
-    "37": [
+    "40": [
       "extras_ParentCardCard"
     ],
-    "38": [
+    "41": [
       "extras_SchoolCompareCard"
     ],
-    "39": [
+    "42": [
       "extras_TimePatternCard"
     ],
-    "40": [
+    "43": [
       "concept_result_or_edupay_fallback"
     ],
-    "41": [
+    "44": [
       "history_HistoryDrawer"
     ],
-    "42": [
+    "45": [
       "ledger_LedgerCard"
     ],
-    "43": [
+    "46": [
       "spendcards_DailySpendCard"
     ],
-    "44": [
+    "47": [
       "spendcards_RecordedCard"
     ],
-    "45": [
+    "48": [
       "spendcards_PeriodReportCard"
     ],
-    "46": [
+    "49": [
       "operia_mockIndex"
     ],
-    "47": [
+    "50": [
       "mock_merchantMap"
     ],
-    "48": [
+    "51": [
       "tablecard_TableCard"
     ],
-    "49": [
+    "52": [
       "operiaindex_results"
     ],
-    "50": [
+    "53": [
       "vite_config_js"
     ],
-    "51": [
+    "54": [
       "src_main_jsx"
-    ],
-    "52": [
-      "WORKFLOW_graphify_rule"
-    ],
-    "53": [
-      "WORKFLOW_role_split"
     ]
   },
   "cohesion": {
-    "0": 0.09879336349924585,
-    "1": 0.05893719806763285,
+    "0": 0.11400966183574879,
+    "1": 0.06060606060606061,
     "2": 0.07804878048780488,
     "3": 0.0931174089068826,
-    "4": 0.10256410256410256,
+    "4": 0.0946969696969697,
     "5": 0.09090909090909091,
     "6": 0.15789473684210525,
-    "7": 0.15789473684210525,
-    "8": 0.32142857142857145,
-    "9": 0.3333333333333333,
-    "10": 0.42857142857142855,
-    "11": 0.2857142857142857,
-    "12": 0.5,
-    "13": 0.6666666666666666,
-    "14": 0.6666666666666666,
-    "15": 0.6666666666666666,
+    "7": 0.19047619047619047,
+    "8": 0.24175824175824176,
+    "9": 0.23636363636363636,
+    "10": 0.35714285714285715,
+    "11": 0.42857142857142855,
+    "12": 0.3333333333333333,
+    "13": 0.2857142857142857,
+    "14": 0.4666666666666667,
+    "15": 0.5,
     "16": 0.6666666666666666,
-    "17": 1.0,
-    "18": 1.0,
-    "19": 1.0,
+    "17": 0.6666666666666666,
+    "18": 0.6666666666666666,
+    "19": 0.6666666666666666,
     "20": 1.0,
     "21": 1.0,
     "22": 1.0,
@@ -521,13 +546,19 @@
     "50": 1.0,
     "51": 1.0,
     "52": 1.0,
-    "53": 1.0
+    "53": 1.0,
+    "54": 1.0
   },
   "gods": [
     {
       "id": "charts_util_num",
       "label": "num()",
       "degree": 18
+    },
+    {
+      "id": "queries_QUERIES",
+      "label": "QUERIES intent→{sql,shape} catalog",
+      "degree": 16
     },
     {
       "id": "charts_util_chartshell",
@@ -560,18 +591,13 @@
       "degree": 7
     },
     {
-      "id": "shapeForIntent_shapeForIntent",
-      "label": "shapeForIntent (tableData→카드 입력)",
+      "id": "queries_report",
+      "label": "report intent (bar: series+breakdown by means)",
       "degree": 7
     },
     {
       "id": "api_operia_runsql",
       "label": "runSql()",
-      "degree": 6
-    },
-    {
-      "id": "api_operia_runknownclaude",
-      "label": "runKnownClaude()",
       "degree": 6
     }
   ],
@@ -588,15 +614,15 @@
       "why": "ambiguous connection - not explicitly stated in source; crosses file types (code ↔ doc); connects across different repos/directories"
     },
     {
-      "source": "shapeForIntent (tableData→카드 입력)",
-      "target": "표준 tableData+columnMetadata 계약",
+      "source": "Milestone: Operia sim mode option B (front alasql on dataset.json)",
+      "target": "QUERIES intent→{sql,shape} catalog",
       "source_files": [
-        "src/charts/shapeForIntent.js",
-        "WORKFLOW.md"
+        "WORKFLOW.md",
+        "src/mock/operia/queries.js"
       ],
-      "confidence": "INFERRED",
-      "relation": "implements",
-      "why": "inferred connection - not explicitly stated in source; crosses file types (code ↔ doc); connects across different repos/directories; peripheral node `표준 tableData+columnMetadata 계약` unexpectedly reaches hub `shapeForIntent (tableData→카드 입력)`"
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "crosses file types (code ↔ doc); connects across different repos/directories; bridges separate communities; peripheral node `Milestone: Operia sim mode option B (front alasql on dataset.json)` unexpectedly reaches hub `QUERIES intent→{sql,shape} catalog`"
     },
     {
       "source": "alasql",
@@ -644,29 +670,29 @@
       "why": "Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low."
     },
     {
-      "type": "ambiguous_edge",
-      "question": "What is the exact relationship between `SqlChip (SQL 칩)` and `CHANNEL_CANON (채널 표준키)`?",
-      "why": "Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low."
+      "type": "bridge_node",
+      "question": "Why does `runSql()` connect `Community 3` to `Community 5`?",
+      "why": "High betweenness centrality (0.014) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `runSql()` connect `operia NL2SQL 엔진` to `패키지 의존성`?",
-      "why": "High betweenness centrality (0.016) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `alasql` connect `패키지 의존성` to `operia NL2SQL 엔진`?",
-      "why": "High betweenness centrality (0.015) - this node is a cross-community bridge."
+      "question": "Why does `alasql` connect `Community 5` to `Community 3`?",
+      "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
       "question": "What connects `PostCSS Config`, `Tailwind Config (violet palette)`, `complete (저수준 Anthropic 호출)` to the rest of the system?",
-      "why": "110 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "113 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
-      "question": "Should `차트 공용 유틸` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.09879336349924585 - nodes in this community are weakly interconnected."
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.11400966183574879 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06060606060606061 - nodes in this community are weakly interconnected."
     }
   ]
 }

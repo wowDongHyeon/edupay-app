@@ -58,12 +58,17 @@ export const INTENT_CONFIG = {
   nudgeCompare: {
     template: "trend",
     title: "내 조르기 추이", subtitle: "이번 달 vs 지난달 · 월별 충전 요청", badge: "이번 달",
-    options: { labels: { countBox: "이번 달 충전 요청", valueBox: "이번 달 충전 금액", monthlyHeader: "월별 충전 요청", countUnit: "회", deltaLabel: (delta, cu) => (delta > 0 ? `지난달보다 +${delta}${cu}` : delta < 0 ? `지난달보다 ${delta}${cu}` : "지난달과 같음") } },
+    // countNoun/valueNoun = 박스 명사(접두 '이번 달'/'N월'은 trend.jsx 가 current.isCurrentMonth 로 결정). countBox/valueBox 는 폴백.
+    options: { labels: { countBox: "이번 달 충전 요청", valueBox: "이번 달 충전 금액", countNoun: "충전 요청", valueNoun: "충전 금액", monthlyHeader: "월별 충전 요청", countUnit: "회" } },
+    // 정직 표시: 이전 달이 있을 때만 비교 문구, 없으면 중립(지어내지 않음).
     insight: (d) => {
+      const cur = d.current || {};
+      const head = cur.isCurrentMonth ? "이번 달" : (cur.label || "");
+      if (!d.prev) return cur.count != null ? `${head} ${cur.count}번 충전 요청했어.` : "";
       const dc = d.delta || 0;
       return dc > 0
-        ? `지난달보다 ${dc}번 더 충전 요청했어. 꼭 필요한지 생각해볼까? 💪`
-        : `지난달보다 충전 요청이 ${dc < 0 ? "줄었어" : "늘지 않았어"}. 잘 관리하고 있어 👏`;
+        ? `${d.prev.label}보다 ${dc}번 더 충전 요청했어. 꼭 필요한지 생각해볼까? 💪`
+        : `${d.prev.label}보다 충전 요청이 ${dc < 0 ? "줄었어" : "늘지 않았어"}. 잘 관리하고 있어 👏`;
     },
   },
 
