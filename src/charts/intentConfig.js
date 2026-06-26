@@ -81,7 +81,7 @@ export const INTENT_CONFIG = {
   // ⑥ balance (statList) — 3항목 남은 금액(합계 없음). 항목 스타일은 options.itemStyles.
   balance: {
     template: "statList",
-    title: "지금 쓸 수 있는 금액", subtitle: "항목별 남은 금액 · 합산되지 않아요", badge: "실시간",
+    title: "지금 쓸 수 있는 금액", subtitle: "항목별 남은 금액", badge: "실시간",
     options: {
       itemStyles: [
         { icon: "🎫", tint: "#E2F3F2", ink: "#0F5A57" },

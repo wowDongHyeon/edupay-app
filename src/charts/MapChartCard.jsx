@@ -39,6 +39,7 @@ export function MapChartCard({ result, title, subtitle, badge }) {
   const mapRef = React.useRef(null);
   const [mapFailed, setMapFailed] = React.useState(!KAKAO_KEY); // 키 없으면 처음부터 약식 폴백
   const [geo, setGeo] = React.useState({ status: "locating", lat: null, lng: null });
+  const [visibleCount, setVisibleCount] = React.useState(5); // 하단 리스트만 점진 노출(지도 마커는 전부)
 
   const merchantsRaw = (result && Array.isArray(result.items || result.merchants) ? (result.items || result.merchants) : []).filter((m) => m.lat != null && m.lng != null);
   // 지도 중심: result.center → 가맹점 평균 → 청주 기본
@@ -168,7 +169,7 @@ export function MapChartCard({ result, title, subtitle, badge }) {
         )}
       </div>
       <div className="mt-3 flex flex-col gap-2">
-        {list.map((m, i) => (
+        {list.slice(0, visibleCount).map((m, i) => (
           <div key={i} className="flex items-center gap-3">
             <span className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-[15px] shrink-0">{m.emoji}</span>
             <div className="flex-1 min-w-0">
@@ -180,6 +181,14 @@ export function MapChartCard({ result, title, subtitle, badge }) {
             )}
           </div>
         ))}
+        {visibleCount < list.length && (
+          <button
+            onClick={() => setVisibleCount((c) => c + 5)}
+            className="mt-1 w-full py-2 rounded-xl bg-gray-50 text-[12.5px] font-bold text-violet-600"
+          >
+            더보기
+          </button>
+        )}
       </div>
     </ChartShell>
   );
