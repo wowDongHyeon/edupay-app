@@ -1,0 +1,25 @@
+// vite.config.js
+import { defineConfig } from "file:///sessions/stoic-beautiful-shannon/mnt/edupay-app/node_modules/vite/dist/node/index.js";
+import react from "file:///sessions/stoic-beautiful-shannon/mnt/edupay-app/node_modules/@vitejs/plugin-react/dist/index.js";
+var vite_config_default = defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    open: true,
+    host: true,
+    // 0.0.0.0 바인딩 — LAN/터널에서 접근 가능
+    // ngrok/cloudflare 등 터널 도메인 허용 (Vite의 host 차단 우회)
+    allowedHosts: true
+    // 터널(https) 위에서 HMR 웹소켓이 끊기지 않도록
+    // 백엔드 API 프록시 (개발 시 CORS 회피). VITE_API_BASE 사용 시 불필요.
+    // proxy: { "/api": { target: "http://10.0.1.12:8080", changeOrigin: true } },
+  },
+  build: {
+    outDir: "dist",
+    sourcemap: true
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcuanMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvc2Vzc2lvbnMvc3RvaWMtYmVhdXRpZnVsLXNoYW5ub24vbW50L2VkdXBheS1hcHBcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfZmlsZW5hbWUgPSBcIi9zZXNzaW9ucy9zdG9pYy1iZWF1dGlmdWwtc2hhbm5vbi9tbnQvZWR1cGF5LWFwcC92aXRlLmNvbmZpZy5qc1wiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9pbXBvcnRfbWV0YV91cmwgPSBcImZpbGU6Ly8vc2Vzc2lvbnMvc3RvaWMtYmVhdXRpZnVsLXNoYW5ub24vbW50L2VkdXBheS1hcHAvdml0ZS5jb25maWcuanNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tIFwidml0ZVwiO1xuaW1wb3J0IHJlYWN0IGZyb20gXCJAdml0ZWpzL3BsdWdpbi1yZWFjdFwiO1xuXG5leHBvcnQgZGVmYXVsdCBkZWZpbmVDb25maWcoe1xuICBwbHVnaW5zOiBbcmVhY3QoKV0sXG4gIHNlcnZlcjoge1xuICAgIHBvcnQ6IDUxNzMsXG4gICAgb3BlbjogdHJ1ZSxcbiAgICBob3N0OiB0cnVlLCAvLyAwLjAuMC4wIFx1QkMxNFx1Qzc3OFx1QjUyOSBcdTIwMTQgTEFOL1x1RDEzMFx1QjExMFx1QzVEMFx1QzExQyBcdUM4MTFcdUFERkMgXHVBQzAwXHVCMkE1XG4gICAgLy8gbmdyb2svY2xvdWRmbGFyZSBcdUI0RjEgXHVEMTMwXHVCMTEwIFx1QjNDNFx1QkE1NFx1Qzc3OCBcdUQ1QzhcdUM2QTkgKFZpdGVcdUM3NTggaG9zdCBcdUNDMjhcdUIyRTggXHVDNkIwXHVENjhDKVxuICAgIGFsbG93ZWRIb3N0czogdHJ1ZSxcbiAgICAvLyBcdUQxMzBcdUIxMTAoaHR0cHMpIFx1QzcwNFx1QzVEMFx1QzExQyBITVIgXHVDNkY5XHVDMThDXHVDRjEzXHVDNzc0IFx1QjA0QVx1QUUzMFx1QzlDMCBcdUM1NEFcdUIzQzRcdUI4NURcbiAgICAvLyBcdUJDMzFcdUM1RDRcdUI0REMgQVBJIFx1RDUwNFx1Qjg1RFx1QzJEQyAoXHVBQzFDXHVCQzFDIFx1QzJEQyBDT1JTIFx1RDY4Q1x1RDUzQykuIFZJVEVfQVBJX0JBU0UgXHVDMEFDXHVDNkE5IFx1QzJEQyBcdUJEODhcdUQ1NDRcdUM2OTQuXG4gICAgLy8gcHJveHk6IHsgXCIvYXBpXCI6IHsgdGFyZ2V0OiBcImh0dHA6Ly8xMC4wLjEuMTI6ODA4MFwiLCBjaGFuZ2VPcmlnaW46IHRydWUgfSB9LFxuICB9LFxuICBidWlsZDoge1xuICAgIG91dERpcjogXCJkaXN0XCIsXG4gICAgc291cmNlbWFwOiB0cnVlLFxuICB9LFxufSk7XG4iXSwKICAibWFwcGluZ3MiOiAiO0FBQWtVLFNBQVMsb0JBQW9CO0FBQy9WLE9BQU8sV0FBVztBQUVsQixJQUFPLHNCQUFRLGFBQWE7QUFBQSxFQUMxQixTQUFTLENBQUMsTUFBTSxDQUFDO0FBQUEsRUFDakIsUUFBUTtBQUFBLElBQ04sTUFBTTtBQUFBLElBQ04sTUFBTTtBQUFBLElBQ04sTUFBTTtBQUFBO0FBQUE7QUFBQSxJQUVOLGNBQWM7QUFBQTtBQUFBO0FBQUE7QUFBQSxFQUloQjtBQUFBLEVBQ0EsT0FBTztBQUFBLElBQ0wsUUFBUTtBQUFBLElBQ1IsV0FBVztBQUFBLEVBQ2I7QUFDRixDQUFDOyIsCiAgIm5hbWVzIjogW10KfQo=
