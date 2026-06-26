@@ -98,7 +98,7 @@ export const INTENT_CONFIG = {
     template: "txList",
     title: "온·오프라인 결제 내역", subtitle: "결제 채널별 · 최근 거래", badge: "최근 내역",
     options: {
-      limit: 8,
+      limit: 5, // 거래 리스트 초기 노출 5건 → '더보기' +5 (txList 점진 노출)
       groupStyles: {
         OFFLINE: { color: "#5B4DD6", soft: "#EDEBFB", emoji: "🏪" },
         ONLINE: { color: "#16A394", soft: "#E2F3F1", emoji: "🌐" },

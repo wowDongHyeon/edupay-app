@@ -16,6 +16,11 @@ export function BarListTemplate({ data, config }) {
   const avgRow = opt.avgRow ? (data && data.avgRow) : null;
   const maxV = Math.max(1, ...items.map((r) => r.value || 0), avgRow ? avgRow.value || 0 : 0);
   const ranked = !!(opt.me || opt.rankAccent); // 랭킹(학교) 변형 vs 가맹점 변형
+  // 순위/내역 리스트 점진 노출(MapChartCard 패턴): 초기 limit(기본 5)개 → '더보기' +limit씩, 전체 노출 시 버튼 숨김.
+  // (schoolCompare 는 shaper 가 TOP5 로 잘라 5개뿐 → 버튼 미노출, 회귀 0)
+  const limit = opt.limit || 5;
+  const [visibleCount, setVisibleCount] = React.useState(limit);
+  const shownItems = items.slice(0, visibleCount);
 
   const Bar = ({ frac, color }) => (
     <div className={"flex-1 rounded-full bg-gray-100 overflow-hidden " + (ranked ? "h-3" : "h-2.5")}>
@@ -26,7 +31,7 @@ export function BarListTemplate({ data, config }) {
   return (
     <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
       <div className={"flex flex-col " + (ranked ? "mt-3 gap-1.5" : "mt-4 gap-2.5")}>
-        {items.map((m, i) => {
+        {shownItems.map((m, i) => {
           const rk = m.rank != null ? m.rank : i + 1;
           const me = opt.me && m.me;
           const barColor = me ? "#5B4DD6" : (opt.rankAccent && rk === 1) ? "#F5B83D" : ranked ? "#D7D2F2" : "#5B4DD6";
@@ -44,6 +49,10 @@ export function BarListTemplate({ data, config }) {
             </div>
           );
         })}
+        {items.length > visibleCount && (
+          <button onClick={() => setVisibleCount((c) => c + limit)}
+            className="mt-1 w-full py-2 rounded-xl bg-gray-50 text-[12.5px] font-bold text-violet-600">더보기</button>
+        )}
       </div>
       {avgRow && (
         <div className="mt-2 pt-2.5 border-t border-dashed border-gray-200 flex items-center gap-2 px-2">

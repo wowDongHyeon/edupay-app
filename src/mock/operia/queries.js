@@ -1,7 +1,7 @@
 // 알려진 10개 intent — 고정 SQL 템플릿 + shaper (MOCK_API_설계.md §8.4 / TEMPLATE_설계.md §4)
 // ★ 실 오페리아 계약 = 한 요청 = SQL 1문장 = 결과셋 1개(rows). intent당 sql은 '정확히 1문장'(UNION ALL 허용).
 //   shape(rows)는 그 단일 rows를 '템플릿 표준 데이터'(§2)로 정규화한다(표현/필드는 charts/intentConfig·templates 담당).
-import { labelOfCode, CHANNEL_CANON } from "../../charts/codeLabels";
+import { labelOfCode, canonChannel } from "../../charts/codeLabels";
 
 const UID = "stu_demo";
 const VOUCHER_LIMIT = 100000;
@@ -213,8 +213,9 @@ export const QUERIES = {
   channel: {
     sql: `SELECT p.PAY_CHANNEL AS channel, v.MERCHANT_NM AS item, v.BIZ_ITEM_NM AS cat, p.PAY_AMT AS amount, p.PAY_DT AS dt FROM TB_PAY_DTL p JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO WHERE p.USER_ID='${UID}' AND p.PAY_STTS='APPROVED' ORDER BY p.PAY_DT DESC`,
     shape: (rows) => {
-      // backend CHANNEL_CD 는 'ON'/'OFF', mock 은 'ONLINE'/'OFFLINE' → 표준키로 정규화(템플릿 groupStyles 와 정렬).
-      const canon = (c) => CHANNEL_CANON[c] || c;
+      // backend CHANNEL_CD 는 코드('ON'/'OFF')·영문·한글("온라인"/"오프라인"), mock 은 'ONLINE'/'OFFLINE'
+      //   → canonChannel 로 표준키 정규화(trim·대소문자·한글 수용; 템플릿 groupStyles 키와 정렬).
+      const canon = canonChannel;
       const total = rows.reduce((s, r) => s + (r.amount || 0), 0) || 1;
       // backend 집계행은 cnt(cnt_pay)로 건수를 주고, mock 은 거래 1건=1행. count 는 cnt 있으면 합, 없으면 행 수.
       const group = (ch, label) => {
@@ -233,9 +234,16 @@ export const QUERIES = {
   },
 
   // ⑧ merchantBreakdown → barlist 표준형 { items:[{label,value,pct}] }
+  // ★미집계 응답 방어(Q2): backend 가 가맹점/업종별 집계 없이 개별 거래를 그대로 줄 수 있다(중복 label·미정렬).
+  //   → label 정규화(카테고리 코드는 CATEGORY_CD 한글화, 이미 한글이면 통과) → 동일 label 합산 1행 병합
+  //   → 합계 내림차순 → withPct 로 비율 재계산. mock 은 이미 GROUP BY 집계라 병합이 no-op(회귀 0).
   merchantBreakdown: {
     sql: `SELECT v.MERCHANT_NM AS merchant, SUM(p.PAY_AMT) AS amount FROM TB_PAY_DTL p JOIN TB_COM_VOUCHER v ON v.MERCHANT_NO=p.MERCHANT_NO WHERE p.USER_ID='${UID}' AND p.PAY_STTS='APPROVED' GROUP BY v.MERCHANT_NM ORDER BY amount DESC LIMIT 6`,
-    shape: (rows) => ({ items: withPct(rows.map((x) => ({ merchant: x.merchant, amount: x.amount }))).map((x) => ({ label: x.merchant, value: x.amount, pct: x.pct })) }),
+    shape: (rows) => {
+      const labeled = rows.map((x) => ({ merchant: labelOfCode(x.merchant, "CATEGORY_CD"), amount: x.amount }));
+      const merged = sumBy(labeled, "merchant").sort((a, b) => b.amount - a.amount);
+      return { items: withPct(merged).map((x) => ({ label: x.merchant, value: x.amount, pct: x.pct })) };
+    },
   },
 
   // ⑨ parentCard → list 표준형 { rows:[{date,merchant,amount}], total, count }

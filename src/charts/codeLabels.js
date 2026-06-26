@@ -7,13 +7,24 @@
 //   · backend·mock 코드를 함께 수용(예: 부모카드 = PARENT_CARD(backend) / APPCARD(mock)).
 
 export const CODE_LABELS = {
-  CATEGORY_CD: { FOOD: "음식", CVS: "편의점", TRANSPORT: "교통", BOOK: "도서", ONLINE: "온라인" },
+  CATEGORY_CD: { FOOD: "음식", CVS: "편의점", TRANSPORT: "교통", BOOK: "도서/문구", ONLINE: "온라인" },
   CHANNEL_CD: { ON: "온라인", OFF: "오프라인", ONLINE: "온라인", OFFLINE: "오프라인" },
   PAY_MEAN_CD: { VOUCHER: "바우처(지원금)", PARENT_CARD: "부모카드", APPCARD: "부모카드", JORUGI: "조르기", BEG: "조르기" },
 };
 
-// 채널 표준 키(txList groupStyles 키와 정렬): ON/OFF(backend) → ONLINE/OFFLINE(mock·템플릿).
-export const CHANNEL_CANON = { ON: "ONLINE", OFF: "OFFLINE", ONLINE: "ONLINE", OFFLINE: "OFFLINE" };
+// 채널 표준 키(txList groupStyles 키와 정렬): backend 가 코드(ON/OFF)·영문(ONLINE/OFFLINE)·한글("온라인"/"오프라인")
+//   무엇을 줘도 표준키 ONLINE/OFFLINE 로 매핑(한글 미수용 시 그룹 매칭 실패 → 0원/0건 회귀 발생).
+export const CHANNEL_CANON = {
+  ON: "ONLINE", OFF: "OFFLINE", ONLINE: "ONLINE", OFFLINE: "OFFLINE",
+  "온라인": "ONLINE", "오프라인": "OFFLINE",
+};
+
+// 채널 값 → 표준키. 공백 trim + ASCII 대문자 폴백(한글은 그대로 매칭). 미지정 값은 원문 유지.
+export function canonChannel(c) {
+  if (c == null) return c;
+  const k = String(c).trim();
+  return CHANNEL_CANON[k] || CHANNEL_CANON[k.toUpperCase()] || c;
+}
 
 const hasKorean = (s) => typeof s === "string" && /[가-힣]/.test(s);
 

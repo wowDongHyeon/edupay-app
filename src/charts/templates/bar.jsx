@@ -10,7 +10,6 @@ export function BarTemplate({ data, config, tab, onTab, loading, error, onRetry 
   const cfg = config || {};
   const series = (data && data.series) || [];
   const chart = series.map((s) => ({ label: s.label, amount: s.value }));
-  const max = Math.max(1, ...chart.map((d) => d.amount));
   const breakdown = (data && data.breakdown) || [];
   const total = breakdown.reduce((s, m) => s + (m.value || 0), 0) || 1;
   const toggle = cfg.options && cfg.options.toggle;
@@ -50,7 +49,7 @@ export function BarTemplate({ data, config, tab, onTab, loading, error, onRetry 
               <LabelList dataKey="amount" position="top"
                 formatter={(v) => (v ? (v >= 10000 ? (Number.isInteger(v / 10000) ? v / 10000 : (v / 10000).toFixed(1)) + "만" : num(v)) : "")}
                 style={{ fontSize: 10, fontWeight: 700, fill: "#6B7280" }} />
-              {chart.map((e, i) => <Cell key={i} fill={e.amount === max ? "#5B4DD6" : "#D7D2F2"} />)}
+              {chart.map((e, i) => <Cell key={i} fill={i === chart.length - 1 ? "#5B4DD6" : "#D7D2F2"} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

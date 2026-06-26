@@ -19,7 +19,7 @@ export function CompareTemplate({ data, config }) {
             <div className="flex-1 h-3.5 rounded-full bg-gray-100 overflow-hidden">
               <div className="h-full rounded-full" style={{ width: Math.max((b.value || 0) / max * 100, 5) + "%", background: b.me ? "#5B4DD6" : "#D7D2F2" }}></div>
             </div>
-            <span className="text-[12.5px] font-bold text-gray-800 tabular-nums w-[60px] text-right whitespace-nowrap">{num(b.value)}{unit}</span>
+            <span className="text-[12.5px] font-bold text-gray-800 tabular-nums w-[60px] text-right whitespace-nowrap">{num(unit === "원" ? Math.round(b.value || 0) : b.value)}{unit}</span>
           </div>
         ))}
       </div>

@@ -11,6 +11,9 @@ export function ListTemplate({ data, config }) {
   const total = data && data.total != null ? data.total : rows.reduce((s, r) => s + (r.amount || 0), 0);
   const count = data && data.count != null ? data.count : rows.length;
   const fmt = (iso) => { const [, m, d] = String(iso).split("-").map(Number); return `${m}월 ${d}일`; };
+  // 내역 리스트 점진 노출(MapChartCard 패턴): 초기 limit(기본 5)개 → '더보기' +limit씩, 전체 노출 시 버튼 숨김.
+  const limit = opt.limit || 5;
+  const [visibleCount, setVisibleCount] = React.useState(limit);
   return (
     <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
       <div className="mt-3 text-[26px] font-extrabold text-gray-900">{num(total)}원</div>
@@ -19,7 +22,7 @@ export function ListTemplate({ data, config }) {
         <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-[13px] text-gray-400">{opt.emptyText || "내역이 없어요 👍"}</div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {rows.map((e, i) => (
+          {rows.slice(0, visibleCount).map((e, i) => (
             <div key={i} className="flex items-center gap-2.5">
               <span className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-[15px] shrink-0">{icon}</span>
               <div className="flex-1 min-w-0">
@@ -29,6 +32,10 @@ export function ListTemplate({ data, config }) {
               <span className="text-[13.5px] font-bold text-gray-900 tabular-nums shrink-0">-{num(e.amount)}원</span>
             </div>
           ))}
+          {rows.length > visibleCount && (
+            <button onClick={() => setVisibleCount((c) => c + limit)}
+              className="mt-1 w-full py-2 rounded-xl bg-gray-50 text-[12.5px] font-bold text-violet-600">더보기</button>
+          )}
         </div>
       )}
     </ChartShell>

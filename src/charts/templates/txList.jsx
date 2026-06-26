@@ -11,14 +11,17 @@ const dayMD = (dt) => {
 export function TxListTemplate({ data, config }) {
   const cfg = config || {};
   const gs = (cfg.options && cfg.options.groupStyles) || {};
-  const limit = (cfg.options && cfg.options.limit) || 8;
+  const limit = (cfg.options && cfg.options.limit) || 5;
   const groups = (data && Array.isArray(data.groups) ? data.groups : []);
   const rows = (data && Array.isArray(data.rows) ? data.rows : []);
   const total = groups.reduce((s, g) => s + (g.amount || 0), 0) || 1;
   const labelOf = Object.fromEntries(groups.map((g) => [g.key, g.label]));
   const w0 = groups[0] ? Math.round((groups[0].amount / total) * 100) : 0;
   const widths = groups.map((g, i) => (groups.length === 2 ? (i === 0 ? w0 : 100 - w0) : Math.round((g.amount / total) * 100)));
-  const shown = rows.slice(0, limit);
+  // 거래 리스트 점진 노출(MapChartCard 패턴): 초기 limit(기본 5)개 → '더보기' +limit씩, 전체 노출 시 버튼 숨김.
+  // 상단 스택바·그룹 요약 박스는 전체 기준 유지(거래 리스트만 페이징).
+  const [visibleCount, setVisibleCount] = React.useState(limit);
+  const shown = rows.slice(0, visibleCount);
   return (
     <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
       {/* 가로 스택 바 */}
@@ -55,8 +58,9 @@ export function TxListTemplate({ data, config }) {
             </div>
           );
         })}
-        {rows.length > shown.length && (
-          <div className="text-[11px] text-gray-400 text-center pt-1.5">+{rows.length - shown.length}건 더</div>
+        {rows.length > visibleCount && (
+          <button onClick={() => setVisibleCount((c) => c + limit)}
+            className="mt-1 w-full py-2 rounded-xl bg-gray-50 text-[12.5px] font-bold text-violet-600">더보기</button>
         )}
       </div>
     </ChartShell>
