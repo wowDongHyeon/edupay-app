@@ -19,6 +19,19 @@ const DATA = EDUPAY;
 // [데이터창구] context.companyId (§3 — 값은 추후 주입, 없으면 기본)
 const COMPANY_ID = import.meta.env.VITE_OPERIA_COMPANY_ID || "OPERIA";
 
+// answer 말풍선 프라이버시 가드 — backend answer 에 사용자 GPS 좌표("위도 …, 경도 …")가 섞여 와도 화면에 노출 안 되게 제거.
+//   괄호형 "(위도 36.64, 경도 127.48)"·무괄호 "위도 36.64, 경도 127.48" 둘 다 제거 후 잔여 공백 정리.
+//   ★근본해결은 백엔드가 좌표를 안 넣는 것. 프론트는 어떤 응답이 와도 안전하게 가리는 방어선.
+function sanitizeAnswer(text) {
+  if (text == null) return text;
+  return String(text)
+    .replace(/\s*[\(（]\s*위도\s*[-\d.]+\s*[,，]?\s*경도\s*[-\d.]+\s*[\)）]/g, "")
+    .replace(/\s*위도\s*[-\d.]+\s*[,，]?\s*경도\s*[-\d.]+/g, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([.,!?·])/g, "$1")
+    .trim();
+}
+
 // 데이터 질문 1건 → 데이터창구 어댑터의 SSE 이벤트(data 청크 → result) 소비.
 // StreamState: data 의 tableData 를 rows 에 누적, isLast 로 종료. 데이터 확정 시 computeSummaryStats 계산(§4.4, §8).
 // ★Phase A 브리지: result 이벤트를 "기존 렌더가 기대하는 입력"{ result, rawRows, sql, source } 로 변환해 resolve.
@@ -54,11 +67,11 @@ function queryDataSource(userInput, intent, scope) {
               columnMetadata,
               reportPlan: e && e.reportPlan,
               summaryStats,
-              answer: (e && e.answer) || "",
+              answer: sanitizeAnswer((e && e.answer) || ""),
               sql: qi.sql || null,         // §9 SQL 칩
               source: qi.source || "api",  // 칩 라벨용(mock=template, backend/operia=자기 값)
               unsupported: !!(e && e.unsupported),
-              message: (e && e.answer) || "",
+              message: sanitizeAnswer((e && e.answer) || ""),
               success: !(e && e.success === false),
               errorMessage: (e && e.errorMessage) || null,
             });
@@ -523,17 +536,50 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
 
 }
 
-function Typing() {
+// 로딩 말풍선 문구 풀 — 질의 유형별로 순환 노출(점 애니메이션과 병기).
+const LOADING_POOLS = {
+  "현재 사용 가능 금액": ["지갑을 살짝 열어보는 중이에요", "쓸 수 있는 돈이 얼마인지 세는 중!", "지원금·용돈·카드를 따로따로 확인하고 있어요", "동전을 하나씩 세어보는 중이에요", "잔액을 깔끔하게 정리하는 중이에요"],
+  "월별 사용 내역": ["이번 달 가계부를 펼치는 중이에요", "달력을 넘기며 기록을 모으고 있어요", "한 달 동안 쓴 내역을 줄 세우는 중!", "영수증을 차곡차곡 모으고 있어요", "월별 흐름을 그려보는 중이에요"],
+  "근처 가맹점": ["주변 지도를 펼쳐보는 중이에요", "근처에 쓸 만한 곳을 찾고 있어요", "발도장 찍을 가게를 둘러보는 중!", "가까운 가맹점에 핀을 꽂는 중이에요", "걸어갈 만한 거리부터 살펴보는 중!"],
+  "사용처별 내역": ["어디에 제일 많이 썼나 살펴보는 중이에요", "사용처를 순위대로 줄 세우는 중!", "가게별로 쓴 돈을 모으고 있어요", "영수증을 가게별로 분류하는 중!", "소비 순위표를 그려보는 중이에요"],
+  "기타": ["열심히 생각하는 중이에요", "잠깐만요, 답을 정리하고 있어요", "데이터를 살펴보는 중이에요", "거의 다 됐어요!"],
+};
+
+// intent → 풀 키. 미매칭(친구/조르기/채널/부모카드/학교/잡담/null)은 모두 '기타'.
+function poolKeyForIntent(intent) {
+  switch (intent) {
+    case "balance": return "현재 사용 가능 금액";
+    case "report": return "월별 사용 내역";
+    case "merchantMap": return "근처 가맹점";
+    case "merchantBreakdown":
+    case "catSpend": return "사용처별 내역";
+    default: return "기타";
+  }
+}
+
+function Typing({ intent }) {
+  const pool = LOADING_POOLS[poolKeyForIntent(intent)] || LOADING_POOLS["기타"];
+  const [idx, setIdx] = useState(0);
+  // 마운트/intent 변경 시 첫 문구부터, 1.8s 마다 모듈로 순환. 언마운트 시 clearInterval.
+  useEffect(() => {
+    setIdx(0);
+    const id = setInterval(() => setIdx((i) => (i + 1) % pool.length), 1800);
+    return () => clearInterval(id);
+  }, [intent]);
+  const msg = pool[idx % pool.length];
   return (
     <div className="flex gap-2 items-start edupay-fade">
       <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
       style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
       </div>
-      <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-1 items-center">
-        {[0, 1, 2].map((i) =>
-        <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-300 edupay-dot" style={{ animationDelay: i * 0.16 + "s" }}></span>
-        )}
+      <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2 items-center">
+        <span className="text-[13px] text-gray-500 leading-snug">{msg}</span>
+        <span className="flex gap-1 items-center shrink-0">
+          {[0, 1, 2].map((i) =>
+          <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-300 edupay-dot" style={{ animationDelay: i * 0.16 + "s" }}></span>
+          )}
+        </span>
       </div>
     </div>);
 
@@ -597,6 +643,7 @@ function App() {
   const [inputFocused, setInputFocused] = useState(false); // 입력 포커스(키보드 올라옴) 시 FAQ 패널 숨김
   const [faqOpen, setFaqOpen] = useState(true); // 자주 묻는 질문 펼침 상태(App이 소유) — 최초 펼침, 대화/탭/전송 시 접힘
   const [typing, setTyping] = useState(false);
+  const [typingIntent, setTypingIntent] = useState(null); // 로딩 말풍선 문구 풀 선택용(send 에서 cardIntent 결과 저장)
   const [ledger, setLedger] = useState(() => DATA.ledgerSeed.map((x) => ({ ...x })));
   const [modal, setModal] = useState(null);
   const [tab, setTab] = useState("금융친구");
@@ -980,6 +1027,7 @@ function App() {
 
     // 소비 조회/분석 질의 → 시각화 카드로 바로 응답
     const ci = cardIntent(q);
+    setTypingIntent(ci ? ci.kind : null); // 로딩 말풍선 문구 풀 선택(미매칭/잡담 → 기타)
     if (ci) {
       // ── 데이터 질문 → 오페리아 API 호출 → ChartRenderer 렌더 ──
       // 차트 유형은 응답이 아니라 프론트가 결정(chartTypeForIntent). 응답은 {question,sql,result}.
@@ -996,7 +1044,7 @@ function App() {
           setTyping(false);
           // §8.5 키 게이팅: 미지원(키 없음) → 차트 대신 친절 텍스트 안내(에러 아님)
           if (resp && resp.unsupported) {
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.message }]);
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.message) }]);
             return;
           }
           // §4.5/§8 오류: 채널이 success=false 로 응답 → errorMessage 표시(backend/operia). mock 은 항상 true.
@@ -1008,7 +1056,7 @@ function App() {
           // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
           if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
           // answer 말풍선(§6/§9): 있으면 카드 위 텍스트, 없으면 생략(10개 intent 는 빈 answer → 기존과 동일, 시각 보존).
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.answer || "", chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats }]);
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats }]);
         } catch (e) {
           console.error("[데이터] 호출 오류:", e);
           showApiToast("데이터 오류", "error");
@@ -1058,7 +1106,7 @@ function App() {
   }
 
   return (
-    <div className="relative w-full mx-auto bg-[#F6F6FB] flex flex-col overflow-hidden phone-frame"
+    <div className="relative w-full mx-auto bg-[#ECE7FA] flex flex-col overflow-hidden phone-frame"
     style={{ maxWidth: 390 }}>
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
@@ -1085,7 +1133,7 @@ function App() {
         <div ref={scrollRef} onPointerDown={() => faqOpen && setFaqOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {WEBVIEW && !started && <WebviewWelcome />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onCopy={onCopyMessage} />)}
-          {typing && <Typing />}
+          {typing && <Typing intent={typingIntent} />}
           <div className="h-1"></div>
         </div>
         }
