@@ -7,7 +7,6 @@ import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from ".
 import { isOperiaAiMode } from "./api/operia";
 import { getDataSource, activeChannelName } from "./api/datasource";
 import { getUserId } from "./api/session";
-import { copyText } from "./util/clipboard";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { OPERIA_KINDS } from "./mock/operia";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
@@ -408,8 +407,7 @@ function MenuScreen({ onPick }) {
   { key: "local", label: "지역상생 몰", text: "근처 사용 가능 가맹점 알려줘" }];
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden edupay-fade px-5 pt-8 pb-6"
-    style={{ background: "linear-gradient(165deg, #ECE7FA 0%, #F1E9FA 30%, #FBEAF2 68%, #FCEFE7 100%)" }}>
+    <div className="flex-1 flex flex-col overflow-hidden edupay-fade px-5 pt-8 pb-6 bg-white">
       {/* 마스코트 */}
       <div className="flex justify-center items-center shrink-0" style={{ height: 90 }}>
         <div style={{ transform: "scale(.56)" }}><AIOrb /></div>
@@ -441,7 +439,7 @@ function WebviewWelcome() {
       style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
       </div>
-      <div className="max-w-[85%] bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
+      <div className="max-w-[85%] bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
         {"안녕! 난 너의 금융친구야 😊\n이번 달 소비, 같이 살펴볼까?\n아래 추천 질문에서 골라보거나 직접 물어봐 👇"}
       </div>
     </div>);
@@ -474,15 +472,18 @@ function WelcomeScreen({ onPick }) {
 }
 
 /* ── 채팅 말풍선 ──────────────────────────────────────── */
-function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery, onCopy }) {
+function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery, onRegisterFaq }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
   const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
-  // long-press(꾹 누르기) 복사: 500ms 유지 시 그 말풍선 텍스트 복사 + "복사됨" 토스트. 이동(스크롤)·뗌·취소 시 취소.
+  // long-press(꾹 누르기): 500ms 유지 시 onFire(text) 호출. 이동(10px↑)·뗌·취소 시 타이머 취소(스크롤 보호), 짧은 탭 무영향.
+  //   사용자 말풍선 → FAQ 등록(onRegisterFaq). AI 말풍선엔 부착하지 않음(동작 없음). 복사 기능은 제거됨.
+  //   웹 long-press 억제 최대치: user-select/touch-callout none(style) + contextmenu/selectstart/dragstart preventDefault.
   const lp = React.useRef({ timer: null, x: 0, y: 0 });
-  function longPress(text) {
+  function longPress(text, onFire) {
     const clear = () => { if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = null; } };
     return {
       onContextMenu: (e) => e.preventDefault(), // 네이티브 메뉴/콜아웃 억제(꾹 누름)
+      onDragStart: (e) => e.preventDefault(),   // 드래그(데스크톱 선택) 억제. 선택 자체는 CSS user-select:none 로 차단
       onPointerDown: (e) => {
         if (!text) return;
         lp.current.x = e.clientX; lp.current.y = e.clientY;
@@ -490,7 +491,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
         lp.current.timer = setTimeout(() => {
           lp.current.timer = null;
           try { window.getSelection && window.getSelection().removeAllRanges(); } catch (err) {} // 선택 해제
-          onCopy && onCopy(text);
+          onFire && onFire(text);
         }, 500);
       },
       onPointerMove: (e) => {
@@ -505,7 +506,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
   if (msg.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-[14px] leading-relaxed whitespace-pre-line shadow-sm select-none" style={{ background: "#E0E2FA", color: "#2D2870", WebkitTouchCallout: "none" }} {...longPress(msg.text)}>
+        <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-[14px] leading-relaxed whitespace-pre-line shadow-sm select-none" style={{ background: "#E0E2FA", color: "#2D2870", WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none", touchAction: "pan-y" }} {...longPress(msg.text, onRegisterFaq)}>
           {msg.text}
         </div>
       </div>);
@@ -522,7 +523,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
         </div>
         <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
           {msg.text &&
-          <div className="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm select-none" style={{ WebkitTouchCallout: "none" }} {...longPress(msg.text)}>
+          <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm" style={{ WebkitTouchCallout: "none" }}>
             {msg.text}
           </div>
           }
@@ -573,7 +574,7 @@ function Typing({ intent }) {
       style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
       </div>
-      <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2 items-center">
+      <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2 items-center">
         <span className="text-[13px] text-gray-500 leading-snug">{msg}</span>
         <span className="flex gap-1 items-center shrink-0">
           {[0, 1, 2].map((i) =>
@@ -602,34 +603,166 @@ function FavoritesBar({ onPick }) {
 
 }
 
-/* ── 입력창 위 빠른 질문 패널 (접기/펼치기) ──────────── */
-function QuickReplyPanel({ onPick, open, setOpen }) {
-  // open/접힘은 App이 소유(컨트롤드): 최초 펼침, 대화 시작·전송·채팅 탭 시 접힘. 더보기/접기로 수동 토글.
-  const shown = open ? QUICK_QUERIES : [];
+/* ── 자주 묻는 질문(FAQ) 항목 1행 — 탭=질문 전송, 좌측 가로 스와이프=삭제 노출 ──── */
+// WebView 네이티브 long-press 충돌 회피: 길게 누르기 의존 없이 '가로 스와이프'만으로 삭제.
+// 열린 행은 App(openFaqKey) 단일 소스로 관리 → isOpen/onOpen/onClose 컨트롤드.
+// 포인터 기반 drag 상태기계: 가로 이동이 세로보다 우세할 때만 스와이프 처리(세로 스크롤 보존),
+//   threshold(REVEAL=72px 노출폭, OPEN_TH=64px 스냅 기준) 넘기면 '열림' 스냅, 미만은 닫힘.
+const FAQ_REVEAL = 72; // 빨간 삭제 버튼 노출 폭(px)
+const FAQ_OPEN_TH = 64; // 이 이상 끌면 열림 스냅
+function FaqRow({ item, isLast, onPick, onRequestDelete, isOpen, onOpen, onClose }) {
+  const drag = React.useRef({ active: false, decided: false, horiz: false, x0: 0, y0: 0 });
+  const [dx, setDx] = useState(0); // 현재 행 가로 이동량(0 ~ -REVEAL). 손가락 추적 중 임시값
+  // 외부에서 isOpen 변경(다른 행 열림/빈 곳 탭) → 드래그 중이 아니면 위치 동기화
+  useEffect(() => { if (!drag.current.active) setDx(isOpen ? -FAQ_REVEAL : 0); }, [isOpen]);
+
+  const onPointerDown = (e) => {
+    drag.current = { active: true, decided: false, horiz: false, x0: e.clientX, y0: e.clientY };
+  };
+  const onPointerMove = (e) => {
+    const d = drag.current;
+    if (!d.active) return;
+    const ddx = e.clientX - d.x0;
+    const ddy = e.clientY - d.y0;
+    if (!d.decided) {
+      // 5px 이동 전엔 방향 미정(탭/스크롤 보호). 가로 우세하면 스와이프 점유.
+      if (Math.abs(ddx) < 5 && Math.abs(ddy) < 5) return;
+      d.decided = true;
+      d.horiz = Math.abs(ddx) > Math.abs(ddy);
+    }
+    if (!d.horiz) return; // 세로 우세 → 스크롤에 맡김
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+    const base = isOpen ? -FAQ_REVEAL : 0;
+    let next = base + ddx;
+    if (next > 0) next = 0;                       // 오른쪽 한계(완전 닫힘)
+    if (next < -FAQ_REVEAL) next = -FAQ_REVEAL;   // 왼쪽 한계(완전 노출)
+    setDx(next);
+  };
+  const finish = () => {
+    const d = drag.current;
+    if (!d.active) return;
+    drag.current.active = false;
+    if (!d.horiz) return; // 스와이프 아니면 위치 변동 없음(탭은 onClick에서 처리)
+    // threshold 기준 스냅 → App 상태(open) 갱신. setDx 는 isOpen useEffect 로 동기화됨.
+    if (dx <= -FAQ_OPEN_TH) { if (isOpen) setDx(-FAQ_REVEAL); else onOpen(); }
+    else { if (isOpen) onClose(); else setDx(0); }
+  };
+  const onClick = () => {
+    // 드래그(가로) 직후 click 억제, 열림 상태면 닫기만, 닫힘이면 질문 전송.
+    if (drag.current.decided && drag.current.horiz) return;
+    if (isOpen) { onClose(); return; }
+    onPick(item.text);
+  };
+
   return (
-    <div className="shrink-0 bg-white rounded-t-2xl" style={{ boxShadow: "0 -6px 18px -8px rgba(45,40,112,0.16)" }}>
-      {/* 핸들 (탭하면 펼침/접힘) */}
-      <button onClick={() => setOpen((o) => !o)}
-      className="w-full flex items-center justify-center pt-2 pb-1.5 active:opacity-60 transition" aria-label={open ? "질문 접기" : "질문 더보기"}>
-        <span className="w-9 h-1 rounded-full bg-gray-300"></span>
+    <div className={"relative overflow-hidden " + (!isLast ? "border-b border-gray-100/80" : "")}>
+      {/* 우측 빨간 삭제 버튼(행 아래에 깔림 → 행이 왼쪽으로 밀리며 드러남) */}
+      <button
+        onClick={() => onRequestDelete(item)}
+        aria-label={`"${item.text}" 질문 삭제`}
+        className="absolute top-0 right-0 h-full flex items-center justify-center text-white text-[13px] font-bold active:opacity-80 transition"
+        style={{ width: FAQ_REVEAL, background: "#EF4444" }}>
+        삭제
       </button>
-      <div className="px-4 pb-1.5 flex items-center justify-between">
-        <span className="text-[11.5px] font-bold text-gray-400">자주 묻는 질문</span>
-        <button onClick={() => setOpen((o) => !o)} className="text-[11.5px] font-bold text-violet-500 active:opacity-60">{open ? "접기" : "더보기"}</button>
-      </div>
-      {open &&
-      <div className="px-2 pb-1.5">
-        {shown.map((s, i) =>
-        <button key={i} onClick={() => onPick(s.text)}
-        className={"w-full flex items-center gap-2.5 px-3 py-[11px] active:bg-violet-50 rounded-xl transition text-left " + (i < shown.length - 1 ? "border-b border-gray-100/80" : "")}>
-            <span className="flex-1 text-[13.5px] font-medium text-gray-700">{s.text}</span>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="shrink-0">
-              <path d="M9 6l6 6-6 6" stroke="#C4C4CC" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        )}
-      </div>
+      {/* 슬라이드되는 행 본체(흰 배경으로 삭제 버튼 가림) */}
+      <button
+        onClick={onClick}
+        onContextMenu={(e) => e.preventDefault()}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={finish}
+        onPointerLeave={finish}
+        onPointerCancel={finish}
+        className="relative w-full flex items-center gap-2.5 px-3 py-[11px] bg-white active:bg-violet-50 transition text-left select-none"
+        style={{
+          transform: `translateX(${dx}px)`,
+          transition: drag.current.active ? "none" : "transform 0.22s ease",
+          touchAction: "pan-y",
+          WebkitTouchCallout: "none" }}>
+        <span className="text-[14px] shrink-0">{item.icon}</span>
+        <span className="flex-1 text-[13.5px] font-medium text-gray-700">{item.text}</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="shrink-0">
+          <path d="M9 6l6 6-6 6" stroke="#C4C4CC" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </div>);
+
+}
+
+/* ── 입력창 위 빠른 질문 패널 (접기/펼치기 + 추가/삭제) ──────────── */
+function QuickReplyPanel({ onPick, open, setOpen, items, onDelete, onReset, openKey, setOpenKey }) {
+  // open/접힘은 App이 소유(컨트롤드): 최초 펼침, 대화 시작·전송·채팅 탭 시 접힘. 더보기/접기·세로 스와이프로 토글.
+  // 첫 등장은 edupay-slide-up(아래→위), 펼침/접힘은 edupay-faq-grid(grid-template-rows 높이 슬라이드).
+  // items/onDelete/onReset 는 App 소유(컨트롤드 + localStorage 영속). onPick(전송) 동작 불변.
+  // 추가는 인라인 입력행 대신 '내 질문 말풍선 long-press'(App.registerFaqFromBubble)로 이동 → 여기선 +추가 UI 없음.
+  // [세로 스와이프] 핸들/헤더에서 아래로 끌면 접기(open=false), 위로 끌면 펼치기(open=true).
+  //   행 가로 삭제스와이프와는 별개 영역(헤더)이고 세로 우세일 때만 처리 → 충돌 없음.
+  // pointerdown 시 document 에 move/up 리스너 부착 → 손가락이 헤더(접힘 시 ≈17px)를 벗어나도 모든 move 수신.
+  //   setPointerCapture 는 일부 환경(헤드리스 등)에서 합성 move 를 리다이렉트 못해 끊기므로 쓰지 않는다.
+  //   탭(이동<8px)은 move 가 처리 분기에 안 닿아 토글 보존, swiped 로 스와이프 직후 토글만 1회 억제.
+  const sw = React.useRef({ y0: 0, x0: 0, decided: false, vert: false, swiped: false, docMove: null, docUp: null });
+  React.useEffect(() => () => {
+    if (sw.current.docMove) document.removeEventListener("pointermove", sw.current.docMove);
+    if (sw.current.docUp) document.removeEventListener("pointerup", sw.current.docUp);
+  }, []);
+  const onHdrDown = (e) => {
+    const s = sw.current;
+    s.y0 = e.clientY; s.x0 = e.clientX; s.decided = false; s.vert = false; s.swiped = false;
+    if (s.docMove) { document.removeEventListener("pointermove", s.docMove); document.removeEventListener("pointerup", s.docUp); }
+    s.docMove = (ev) => {
+      const dy = ev.clientY - s.y0, dx = ev.clientX - s.x0;
+      if (!s.decided) {
+        if (Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
+        s.decided = true; s.vert = Math.abs(dy) > Math.abs(dx); // 세로 우세일 때만 스와이프
       }
+      if (!s.vert) return;
+      if (dy > 28) { setOpenKey(null); setOpen(false); s.swiped = true; s.end(); }   // 아래로 → 접기
+      else if (dy < -28) { setOpen(true); s.swiped = true; s.end(); }                 // 위로 → 펼치기
+    };
+    s.docUp = () => s.end();
+    s.end = () => {
+      if (s.docMove) document.removeEventListener("pointermove", s.docMove);
+      if (s.docUp) document.removeEventListener("pointerup", s.docUp);
+      s.docMove = null; s.docUp = null;
+    };
+    document.addEventListener("pointermove", s.docMove);
+    document.addEventListener("pointerup", s.docUp);
+  };
+  // 핸들/헤더 탭: 세로 스와이프 직후엔 토글 억제(swiped 1회 소비). 열린 삭제행도 닫음.
+  const hdrTapToggle = () => { if (sw.current.swiped) { sw.current.swiped = false; return; } setOpenKey(null); setOpen((o) => !o); };
+  return (
+    <div className="shrink-0 bg-white rounded-t-2xl edupay-slide-up" style={{ boxShadow: "0 -6px 18px -8px rgba(45,40,112,0.16)" }}>
+      {/* 핸들+헤더: 탭=펼침/접힘 토글, 세로 스와이프=접기/펼치기. (열린 삭제행도 닫음) */}
+      <div onPointerDown={onHdrDown} style={{ touchAction: "none" }}>
+        <button onClick={hdrTapToggle}
+        className="w-full flex items-center justify-center pt-2 pb-1.5 active:opacity-60 transition" aria-label={open ? "질문 접기" : "질문 더보기"}>
+          <span className="w-9 h-1 rounded-full bg-gray-300"></span>
+        </button>
+        <div className="px-4 pb-1.5 flex items-center justify-between">
+          <span className="text-[11.5px] font-bold text-gray-400">자주 묻는 질문</span>
+          <button onClick={hdrTapToggle} className="text-[11.5px] font-bold text-violet-500 active:opacity-60">{open ? "접기" : "더보기"}</button>
+        </div>
+      </div>
+      <div className={"edupay-faq-grid" + (open ? " is-open" : "")}>
+        <div className="edupay-faq-clip">
+          <div className="edupay-faq-inner px-2 pb-1.5">
+            {items.length === 0 ?
+            /* 비움 상태: 안내 + 기본값 복구 */
+            <div className="flex flex-col items-center gap-2.5 px-4 py-5 text-center">
+              <span className="text-[12.5px] text-gray-400 leading-relaxed">등록된 질문이 없어요.<br />질문을 추가하거나 기본값으로 되돌릴 수 있어요.</span>
+              <button onClick={onReset}
+                className="px-4 py-2 rounded-xl text-[12.5px] font-bold text-violet-600 bg-violet-50 active:scale-95 transition">기본값으로 되돌리기</button>
+            </div> :
+
+            items.map((s, i) =>
+            <FaqRow key={s.text} item={s} isLast={i === items.length - 1} onPick={onPick} onRequestDelete={onDelete}
+              isOpen={openKey === s.text}
+              onOpen={() => setOpenKey(s.text)}
+              onClose={() => setOpenKey((k) => (k === s.text ? null : k))} />
+            )}
+          </div>
+        </div>
+      </div>
     </div>);
 
 }
@@ -664,16 +797,64 @@ function App() {
     setApiToast({ msg, kind, id });
     setTimeout(() => setApiToast((cur) => (cur && cur.id === id ? null : cur)), 2600);
   };
-  // [사용자] 말풍선 long-press 복사 토스트 — apiToast(dev 전용)와 별개로 prod 에서도 노출. 1.2초.
-  const [copyToast, setCopyToast] = useState(false);
-  const copyTimerRef = useRef(null);
-  const onCopyMessage = async (text) => {
-    const ok = await copyText(text);
-    if (!ok) return;
-    setCopyToast(true);
-    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-    copyTimerRef.current = setTimeout(() => setCopyToast(false), 1200);
+  // [FAQ 등록 피드백] 사용자 말풍선 long-press 등록 결과 토스트 — prod 포함 노출(showApiToast는 dev 전용이라 부적합).
+  //   복사 기능 제거로 비는 기존 prod 토스트(구 copyToast) 자리를 메시지형으로 재사용. 1.6초.
+  const [faqToast, setFaqToast] = useState(null);
+  const faqToastTimerRef = useRef(null);
+  const showFaqToast = (m) => {
+    setFaqToast(m);
+    if (faqToastTimerRef.current) clearTimeout(faqToastTimerRef.current);
+    faqToastTimerRef.current = setTimeout(() => setFaqToast(null), 1600);
   };
+  // [FAQ] 자주 묻는 질문 — DB 없이 localStorage("edupay_faq_v1") 영속(웹뷰용 데모). 형식: [{icon,text}].
+  //   초기값: 저장본 있으면 parse(배열·필드 유효성 정리), 없거나 파싱 실패 시 시드(QUICK_QUERIES) 폴백.
+  const [faqItems, setFaqItems] = useState(() => {
+    try {
+      const raw = localStorage.getItem("edupay_faq_v1");
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          const cleaned = arr
+            .filter((x) => x && typeof x.text === "string" && x.text.trim())
+            .map((x) => ({ icon: x.icon || "💬", text: String(x.text).trim() }));
+          return cleaned; // 빈 배열도 '사용자가 다 지운 상태'로 존중(비움 UI 노출)
+        }
+      }
+    } catch (e) {}
+    return QUICK_QUERIES.map((x) => ({ ...x }));
+  });
+  // faqItems 변경 시마다 저장(프라이빗 모드/차단 대비 try/catch).
+  useEffect(() => {
+    try { localStorage.setItem("edupay_faq_v1", JSON.stringify(faqItems)); } catch (e) {}
+  }, [faqItems]);
+  // [FAQ] 스와이프로 '열린'(삭제 버튼 노출) 행 단일 소스. 행 key=item.text. null=모두 닫힘.
+  const [openFaqKey, setOpenFaqKey] = useState(null);
+  // 추가: trim·빈값/중복(text 동일)·길이(≤40) 검증. 성공 시 true 반환(패널이 입력행 닫기 판단).
+  const addFaq = (text) => {
+    const t = (text || "").trim().slice(0, 40);
+    if (!t) return false;
+    if (faqItems.some((x) => x.text === t)) return false;
+    setFaqItems((prev) => [...prev, { icon: "💬", text: t }]);
+    return true;
+  };
+  // 삭제(가로 스와이프 → 빨간 '삭제' 버튼 탭): 2단계 제스처가 곧 확인이므로 window.confirm 없이 즉시 제거.
+  //   setFaqItems → faqItems useEffect 가 localStorage("edupay_faq_v1") 자동 갱신. 열린 키도 초기화.
+  const deleteFaq = (item) => {
+    if (!item || !item.text) return;
+    setFaqItems((prev) => prev.filter((x) => x.text !== item.text));
+    setOpenFaqKey((k) => (k === item.text ? null : k));
+  };
+  // 사용자(role==='user') 말풍선 long-press → 그 텍스트를 FAQ로 등록. addFaq 가 trim·중복·40자 검증.
+  //   성공 시 등록 토스트, 중복(또는 빈/길이초과로 false)이면 '이미 등록' 토스트. (인라인 '+추가' UI 대체 진입점)
+  const registerFaqFromBubble = (text) => {
+    const t = (text || "").trim();
+    if (!t) return;
+    const ok = addFaq(t);
+    showFaqToast(ok ? "자주 묻는 질문에 등록했어" : "이미 등록된 질문이야");
+  };
+  // 시드 기본값으로 복구.
+  const resetFaq = () => setFaqItems(QUICK_QUERIES.map((x) => ({ ...x })));
+
   const scrollRef = useRef(null);
   const started = messages.length > 0;
 
@@ -1106,7 +1287,7 @@ function App() {
   }
 
   return (
-    <div className="relative w-full mx-auto bg-[#ECE7FA] flex flex-col overflow-hidden phone-frame"
+    <div className="relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame"
     style={{ maxWidth: 390 }}>
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
@@ -1132,13 +1313,13 @@ function App() {
 
         <div ref={scrollRef} onPointerDown={() => faqOpen && setFaqOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {WEBVIEW && !started && <WebviewWelcome />}
-          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onCopy={onCopyMessage} />)}
+          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={registerFaqFromBubble} />)}
           {typing && <Typing intent={typingIntent} />}
           <div className="h-1"></div>
         </div>
         }
 
-      {(started || WEBVIEW) && !inputFocused && <QuickReplyPanel onPick={send} open={faqOpen} setOpen={setFaqOpen} />}
+      {(started || WEBVIEW) && !inputFocused && <QuickReplyPanel onPick={send} open={faqOpen} setOpen={setFaqOpen} items={faqItems} onDelete={deleteFaq} onReset={resetFaq} openKey={openFaqKey} setOpenKey={setOpenFaqKey} />}
       {/* 입력 바: relative z-10 으로 QuickReplyPanel 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
@@ -1181,12 +1362,12 @@ function App() {
       </div>
       }
 
-      {/* [사용자] 말풍선 복사됨 토스트 (long-press) — prod 포함 노출, 1.2초 */}
-      {copyToast &&
+      {/* [사용자] 말풍선 long-press → FAQ 등록 피드백 토스트 — prod 포함 노출, 1.6초 */}
+      {faqToast &&
       <div className="absolute left-1/2 -translate-x-1/2 bottom-24 z-50 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12.5px] font-bold text-white shadow-lg edupay-fade pointer-events-none"
       style={{ background: "#2D2870" }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        복사됨
+        {faqToast}
       </div>
       }
     </div>);

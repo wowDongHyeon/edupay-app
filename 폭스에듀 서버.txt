@@ -1,0 +1,27 @@
+vpn 접속 정보 입니다
+ID : web-cash@gnefoxedu.onmicrosoft.com
+PW : Bafa286679
+->Bafa286678 로변경
+->H^521946617400ab 변경
+ 
+db 접속 정보 입니다
+(기존에 김평식팀장님께 드린 정보와 같습니다)
+10.0.1.11: 3306
+edupay_db
+계정
+edu_manager
+Fox1099!@
+
+셋팅된 서버 정보 전달 드립니다
+접속시에는 vpn 후 내부로 접속해 주시면 됩니다
+public - 20.214.176.113    
+private  - 10.0.1.12    
+id - rootadmin    
+pw - eogksalsrnr1@
+
+
+sudo rm -rf /var/www/edupay-app/dist
+sudo mv /home/rootadmin/dist /var/www/edupay-app/dist
+sudo chown -R www-data:www-data /var/www/edupay-app
+sudo nginx -t && sudo systemctl reload nginx
+curl -I http://localhost:7071/          # → 200 확인

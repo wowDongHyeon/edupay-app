@@ -13,7 +13,7 @@ const { useState: useStateC } = React;
 
 function CardShell({ title, sub, right, children }) {
   return (
-    <div className="mt-2 rounded-2xl bg-white border border-violet-100 shadow-sm overflow-hidden">
+    <div className="mt-2 rounded-2xl bg-white border border-violet-200 shadow-sm overflow-hidden">
       <div className="px-4 pt-3.5 pb-2.5 border-b border-gray-100 flex items-start justify-between gap-2">
         <div>
           <div className="text-[14px] font-bold text-gray-900">{title}</div>

@@ -13,7 +13,7 @@ body {
 }
 body {
   font-family: "Pretendard", -apple-system, sans-serif;
-  background: #e7e5f2;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,6 +104,34 @@ body {
   to { transform: none; }
 }
 .edupay-sheet { animation: edupaySheet 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* FAQ 패널 첫 등장: 아래→위 슬라이드업 + 페이드 */
+@keyframes edupaySlideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.edupay-slide-up { animation: edupaySlideUp 0.28s ease-out; }
+
+/* FAQ 항목 리스트 펼침/접힘: grid-template-rows 로 높이 슬라이드(접기도 부드럽게) */
+.edupay-faq-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease, opacity 0.28s ease;
+  opacity: 0;
+}
+.edupay-faq-grid.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.edupay-faq-grid > .edupay-faq-clip {
+  overflow: hidden;
+  min-height: 0;
+}
+.edupay-faq-inner {
+  transform: translateY(10px);
+  transition: transform 0.28s ease;
+}
+.edupay-faq-grid.is-open .edupay-faq-inner { transform: none; }
 
 @keyframes edupayBackdrop {
   from { opacity: 0; }

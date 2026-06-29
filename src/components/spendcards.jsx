@@ -23,7 +23,7 @@ function DailySpendCard({ ledger, date }) {
   const maxCat = cats.length ? cats[0].value : 1;
 
   return (
-    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">
+    <div className="rounded-[22px] bg-white border border-violet-200 shadow-sm px-5 py-5 edupay-fade">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[12.5px] text-gray-400">{relPrefix}{dateStr} 지출</div>
@@ -81,7 +81,7 @@ function RecordedCard({ entry, onSend }) {
   const rel = D.dayLabel(entry.date);
   const dateStr = (rel === "오늘" || rel === "어제" ? rel + " · " : "") + `${mo}월 ${d}일`;
   return (
-    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-4 py-4 edupay-fade">
+    <div className="rounded-[22px] bg-white border border-violet-200 shadow-sm px-4 py-4 edupay-fade">
       <div className="flex items-center gap-1.5 text-[12.5px] font-bold text-emerald-600 mb-3">
         <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span>
         용돈기입장에 기록했어요
@@ -141,7 +141,7 @@ function PeriodReportCard({ ledger, range }) {
     : `${top.name}에 가장 많이 썼어 (${D.num(top.value)}원, ${Math.round((top.value / total) * 100)}%). 한눈에 패턴이 보이지? 📊`;
 
   return (
-    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">
+    <div className="rounded-[22px] bg-white border border-violet-200 shadow-sm px-5 py-5 edupay-fade">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[12.5px] font-bold text-violet-600 flex items-center gap-1.5">
@@ -203,7 +203,7 @@ function CategoryDonut({ result }) {
   const data = rows.map((e, i) => ({ name: e.category, value: e.amount, cnt: e.cnt, color: CATSPEND_COLORS[i % CATSPEND_COLORS.length] }));
   const top = data[0];
   return (
-    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">
+    <div className="rounded-[22px] bg-white border border-violet-200 shadow-sm px-5 py-5 edupay-fade">
       <span className="inline-block mb-1.5 px-2 py-0.5 rounded-full bg-violet-50 text-[11.5px] font-bold text-violet-600">최근 3개월</span>
       <div className="text-[17px] font-extrabold text-gray-900 tracking-[-0.01em]">사용처별 사용 내역</div>
       <div className="text-[12.5px] text-gray-400 mt-0.5">업종별 사용 금액 · 가맹점 기준</div>
@@ -256,7 +256,7 @@ function CategorySpendCard({ ledger, range, ckey, label, result }) {
   const pct = Math.round(sum / monthSum * 100);
   const rangeStr = r.start === r.end ? fmt(r.start) : `${fmt(r.start)} ~ ${fmt(r.end)}`;
   return (
-    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">
+    <div className="rounded-[22px] bg-white border border-violet-200 shadow-sm px-5 py-5 edupay-fade">
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="inline-block mb-1.5 px-2 py-0.5 rounded-full bg-violet-50 text-[11.5px] font-bold text-violet-600">{r.label || "이번 달"}</span>

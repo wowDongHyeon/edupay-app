@@ -20,7 +20,7 @@ export const dayLabel = (ymd) => {
 
 export function ChartShell({ title, sub, badge, children }) {
   return (
-    <div className="rounded-[22px] bg-white border border-violet-50 shadow-sm px-5 py-5 edupay-fade">
+    <div className="rounded-[22px] bg-white border border-violet-200 shadow-md px-5 py-5 edupay-fade">
       <div className="flex items-start justify-between gap-3">
         <div>
           {badge && (
