@@ -471,46 +471,110 @@ function WelcomeScreen({ onPick }) {
 
 }
 
+/* ── 가로 스와이프 노출 공용 훅 (FAQ 행 삭제 / 사용자 말풍선 등록 공통) ──────────
+   왼쪽으로 끌면 본체가 -reveal 까지 이동해 우측 버튼 노출. touch/mouse 분리로 이중 처리 없음.
+   iOS(WKWebView): 가로 확정 후 비수동 touchmove 에서 preventDefault → 가장자리 한정 해소(중앙에서도 점유).
+   세로 우세면 스크롤에 양보, 짧은 탭은 onClick 으로(드래그 직후 click 은 dragRef 로 억제).
+   isOpen/onOpen/onClose 는 호출부가 단일 소스로 소유(컨트롤드). */
+function useSwipeReveal({ reveal, openTh, isOpen, onOpen, onClose }) {
+  const drag = React.useRef({ active: false, decided: false, horiz: false, x0: 0, y0: 0, mode: null });
+  const [dx, setDx] = React.useState(0);
+  const bodyRef = React.useRef(null);
+  React.useEffect(() => { if (!drag.current.active) setDx(isOpen ? -reveal : 0); }, [isOpen, reveal]);
+
+  const start = (x, y, mode) => { drag.current = { active: true, decided: false, horiz: false, x0: x, y0: y, mode }; };
+  const move = (x, y, ev) => {
+    const d = drag.current;
+    if (!d.active) return;
+    const ddx = x - d.x0, ddy = y - d.y0;
+    if (!d.decided) {
+      if (Math.abs(ddx) < 5 && Math.abs(ddy) < 5) return; // 방향 미정(탭/스크롤 보호)
+      d.decided = true; d.horiz = Math.abs(ddx) > Math.abs(ddy);
+    }
+    if (!d.horiz) return;                       // 세로 우세 → 스크롤에 맡김(preventDefault 안 함)
+    if (ev && ev.cancelable) ev.preventDefault(); // 가로 확정 → iOS 가로채기 차단(중앙에서도 점유)
+    let next = (isOpen ? -reveal : 0) + ddx;
+    if (next > 0) next = 0;
+    if (next < -reveal) next = -reveal;
+    setDx(next);
+  };
+  const finish = () => {
+    const d = drag.current;
+    if (!d.active) return;
+    d.active = false;
+    if (!d.horiz) return; // 스와이프 아니면 위치 변동 없음(탭은 onClick)
+    if (dx <= -openTh) { if (isOpen) setDx(-reveal); else onOpen(); }
+    else { if (isOpen) onClose(); else setDx(0); }
+  };
+  // [터치] touchmove 는 React(passive)로 preventDefault 불가 → ref 로 비수동 등록.
+  React.useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const onTouchMove = (e) => { if (drag.current.mode !== "touch") return; const t = e.touches[0]; if (t) move(t.clientX, t.clientY, e); };
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => el.removeEventListener("touchmove", onTouchMove);
+  }, [isOpen]); // isOpen 변경 시 move 클로저(base) 갱신 위해 재바인딩
+
+  const handlers = {
+    onTouchStart: (e) => { const t = e.touches[0]; if (t) start(t.clientX, t.clientY, "touch"); },
+    onTouchEnd: finish,
+    onTouchCancel: finish,
+    onPointerDown: (e) => { if (e.pointerType === "mouse") start(e.clientX, e.clientY, "mouse"); }, // 터치는 위 touch 핸들러
+    onPointerMove: (e) => {
+      if (drag.current.mode !== "mouse") return;
+      if (!drag.current.decided || drag.current.horiz) { try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {} }
+      move(e.clientX, e.clientY, null); // 마우스는 preventDefault 불필요
+    },
+    onPointerUp: () => { if (drag.current.mode === "mouse") finish(); },
+    onPointerLeave: () => { if (drag.current.mode === "mouse") finish(); },
+    onPointerCancel: () => { if (drag.current.mode === "mouse") finish(); },
+  };
+  return { dx, bodyRef, handlers, dragRef: drag };
+}
+
+/* ── 사용자 말풍선 — long-press(~500ms) → onRegisterFaq(text)(App에서 등록 확인창). 짧은 탭/스크롤 무동작. ──
+   웹 long-press 억제: user-select/touch-callout none(style) + contextmenu/dragstart preventDefault.
+   10px 이상 이동 시 타이머 취소(스크롤 보호). AOS 네이티브 가로채기는 Flutter 억제(별도)로 보완, iOS는 웹 억제로 동작. */
+function UserBubble({ text, onRegisterFaq }) {
+  const lp = React.useRef({ timer: null, x: 0, y: 0 });
+  const clear = () => { if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = null; } };
+  const lpHandlers = {
+    onContextMenu: (e) => e.preventDefault(),
+    onDragStart: (e) => e.preventDefault(),
+    onPointerDown: (e) => {
+      if (!text) return;
+      lp.current.x = e.clientX; lp.current.y = e.clientY;
+      clear();
+      lp.current.timer = setTimeout(() => {
+        lp.current.timer = null;
+        try { window.getSelection && window.getSelection().removeAllRanges(); } catch (err) {} // 선택 해제
+        onRegisterFaq && onRegisterFaq(text);
+      }, 500);
+    },
+    onPointerMove: (e) => { if (!lp.current.timer) return; if (Math.abs(e.clientX - lp.current.x) > 10 || Math.abs(e.clientY - lp.current.y) > 10) clear(); }, // 스크롤/드래그 → 취소
+    onPointerUp: clear,
+    onPointerLeave: clear,
+    onPointerCancel: clear,
+  };
+  return (
+    <div className="flex justify-end">
+      <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-[14px] leading-relaxed whitespace-pre-line shadow-sm select-none"
+        style={{ background: "#E0E2FA", color: "#2D2870", WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none", touchAction: "pan-y" }}
+        {...lpHandlers}>
+        {text}
+      </div>
+    </div>);
+
+}
+
 /* ── 채팅 말풍선 ──────────────────────────────────────── */
 function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery, onRegisterFaq }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
   const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
-  // long-press(꾹 누르기): 500ms 유지 시 onFire(text) 호출. 이동(10px↑)·뗌·취소 시 타이머 취소(스크롤 보호), 짧은 탭 무영향.
-  //   사용자 말풍선 → FAQ 등록(onRegisterFaq). AI 말풍선엔 부착하지 않음(동작 없음). 복사 기능은 제거됨.
-  //   웹 long-press 억제 최대치: user-select/touch-callout none(style) + contextmenu/selectstart/dragstart preventDefault.
-  const lp = React.useRef({ timer: null, x: 0, y: 0 });
-  function longPress(text, onFire) {
-    const clear = () => { if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = null; } };
-    return {
-      onContextMenu: (e) => e.preventDefault(), // 네이티브 메뉴/콜아웃 억제(꾹 누름)
-      onDragStart: (e) => e.preventDefault(),   // 드래그(데스크톱 선택) 억제. 선택 자체는 CSS user-select:none 로 차단
-      onPointerDown: (e) => {
-        if (!text) return;
-        lp.current.x = e.clientX; lp.current.y = e.clientY;
-        clear();
-        lp.current.timer = setTimeout(() => {
-          lp.current.timer = null;
-          try { window.getSelection && window.getSelection().removeAllRanges(); } catch (err) {} // 선택 해제
-          onFire && onFire(text);
-        }, 500);
-      },
-      onPointerMove: (e) => {
-        if (!lp.current.timer) return;
-        if (Math.abs(e.clientX - lp.current.x) > 10 || Math.abs(e.clientY - lp.current.y) > 10) clear(); // 스크롤/드래그 → 취소
-      },
-      onPointerUp: clear,
-      onPointerLeave: clear,
-      onPointerCancel: clear,
-    };
-  }
+  // 사용자 말풍선은 좌측 스와이프 → '등록' 버튼(UserBubble). long-press 등록/복사는 모두 제거됨.
+  //   AI 말풍선은 아무 제스처도 부착하지 않음(무동작).
   if (msg.role === "user") {
-    return (
-      <div className="flex justify-end">
-        <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-[14px] leading-relaxed whitespace-pre-line shadow-sm select-none" style={{ background: "#E0E2FA", color: "#2D2870", WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none", touchAction: "pan-y" }} {...longPress(msg.text, onRegisterFaq)}>
-          {msg.text}
-        </div>
-      </div>);
-
+    return <UserBubble text={msg.text} onRegisterFaq={onRegisterFaq} />;
   }
   const isChart = !!msg.chartType; // 오페리아 데이터 메시지(ChartRenderer 렌더)
   const bigCard = isChart || ["spending", "report", "recorded", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
@@ -611,45 +675,11 @@ function FavoritesBar({ onPick }) {
 const FAQ_REVEAL = 72; // 빨간 삭제 버튼 노출 폭(px)
 const FAQ_OPEN_TH = 64; // 이 이상 끌면 열림 스냅
 function FaqRow({ item, isLast, onPick, onRequestDelete, isOpen, onOpen, onClose }) {
-  const drag = React.useRef({ active: false, decided: false, horiz: false, x0: 0, y0: 0 });
-  const [dx, setDx] = useState(0); // 현재 행 가로 이동량(0 ~ -REVEAL). 손가락 추적 중 임시값
-  // 외부에서 isOpen 변경(다른 행 열림/빈 곳 탭) → 드래그 중이 아니면 위치 동기화
-  useEffect(() => { if (!drag.current.active) setDx(isOpen ? -FAQ_REVEAL : 0); }, [isOpen]);
-
-  const onPointerDown = (e) => {
-    drag.current = { active: true, decided: false, horiz: false, x0: e.clientX, y0: e.clientY };
-  };
-  const onPointerMove = (e) => {
-    const d = drag.current;
-    if (!d.active) return;
-    const ddx = e.clientX - d.x0;
-    const ddy = e.clientY - d.y0;
-    if (!d.decided) {
-      // 5px 이동 전엔 방향 미정(탭/스크롤 보호). 가로 우세하면 스와이프 점유.
-      if (Math.abs(ddx) < 5 && Math.abs(ddy) < 5) return;
-      d.decided = true;
-      d.horiz = Math.abs(ddx) > Math.abs(ddy);
-    }
-    if (!d.horiz) return; // 세로 우세 → 스크롤에 맡김
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
-    const base = isOpen ? -FAQ_REVEAL : 0;
-    let next = base + ddx;
-    if (next > 0) next = 0;                       // 오른쪽 한계(완전 닫힘)
-    if (next < -FAQ_REVEAL) next = -FAQ_REVEAL;   // 왼쪽 한계(완전 노출)
-    setDx(next);
-  };
-  const finish = () => {
-    const d = drag.current;
-    if (!d.active) return;
-    drag.current.active = false;
-    if (!d.horiz) return; // 스와이프 아니면 위치 변동 없음(탭은 onClick에서 처리)
-    // threshold 기준 스냅 → App 상태(open) 갱신. setDx 는 isOpen useEffect 로 동기화됨.
-    if (dx <= -FAQ_OPEN_TH) { if (isOpen) setDx(-FAQ_REVEAL); else onOpen(); }
-    else { if (isOpen) onClose(); else setDx(0); }
-  };
+  // 가로 스와이프 로직은 공용 훅(useSwipeReveal)로 일원화 — 말풍선 등록과 동일 패턴/iOS 견고화 공유.
+  const { dx, bodyRef, handlers, dragRef } = useSwipeReveal({ reveal: FAQ_REVEAL, openTh: FAQ_OPEN_TH, isOpen, onOpen, onClose });
   const onClick = () => {
     // 드래그(가로) 직후 click 억제, 열림 상태면 닫기만, 닫힘이면 질문 전송.
-    if (drag.current.decided && drag.current.horiz) return;
+    if (dragRef.current.decided && dragRef.current.horiz) return;
     if (isOpen) { onClose(); return; }
     onPick(item.text);
   };
@@ -666,17 +696,14 @@ function FaqRow({ item, isLast, onPick, onRequestDelete, isOpen, onOpen, onClose
       </button>
       {/* 슬라이드되는 행 본체(흰 배경으로 삭제 버튼 가림) */}
       <button
+        ref={bodyRef}
         onClick={onClick}
         onContextMenu={(e) => e.preventDefault()}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={finish}
-        onPointerLeave={finish}
-        onPointerCancel={finish}
+        {...handlers}
         className="relative w-full flex items-center gap-2.5 px-3 py-[11px] bg-white active:bg-violet-50 transition text-left select-none"
         style={{
           transform: `translateX(${dx}px)`,
-          transition: drag.current.active ? "none" : "transform 0.22s ease",
+          transition: dragRef.current.active ? "none" : "transform 0.22s ease",
           touchAction: "pan-y",
           WebkitTouchCallout: "none" }}>
         <span className="text-[14px] shrink-0">{item.icon}</span>
@@ -773,7 +800,29 @@ function App() {
   const [entered, setEntered] = useState(WEBVIEW); // webview면 인트로 건너뛰고 바로 진입
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [inputFocused, setInputFocused] = useState(false); // 입력 포커스(키보드 올라옴) 시 FAQ 패널 숨김
+  const [inputFocused, setInputFocused] = useState(false); // 폴백용(visualViewport 미지원). 입력 포커스 시 FAQ 패널 숨김
+  const [keyboardOpen, setKeyboardOpen] = useState(false);  // 키보드 가시성(visualViewport 기반) → FAQ 패널 숨김 트리거
+  // 키보드 가시성 판정: visualViewport.height 가 기준(관측 최대) 대비 충분히 작으면 keyboardOpen=true.
+  //   inputFocused(focus/blur) 대신 사용 → AOS '뒤로가기'로 키보드만 닫혀도(blur 없이) 패널 복귀. 미지원이면 폴백(inputFocused).
+  useEffect(() => {
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    if (!vv) return; // 폴백: inputFocused 사용
+    let base = vv.height, raf = 0;
+    const onChange = () => {
+      if (raf) return;                                  // rAF 디바운스(과호출 방지)
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        if (vv.height > base) base = vv.height;          // 기준 = 관측 최대 높이(주소창 변화 등 흡수)
+        setKeyboardOpen(base - vv.height > 100 || vv.height < base * 0.85);
+      });
+    };
+    vv.addEventListener("resize", onChange);
+    vv.addEventListener("scroll", onChange);
+    onChange();
+    return () => { vv.removeEventListener("resize", onChange); vv.removeEventListener("scroll", onChange); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+  // 패널 숨김 = (visualViewport 지원 시) 키보드 열림 / (미지원 폴백) 입력 포커스
+  const faqHidden = (typeof window !== "undefined" && window.visualViewport) ? keyboardOpen : inputFocused;
   const [faqOpen, setFaqOpen] = useState(true); // 자주 묻는 질문 펼침 상태(App이 소유) — 최초 펼침, 대화/탭/전송 시 접힘
   const [typing, setTyping] = useState(false);
   const [typingIntent, setTypingIntent] = useState(null); // 로딩 말풍선 문구 풀 선택용(send 에서 cardIntent 결과 저장)
@@ -844,8 +893,10 @@ function App() {
     setFaqItems((prev) => prev.filter((x) => x.text !== item.text));
     setOpenFaqKey((k) => (k === item.text ? null : k));
   };
-  // 사용자(role==='user') 말풍선 long-press → 그 텍스트를 FAQ로 등록. addFaq 가 trim·중복·40자 검증.
-  //   성공 시 등록 토스트, 중복(또는 빈/길이초과로 false)이면 '이미 등록' 토스트. (인라인 '+추가' UI 대체 진입점)
+  // 사용자(role==='user') 말풍선 long-press → 등록 확인창(faqConfirm) 표시. '등록' 선택 시에만 register 실행(오등록 방지).
+  const [faqConfirm, setFaqConfirm] = useState(null); // 확인 대기 텍스트(string) | null
+  const askRegisterFaq = (text) => { const t = (text || "").trim(); if (t) setFaqConfirm(t); };
+  // 확인창 '등록' 확정 시: addFaq(trim·중복·40자) → 성공/중복 토스트.
   const registerFaqFromBubble = (text) => {
     const t = (text || "").trim();
     if (!t) return;
@@ -1313,13 +1364,13 @@ function App() {
 
         <div ref={scrollRef} onPointerDown={() => faqOpen && setFaqOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {WEBVIEW && !started && <WebviewWelcome />}
-          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={registerFaqFromBubble} />)}
+          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
           {typing && <Typing intent={typingIntent} />}
           <div className="h-1"></div>
         </div>
         }
 
-      {(started || WEBVIEW) && !inputFocused && <QuickReplyPanel onPick={send} open={faqOpen} setOpen={setFaqOpen} items={faqItems} onDelete={deleteFaq} onReset={resetFaq} openKey={openFaqKey} setOpenKey={setOpenFaqKey} />}
+      {(started || WEBVIEW) && !faqHidden && <QuickReplyPanel onPick={send} open={faqOpen} setOpen={setFaqOpen} items={faqItems} onDelete={deleteFaq} onReset={resetFaq} openKey={openFaqKey} setOpenKey={setOpenFaqKey} />}
       {/* 입력 바: relative z-10 으로 QuickReplyPanel 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
@@ -1349,6 +1400,23 @@ function App() {
       }
 
       {modal && <RecommendModal content={modal} grade={grade} onClose={() => setModal(null)} />}
+
+      {/* [FAQ 등록 확인창] 말풍선 long-press → '등록' 선택 시에만 추가. 앱 일관 UI(중앙 카드), 배경 탭=취소. */}
+      {faqConfirm &&
+      <div className="absolute inset-0 z-[60] flex items-center justify-center px-8" style={{ background: "rgba(45,40,112,0.32)" }}
+        onClick={() => setFaqConfirm(null)}>
+        <div className="w-full max-w-[300px] bg-white rounded-2xl p-5 shadow-xl edupay-fade" onClick={(e) => e.stopPropagation()}>
+          <p className="text-[14px] font-bold text-gray-800 leading-relaxed">이 질문을 '자주 묻는 질문'에 등록할까?</p>
+          <p className="mt-2 text-[12.5px] text-gray-500 leading-relaxed break-words">{faqConfirm}</p>
+          <div className="mt-4 flex gap-2">
+            <button onClick={() => setFaqConfirm(null)}
+              className="flex-1 h-10 rounded-xl text-[13px] font-bold text-gray-500 bg-[#F3F4F6] active:scale-95 transition">취소</button>
+            <button onClick={() => { registerFaqFromBubble(faqConfirm); setFaqConfirm(null); }}
+              className="flex-1 h-10 rounded-xl text-[13px] font-bold text-white active:scale-95 transition" style={{ background: "#5B4DD6" }}>등록</button>
+          </div>
+        </div>
+      </div>
+      }
       {showHistory &&
       <HistoryDrawer convos={convos} activeId={activeId}
       onSelect={selectConvo} onNew={newChat} onDelete={deleteConvo} onClose={() => setShowHistory(false)} />
