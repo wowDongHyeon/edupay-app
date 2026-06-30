@@ -568,6 +568,18 @@ function UserBubble({ text, onRegisterFaq }) {
 }
 
 /* ── 채팅 말풍선 ──────────────────────────────────────── */
+// [연결 실패 안내] 기술/네트워크 에러는 사용자에게 그대로 노출하지 않고 친근 문구로 치환한다.
+//   친근 문구(금융친구 반말 톤, 빨강/경고 아님 — 일반 AI 말풍선 톤 유지).
+const NET_ERROR_MSG = "앗, 지금 잠깐 연결이 안 돼 😅 조금 있다 다시 해볼래?";
+// 판정: 비었거나 한글이 하나도 없으면(Failed to fetch, NetworkError, datasource error, timeout 등 영문/기술 문자열)
+//   → 친근 문구로 치환. 백엔드가 준 '한글 사용자 안내'는 기술 메시지가 아니므로 그대로 노출(현행 유지).
+function isTechErrorMessage(em) {
+  const s = (em == null ? "" : String(em)).trim();
+  if (!s) return true;            // 빈값 → 기술/미상 에러
+  if (!/[가-힣]/.test(s)) return true; // 한글 없음 → 영문/기술 문자열
+  return false;                   // 한글 포함 → 백엔드 사용자 안내(보존)
+}
+
 function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery, onRegisterFaq }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
   const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
@@ -590,6 +602,13 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
           <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm" style={{ WebkitTouchCallout: "none" }}>
             {msg.text}
           </div>
+          }
+          {/* [다시 시도] 연결 실패 안내 말풍선에만 노출 — 탭하면 같은 질문 재전송(onSend). 일반 톤(빨강/경고 아님). */}
+          {msg.retry &&
+          <button type="button" onClick={() => onSend && onSend(msg.retry)}
+          className="mt-1.5 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[13px] font-semibold bg-[#F3F4F6] text-gray-700 active:bg-violet-50 active:text-violet-600 active:scale-95 transition">
+            <span className="text-[13px]">↻</span>다시 시도
+          </button>
           }
           {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} onCardQuery={onCardQuery} onActiveSql={setChip} />}
           {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
@@ -1282,7 +1301,12 @@ function App() {
           // §4.5/§8 오류: 채널이 success=false 로 응답 → errorMessage 표시(backend/operia). mock 은 항상 true.
           if (resp && resp.success === false) {
             showApiToast("채널 오류(success=false)", "error");
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.errorMessage || "요청 처리 중 오류가 발생했어. 잠시 후 다시 시도해줘." }]);
+            // 백엔드 한글 안내는 그대로, 영문/기술/빈값 errorMessage 는 친근 문구 + 다시 시도.
+            if (isTechErrorMessage(resp.errorMessage)) {
+              setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: NET_ERROR_MSG, retry: q }]);
+            } else {
+              setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.errorMessage }]);
+            }
             return;
           }
           // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
@@ -1293,9 +1317,14 @@ function App() {
           console.error("[데이터] 호출 오류:", e);
           showApiToast("데이터 오류", "error");
           setTyping(false);
-          // 스트림 전 HTTP 오류(401/422 등)는 채널 errorMessage 를 그대로 표시(§4.5), generic/네트워크는 기본 안내
+          // 스트림 전 HTTP 오류(401/422 등)의 채널 한글 안내는 그대로 표시(§4.5).
+          // 네트워크/기술 문자열(Failed to fetch, datasource error, timeout 등)·빈값 → 친근 문구 + 다시 시도.
           const em = e && e.message;
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: em && em !== "datasource error" ? em : "데이터를 불러오지 못했어. 잠시 후 다시 시도해줘." }]);
+          if (isTechErrorMessage(em)) {
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: NET_ERROR_MSG, retry: q }]);
+          } else {
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: em }]);
+          }
         }
         return;
       }
