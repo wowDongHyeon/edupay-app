@@ -1,0 +1,2915 @@
+{
+  "nodes": [
+    {
+      "id": "vite_config_js_timestamp_1782464930590_319bf3066aea_mjs",
+      "label": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs",
+      "file_type": "code",
+      "source_file": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "vite_config_js_timestamp_1782464946205_0037bb8192259_mjs",
+      "label": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
+      "file_type": "code",
+      "source_file": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "claude_settings_local_json",
+      "label": "settings.local.json",
+      "file_type": "code",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "claude_settings_local_permissions",
+      "label": "permissions",
+      "file_type": "code",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "claude_settings_local_permissions_allow",
+      "label": "allow",
+      "file_type": "code",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "src_app_jsx",
+      "label": "App.jsx",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_app_sanitizeanswer",
+      "label": "sanitizeAnswer()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_app_querydatasource",
+      "label": "queryDataSource()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L38"
+    },
+    {
+      "id": "src_app_grades",
+      "label": "GRADES",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L99"
+    },
+    {
+      "id": "src_app_grade_labels",
+      "label": "GRADE_LABELS",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L100"
+    },
+    {
+      "id": "src_app_suggestions",
+      "label": "SUGGESTIONS",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L102"
+    },
+    {
+      "id": "src_app_quick_queries",
+      "label": "QUICK_QUERIES",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L112"
+    },
+    {
+      "id": "src_app_foxmark",
+      "label": "FoxMark()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L121"
+    },
+    {
+      "id": "src_app_sparkleicon",
+      "label": "SparkleIcon()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L135"
+    },
+    {
+      "id": "src_app_tabs",
+      "label": "TABS",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L148"
+    },
+    {
+      "id": "src_app_header",
+      "label": "Header()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L151"
+    },
+    {
+      "id": "src_app_comingsoon",
+      "label": "ComingSoon()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L244"
+    },
+    {
+      "id": "src_app_aiorb",
+      "label": "AIOrb()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L264"
+    },
+    {
+      "id": "src_app_introscreen",
+      "label": "IntroScreen()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L279"
+    },
+    {
+      "id": "src_app_menuicons",
+      "label": "MenuIcons",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L348"
+    },
+    {
+      "id": "src_app_menuscreen",
+      "label": "MenuScreen()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L400"
+    },
+    {
+      "id": "src_app_webviewwelcome",
+      "label": "WebviewWelcome()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L435"
+    },
+    {
+      "id": "src_app_welcomescreen",
+      "label": "WelcomeScreen()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L450"
+    },
+    {
+      "id": "src_app_useswipereveal",
+      "label": "useSwipeReveal()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L479"
+    },
+    {
+      "id": "src_app_userbubble",
+      "label": "UserBubble()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L538"
+    },
+    {
+      "id": "src_app_istecherrormessage",
+      "label": "isTechErrorMessage()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L576"
+    },
+    {
+      "id": "src_app_bubble",
+      "label": "Bubble()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L583"
+    },
+    {
+      "id": "src_app_loading_pools",
+      "label": "LOADING_POOLS",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L624"
+    },
+    {
+      "id": "src_app_poolkeyforintent",
+      "label": "poolKeyForIntent()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L633"
+    },
+    {
+      "id": "src_app_typing",
+      "label": "Typing()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L644"
+    },
+    {
+      "id": "src_app_favoritesbar",
+      "label": "FavoritesBar()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L673"
+    },
+    {
+      "id": "src_app_faqrow",
+      "label": "FaqRow()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L696"
+    },
+    {
+      "id": "src_app_quickreplypanel",
+      "label": "QuickReplyPanel()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L739"
+    },
+    {
+      "id": "src_app_uiddebugbadge",
+      "label": "UidDebugBadge()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L822"
+    },
+    {
+      "id": "src_app_app",
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "src\\App.jsx",
+      "source_location": "L855"
+    },
+    {
+      "id": "src_api_session_js",
+      "label": "session.js",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "api_session_recordsession",
+      "label": "__recordSession()",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L21"
+    },
+    {
+      "id": "api_session_safejson",
+      "label": "__safeJson()",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L35"
+    },
+    {
+      "id": "api_session_loc_probe_names",
+      "label": "__LOC_PROBE_NAMES",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L41"
+    },
+    {
+      "id": "api_session_probelocations",
+      "label": "__probeLocations()",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L42"
+    },
+    {
+      "id": "api_session_resolveuserid",
+      "label": "resolveUserId()",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L57"
+    },
+    {
+      "id": "api_session_getuserid",
+      "label": "getUserId()",
+      "file_type": "code",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L92"
+    },
+    {
+      "id": "src_charts_codelabels_js",
+      "label": "codeLabels.js",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "charts_codelabels_code_labels",
+      "label": "CODE_LABELS",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L9"
+    },
+    {
+      "id": "charts_codelabels_channel_canon",
+      "label": "CHANNEL_CANON",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L17"
+    },
+    {
+      "id": "charts_codelabels_canonchannel",
+      "label": "canonChannel()",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L23"
+    },
+    {
+      "id": "charts_codelabels_haskorean",
+      "label": "hasKorean()",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L29"
+    },
+    {
+      "id": "charts_codelabels_labelofcode",
+      "label": "labelOfCode()",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L36"
+    },
+    {
+      "id": "charts_codelabels_labelfor",
+      "label": "labelFor()",
+      "file_type": "code",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L49"
+    },
+    {
+      "id": "src_charts_intentconfig_js",
+      "label": "intentConfig.js",
+      "file_type": "code",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "charts_intentconfig_intent_config",
+      "label": "INTENT_CONFIG",
+      "file_type": "code",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L7"
+    },
+    {
+      "id": "charts_intentconfig_templatefor",
+      "label": "templateFor()",
+      "file_type": "code",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L141"
+    },
+    {
+      "id": "charts_intentconfig_configfor",
+      "label": "configFor()",
+      "file_type": "code",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L144"
+    },
+    {
+      "id": "src_charts_mapchartcard_jsx",
+      "label": "MapChartCard.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "charts_mapchartcard_cheongju",
+      "label": "CHEONGJU",
+      "file_type": "code",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "charts_mapchartcard_distm",
+      "label": "distM()",
+      "file_type": "code",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "charts_mapchartcard_loadkakao",
+      "label": "loadKakao()",
+      "file_type": "code",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "charts_mapchartcard_mapchartcard",
+      "label": "MapChartCard()",
+      "file_type": "code",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L38"
+    },
+    {
+      "id": "src_charts_util_jsx",
+      "label": "util.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "charts_util_num",
+      "label": "num()",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "charts_util_won",
+      "label": "won()",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "charts_util_monthlabel",
+      "label": "monthLabel()",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "charts_util_daylabel",
+      "label": "dayLabel()",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "charts_util_chartshell",
+      "label": "ChartShell()",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "charts_util_insightbox",
+      "label": "InsightBox()",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L39"
+    },
+    {
+      "id": "charts_util_donut_colors",
+      "label": "DONUT_COLORS",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L46"
+    },
+    {
+      "id": "charts_util_cat_emoji",
+      "label": "CAT_EMOJI",
+      "file_type": "code",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L47"
+    },
+    {
+      "id": "src_charts_templates_bar_jsx",
+      "label": "bar.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "templates_bar_means_color",
+      "label": "MEANS_COLOR",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "templates_bar_bartemplate",
+      "label": "BarTemplate()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_charts_templates_barlist_jsx",
+      "label": "barlist.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "templates_barlist_barlisttemplate",
+      "label": "BarListTemplate()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_charts_templates_compare_jsx",
+      "label": "compare.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "templates_compare_comparetemplate",
+      "label": "CompareTemplate()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_charts_templates_list_jsx",
+      "label": "list.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "templates_list_listtemplate",
+      "label": "ListTemplate()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_charts_templates_trend_jsx",
+      "label": "trend.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "templates_trend_trendtemplate",
+      "label": "TrendTemplate()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_charts_templates_txlist_jsx",
+      "label": "txList.jsx",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "templates_txlist_daymd",
+      "label": "dayMD()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "templates_txlist_txlisttemplate",
+      "label": "TxListTemplate()",
+      "file_type": "code",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_components_cards_jsx",
+      "label": "cards.jsx",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_cards_cardshell",
+      "label": "CardShell()",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "components_cards_periodtabs",
+      "label": "PeriodTabs()",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L30"
+    },
+    {
+      "id": "components_cards_donutcard",
+      "label": "DonutCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L45"
+    },
+    {
+      "id": "components_cards_report_insight",
+      "label": "REPORT_INSIGHT",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L96"
+    },
+    {
+      "id": "components_cards_barcard",
+      "label": "BarCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L104"
+    },
+    {
+      "id": "components_cards_inlinecard",
+      "label": "InlineCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L194"
+    },
+    {
+      "id": "src_components_spendcards_jsx",
+      "label": "spendcards.jsx",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_spendcards_dailyspendcard",
+      "label": "DailySpendCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "components_spendcards_recordedcard",
+      "label": "RecordedCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L76"
+    },
+    {
+      "id": "components_spendcards_periodreportcard",
+      "label": "PeriodReportCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L112"
+    },
+    {
+      "id": "components_spendcards_catspend_match",
+      "label": "CATSPEND_MATCH",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L189"
+    },
+    {
+      "id": "components_spendcards_catspend_colors",
+      "label": "CATSPEND_COLORS",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L198"
+    },
+    {
+      "id": "components_spendcards_categorydonut",
+      "label": "CategoryDonut()",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L199"
+    },
+    {
+      "id": "components_spendcards_categoryspendcard",
+      "label": "CategorySpendCard()",
+      "file_type": "code",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L245"
+    },
+    {
+      "id": "src_mock_operia_queries_js",
+      "label": "queries.js",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "operia_queries_round",
+      "label": "round()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L9"
+    },
+    {
+      "id": "operia_queries_mean",
+      "label": "mean()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "operia_queries_withpct",
+      "label": "withPct()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L11"
+    },
+    {
+      "id": "operia_queries_sumby",
+      "label": "sumBy()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L16"
+    },
+    {
+      "id": "operia_queries_digits",
+      "label": "digits()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L24"
+    },
+    {
+      "id": "operia_queries_mlabel",
+      "label": "mLabel()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L25"
+    },
+    {
+      "id": "operia_queries_monthkey",
+      "label": "monthKey()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L27"
+    },
+    {
+      "id": "operia_queries_dlabel",
+      "label": "dLabel()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L28"
+    },
+    {
+      "id": "operia_queries_toisodate",
+      "label": "toIsoDate()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L30"
+    },
+    {
+      "id": "operia_queries_pad2",
+      "label": "pad2()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L31"
+    },
+    {
+      "id": "operia_queries_ymdof",
+      "label": "ymdOf()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L32"
+    },
+    {
+      "id": "operia_queries_today",
+      "label": "TODAY",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L34"
+    },
+    {
+      "id": "operia_queries_last7days",
+      "label": "last7Days()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L38"
+    },
+    {
+      "id": "operia_queries_meanslabel",
+      "label": "meansLabel()",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L51"
+    },
+    {
+      "id": "operia_queries_queries",
+      "label": "QUERIES",
+      "file_type": "code",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L53"
+    },
+    {
+      "id": "src_util_clipboard_js",
+      "label": "clipboard.js",
+      "file_type": "code",
+      "source_file": "src\\util\\clipboard.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "util_clipboard_copytext",
+      "label": "copyText()",
+      "file_type": "code",
+      "source_file": "src\\util\\clipboard.js",
+      "source_location": "L8"
+    }
+  ],
+  "edges": [
+    {
+      "source": "vite_config_js_timestamp_1782464930590_319bf3066aea_mjs",
+      "target": "index_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "vite_config_js_timestamp_1782464930590_319bf3066aea_mjs",
+      "target": "index_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "vite_config_js_timestamp_1782464946205_0037bb8192259_mjs",
+      "target": "index_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "vite_config_js_timestamp_1782464946205_0037bb8192259_mjs",
+      "target": "index_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_settings_local_json",
+      "target": "claude_settings_local_permissions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_settings_local_permissions",
+      "target": "claude_settings_local_permissions_allow",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_npm_run",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_echo_exit_code",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_curl_s_o_dev_null_w_5173_http_code_n_http_localhost_5173",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_curl_s_o_dev_null_w_5174_http_code_n_http_localhost_5174",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_npm_init",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_npm_install",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_echo_npm_exit",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_node_shot_mjs_http_localhost_5173_view_webview_welcome_png",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_echo_exit",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "claude_settings_local_permissions_allow",
+      "target": "ref_bash_node_shot_card_mjs",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude\\settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_data_edupay_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "data_edupay_edupay",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "data_edupay_dragscroll",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_components_cards_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "components_cards_inlinecard",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_components_recommend_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "components_recommend_recommendmodal",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_components_history_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "components_history_historydrawer",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_config_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_config_getaienabled",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_config_setaienabled",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_config_isaifeatureon",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_api_operia_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "api_operia_isoperiaaimode",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_api_datasource_index_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "datasource_index_getdatasource",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "datasource_index_activechannelname",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_api_session_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "api_session_getuserid",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_api_datasource_stats_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "datasource_stats_computesummarystats",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_mock_operia_index_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "operia_index_operia_kinds",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_charts_chartrenderer_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "charts_chartrenderer_chartrenderer",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "charts_chartrenderer_sqlchip",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_charts_registry_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "charts_registry_charttypeforintent",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_sanitizeanswer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_querydatasource",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_grades",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_grade_labels",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_suggestions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_quick_queries",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_foxmark",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_sparkleicon",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L135",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_tabs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_header",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_comingsoon",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L244",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_aiorb",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L264",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_introscreen",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L279",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_menuicons",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L348",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_menuscreen",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L400",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_webviewwelcome",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L435",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_welcomescreen",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L450",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_useswipereveal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L479",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_userbubble",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L538",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_istecherrormessage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L576",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_bubble",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L583",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_loading_pools",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L624",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_poolkeyforintent",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L633",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_typing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L644",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_favoritesbar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L673",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_faqrow",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L696",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_quickreplypanel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L739",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_uiddebugbadge",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L822",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_jsx",
+      "target": "src_app_app",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L855",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_typing",
+      "target": "src_app_poolkeyforintent",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L645",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_faqrow",
+      "target": "src_app_useswipereveal",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\App.jsx",
+      "source_location": "L698",
+      "weight": 1.0
+    },
+    {
+      "source": "src_api_session_js",
+      "target": "api_session_recordsession",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "src_api_session_js",
+      "target": "api_session_safejson",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "src_api_session_js",
+      "target": "api_session_loc_probe_names",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "src_api_session_js",
+      "target": "api_session_probelocations",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "src_api_session_js",
+      "target": "api_session_resolveuserid",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "src_api_session_js",
+      "target": "api_session_getuserid",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "api_session_probelocations",
+      "target": "api_session_safejson",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "api_session_resolveuserid",
+      "target": "api_session_safejson",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "api_session_resolveuserid",
+      "target": "api_session_recordsession",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "api_session_resolveuserid",
+      "target": "api_session_probelocations",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "api_session_getuserid",
+      "target": "api_session_resolveuserid",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\api\\session.js",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_codelabels_js",
+      "target": "charts_codelabels_code_labels",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_codelabels_js",
+      "target": "charts_codelabels_channel_canon",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_codelabels_js",
+      "target": "charts_codelabels_canonchannel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_codelabels_js",
+      "target": "charts_codelabels_haskorean",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_codelabels_js",
+      "target": "charts_codelabels_labelofcode",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_codelabels_js",
+      "target": "charts_codelabels_labelfor",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "charts_codelabels_labelfor",
+      "target": "charts_codelabels_haskorean",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "charts_codelabels_labelfor",
+      "target": "charts_codelabels_labelofcode",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\codeLabels.js",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_intentconfig_js",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_intentconfig_js",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_intentconfig_js",
+      "target": "charts_util_won",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_intentconfig_js",
+      "target": "charts_intentconfig_intent_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_intentconfig_js",
+      "target": "charts_intentconfig_templatefor",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_intentconfig_js",
+      "target": "charts_intentconfig_configfor",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\intentConfig.js",
+      "source_location": "L144",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "charts_util_cat_emoji",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "charts_mapchartcard_cheongju",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "charts_mapchartcard_distm",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "charts_mapchartcard_loadkakao",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_mapchartcard_jsx",
+      "target": "charts_mapchartcard_mapchartcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "charts_mapchartcard_mapchartcard",
+      "target": "charts_mapchartcard_distm",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\MapChartCard.jsx",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_num",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_won",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_monthlabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_daylabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_insightbox",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_donut_colors",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_util_jsx",
+      "target": "charts_util_cat_emoji",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "charts_util_won",
+      "target": "charts_util_num",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\util.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "recharts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "charts_util_won",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "charts_util_donut_colors",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "charts_util_insightbox",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "templates_bar_means_color",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_bar_jsx",
+      "target": "templates_bar_bartemplate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\bar.jsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_barlist_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_barlist_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_barlist_jsx",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_barlist_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_barlist_jsx",
+      "target": "charts_util_insightbox",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_barlist_jsx",
+      "target": "templates_barlist_barlisttemplate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_compare_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_compare_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_compare_jsx",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_compare_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_compare_jsx",
+      "target": "charts_util_insightbox",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_compare_jsx",
+      "target": "templates_compare_comparetemplate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\compare.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_list_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_list_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_list_jsx",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_list_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_list_jsx",
+      "target": "templates_list_listtemplate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_trend_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_trend_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_trend_jsx",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_trend_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_trend_jsx",
+      "target": "charts_util_insightbox",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_trend_jsx",
+      "target": "templates_trend_trendtemplate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_txlist_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_txlist_jsx",
+      "target": "src_charts_util_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_txlist_jsx",
+      "target": "charts_util_num",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_txlist_jsx",
+      "target": "charts_util_chartshell",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_txlist_jsx",
+      "target": "templates_txlist_daymd",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_charts_templates_txlist_jsx",
+      "target": "templates_txlist_txlisttemplate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\charts\\templates\\txList.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "recharts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_data_edupay_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "data_edupay_edupay",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "src_components_spendcards_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_spendcards_recordedcard",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_components_ledger_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_ledger_ledgercard",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_components_quiz_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_quiz_quizcard",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_components_recommend_jsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_recommend_recommendcard",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_cards_cardshell",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_cards_periodtabs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_cards_donutcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_cards_report_insight",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L96",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_cards_barcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_cards_jsx",
+      "target": "components_cards_inlinecard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\cards.jsx",
+      "source_location": "L194",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "recharts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "c_users_wskyl_onedrive_문서_20260616_폭스에듀_오페리아_edupay_app_src_data_edupay_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "data_edupay_edupay",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_dailyspendcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_recordedcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_periodreportcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_catspend_match",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L189",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_catspend_colors",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L198",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_categorydonut",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_spendcards_jsx",
+      "target": "components_spendcards_categoryspendcard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\spendcards.jsx",
+      "source_location": "L245",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "src_charts_codelabels_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "charts_codelabels_labelofcode",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "charts_codelabels_canonchannel",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_round",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_mean",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_withpct",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_sumby",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_digits",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_mlabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_monthkey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_dlabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_toisodate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_pad2",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_ymdof",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_today",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_last7days",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_meanslabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "src_mock_operia_queries_js",
+      "target": "operia_queries_queries",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_mlabel",
+      "target": "operia_queries_digits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_monthkey",
+      "target": "operia_queries_digits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_dlabel",
+      "target": "operia_queries_digits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_toisodate",
+      "target": "operia_queries_digits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_ymdof",
+      "target": "operia_queries_pad2",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_last7days",
+      "target": "operia_queries_ymdof",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_last7days",
+      "target": "operia_queries_dlabel",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "src_util_clipboard_js",
+      "target": "util_clipboard_copytext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\util\\clipboard.js",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "templates_barlist_barlisttemplate",
+      "target": "charts_util_num",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src\\charts\\templates\\barlist.jsx",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "templates_list_listtemplate",
+      "target": "charts_util_num",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src\\charts\\templates\\list.jsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "templates_trend_trendtemplate",
+      "target": "charts_util_num",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src\\charts\\templates\\trend.jsx",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "operia_queries_meanslabel",
+      "target": "charts_codelabels_labelofcode",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src\\mock\\operia\\queries.js",
+      "source_location": "L51",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
