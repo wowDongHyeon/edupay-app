@@ -4,89 +4,32 @@
   "graph": {
     "hyperedges": [
       {
-        "id": "generic_chart_template_family",
-        "label": "Generic chart template family driven by INTENT_CONFIG",
+        "id": "balance_three_item_decomposition",
+        "label": "\uc794\uc561 3\ud56d\ubaa9 \ubd84\ud574 (\ubc14\uc6b0\ucc98\u00b7\uc6a9\ub3c8\u00b7\uc5d0\ub4c0\ud3ec\uc778\ud2b8)",
         "nodes": [
-          "intentConfig_INTENT_CONFIG",
-          "bar_BarTemplate",
-          "barlist_BarListTemplate",
-          "compare_CompareTemplate",
-          "list_ListTemplate"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.75,
-        "source_file": "src/charts/intentConfig.js"
-      },
-      {
-        "id": "chart_shell_shared_ui",
-        "label": "ChartShell + InsightBox shared card UI across templates",
-        "nodes": [
-          "util_ChartShell",
-          "util_InsightBox",
-          "bar_BarTemplate",
-          "barlist_BarListTemplate",
-          "MapChartCard_component"
-        ],
-        "relation": "form",
-        "confidence": "INFERRED",
-        "confidence_score": 0.75,
-        "source_file": "src/charts/util.jsx"
-      },
-      {
-        "id": "datasource_query_flow",
-        "label": "Datasource query flow: userId + companyId context -> SSE -> Bubble render",
-        "nodes": [
-          "App_queryDataSource",
-          "session_getUserId",
-          "App_sanitizeAnswer",
-          "App_Bubble"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.75,
-        "source_file": "src/App.jsx"
-      },
-      {
-        "id": "operia_intent_render_pipeline",
-        "label": "Operia intent SQL/shape to chart-template render",
-        "nodes": [
-          "queries_QUERIES",
-          "trend_TrendTemplate",
-          "txList_TxListTemplate",
-          "queries_codeLabels"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.75,
-        "source_file": "src/mock/operia/queries.js"
-      },
-      {
-        "id": "aegis_dev_governance",
-        "label": "aegis-dev000 governance: agent, specialist standards, review, safety",
-        "nodes": [
-          "agent_aegisdev000",
-          "specialist_doc",
-          "aegisreport_review",
-          "agent_safetyGate"
+          "golden0702_three_row_format",
+          "golden0702_voucher_balance",
+          "golden0702_allowance_balance",
+          "golden0702_edupoint"
         ],
         "relation": "form",
         "confidence": "EXTRACTED",
-        "confidence_score": 0.75,
-        "source_file": ".claude/agents/aegis-dev000.md"
+        "confidence_score": 1.0,
+        "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md"
       },
       {
-        "id": "webview_compat_stack",
-        "label": "WebView compatibility: viewport meta, clipboard fallback, deploy target",
+        "id": "golden_sql_four_faq_scope",
+        "label": "\ub514\ud3f4\ud2b8 FAQ \uce69 \uace8\ub4e0 SQL 4\uc885",
         "nodes": [
-          "indexhtml_webviewMeta",
-          "clipboard_execCommandFallback",
-          "serverinfo_creds"
+          "golden0702_q1_balance",
+          "golden0702_q_monthly",
+          "golden0702_q_nearby",
+          "golden0702_q_by_merchant"
         ],
         "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.65,
-        "source_file": "src/util/clipboard.js"
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md"
       }
     ]
   },
@@ -100,7 +43,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 36,
       "norm_label": "postcss config",
       "id": "postcss_config"
     },
@@ -113,7 +56,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 36,
       "norm_label": "tailwind config (violet palette)",
       "id": "tailwind_config"
     },
@@ -126,7 +69,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 26,
+      "community": 28,
       "norm_label": "config.isaifeatureon()",
       "id": "config_isAiFeatureOn"
     },
@@ -139,7 +82,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 26,
+      "community": 28,
       "norm_label": "config.getaienabled()",
       "id": "config_getAiEnabled"
     },
@@ -152,7 +95,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 35,
+      "community": 37,
       "norm_label": "config.setaienabled()",
       "id": "config_setAiEnabled"
     },
@@ -165,7 +108,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 36,
+      "community": 38,
       "norm_label": "complete (\u110c\u1165\u1109\u116e\u110c\u116e\u11ab anthropic \u1112\u1169\u110e\u116e\u11af)",
       "id": "claude_complete"
     },
@@ -178,7 +121,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 39,
       "norm_label": "client.api \u2014 backend skeleton (10 queries)",
       "id": "client_api"
     },
@@ -191,7 +134,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 27,
+      "community": 30,
       "norm_label": "barchartcard",
       "id": "cards_BarChartCard"
     },
@@ -204,7 +147,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 17,
+      "community": 19,
       "norm_label": "donutchartcard",
       "id": "cards_DonutChartCard"
     },
@@ -217,7 +160,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 17,
       "norm_label": "comparechartcard",
       "id": "cards_CompareChartCard"
     },
@@ -230,7 +173,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 23,
+      "community": 29,
       "norm_label": "gaugechartcard",
       "id": "cards_GaugeChartCard"
     },
@@ -243,7 +186,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 22,
+      "community": 24,
       "norm_label": "barlistchartcard",
       "id": "cards_BarListChartCard"
     },
@@ -256,7 +199,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 24,
+      "community": 25,
       "norm_label": "listchartcard",
       "id": "cards_ListChartCard"
     },
@@ -269,7 +212,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 38,
+      "community": 40,
       "norm_label": "friendcomparecard",
       "id": "extras_FriendCompareCard"
     },
@@ -282,7 +225,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 39,
+      "community": 41,
       "norm_label": "nudgelistcard (\u110c\u1169\u1105\u1173\u1100\u1175 \u1106\u1169\u11a8\u1105\u1169\u11a8)",
       "id": "extras_NudgeListCard"
     },
@@ -295,7 +238,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 40,
+      "community": 42,
       "norm_label": "nudgecomparecard (\u110c\u1169\u1105\u1173\u1100\u1175 \u1107\u1175\u1100\u116d)",
       "id": "extras_NudgeCompareCard"
     },
@@ -308,7 +251,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 41,
+      "community": 43,
       "norm_label": "merchantmapcard (leaflet map)",
       "id": "extras_MerchantMapCard"
     },
@@ -321,7 +264,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 42,
+      "community": 44,
       "norm_label": "balancecard (\u1102\u1161\u11b7\u110b\u1173\u11ab \u110c\u1175\u110b\u116f\u11ab\u1100\u1173\u11b7)",
       "id": "extras_BalanceCard"
     },
@@ -334,7 +277,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 43,
+      "community": 45,
       "norm_label": "channelcard (\u110b\u1169\u11ab/\u110b\u1169\u1111\u1173\u1105\u1161\u110b\u1175\u11ab)",
       "id": "extras_ChannelCard"
     },
@@ -347,7 +290,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 44,
+      "community": 46,
       "norm_label": "merchantbreakdowncard (\u1100\u1161\u1106\u1162\u11bc\u110c\u1165\u11b7\u1107\u1167\u11af)",
       "id": "extras_MerchantBreakdownCard"
     },
@@ -360,7 +303,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 47,
       "norm_label": "parentcardcard (\u1107\u116e\u1106\u1169\u110f\u1161\u1103\u1173)",
       "id": "extras_ParentCardCard"
     },
@@ -373,7 +316,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 46,
+      "community": 48,
       "norm_label": "schoolcomparecard (\u1112\u1161\u11a8\u1100\u116d\u1107\u1167\u11af \u1107\u1175\u1100\u116d)",
       "id": "extras_SchoolCompareCard"
     },
@@ -386,7 +329,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 47,
+      "community": 49,
       "norm_label": "timepatterncard (\u110b\u116d\u110b\u1175\u11af\u00b7\u1109\u1175\u1100\u1161\u11ab\u1103\u1162)",
       "id": "extras_TimePatternCard"
     },
@@ -399,7 +342,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 48,
+      "community": 50,
       "norm_label": "cards prefer operia result, fall back to edupay model",
       "id": "concept_result_or_edupay_fallback"
     },
@@ -412,7 +355,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 49,
+      "community": 51,
       "norm_label": "historydrawer (\u1103\u1162\u1112\u116a \u1100\u1175\u1105\u1169\u11a8)",
       "id": "history_HistoryDrawer"
     },
@@ -425,7 +368,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 50,
+      "community": 52,
       "norm_label": "ledgercard (\u110b\u116d\u11bc\u1103\u1169\u11ab\u1100\u1175\u110b\u1175\u11b8\u110c\u1161\u11bc + ocr)",
       "id": "ledger_LedgerCard"
     },
@@ -438,7 +381,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 21,
+      "community": 23,
       "norm_label": "quizcard (\u1106\u1161\u11bd\u110e\u116e\u11b7 \u1100\u1173\u11b7\u110b\u1172\u11bc \u110f\u1171\u110c\u1173)",
       "id": "quiz_QuizCard"
     },
@@ -451,7 +394,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 21,
+      "community": 23,
       "norm_label": "recommendcard (\u1100\u1173\u11b7\u110b\u1172\u11bc\u1100\u116d\u110b\u1172\u11a8 \u110e\u116e\u110e\u1165\u11ab \u1105\u1175\u1109\u1173\u1110\u1173)",
       "id": "recommend_RecommendCard"
     },
@@ -464,7 +407,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 21,
+      "community": 23,
       "norm_label": "recommendmodal (\u1100\u1168\u1109\u1161\u11ab\u1100\u1175/\u110f\u1171\u110c\u1173 \u1106\u1169\u1103\u1161\u11af)",
       "id": "recommend_RecommendModal"
     },
@@ -477,7 +420,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 33,
+      "community": 34,
       "norm_label": "dailyspendcard",
       "id": "spendcards_DailySpendCard"
     },
@@ -490,7 +433,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "recordedcard",
       "id": "spendcards_RecordedCard"
     },
@@ -503,7 +446,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 33,
+      "community": 34,
       "norm_label": "periodreportcard",
       "id": "spendcards_PeriodReportCard"
     },
@@ -516,7 +459,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "categoryspendcard",
       "id": "spendcards_CategorySpendCard"
     },
@@ -529,7 +472,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "categorydonut (operia result donut)",
       "id": "spendcards_CategoryDonut"
     },
@@ -542,7 +485,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 23,
+      "community": 29,
       "norm_label": "mock: balance (gauge)",
       "id": "mock_balance"
     },
@@ -555,7 +498,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 17,
+      "community": 19,
       "norm_label": "mock: catspend (donut)",
       "id": "mock_catSpend"
     },
@@ -568,7 +511,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 17,
+      "community": 19,
       "norm_label": "mock: channel (donut)",
       "id": "mock_channel"
     },
@@ -581,7 +524,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 17,
       "norm_label": "mock: friendcompare (compare)",
       "id": "mock_friendCompare"
     },
@@ -594,7 +537,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 51,
+      "community": 53,
       "norm_label": "mock/operia (\u110c\u1165\u11bc\u110c\u1165\u11a8 \u1106\u1169\u11a8\u110b\u1165\u11b8 \u110b\u1175\u11ab\u1103\u1166\u11a8\u1109\u1173)",
       "id": "operia_mockIndex"
     },
@@ -607,7 +550,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 22,
+      "community": 24,
       "norm_label": "mock: merchantbreakdown (barlist)",
       "id": "mock_merchantBreakdown"
     },
@@ -620,7 +563,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 52,
+      "community": 54,
       "norm_label": "mock: merchantmap (map)",
       "id": "mock_merchantMap"
     },
@@ -633,7 +576,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 27,
+      "community": 30,
       "norm_label": "mock: monthlyusage (report\u2192bar)",
       "id": "mock_monthlyUsage"
     },
@@ -646,7 +589,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 17,
       "norm_label": "mock: nudgecompare (compare)",
       "id": "mock_nudgeCompare"
     },
@@ -659,7 +602,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 24,
+      "community": 25,
       "norm_label": "mock: parentcard (list)",
       "id": "mock_parentCard"
     },
@@ -672,7 +615,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 17,
       "norm_label": "mock: schoolcompare (compare)",
       "id": "mock_schoolCompare"
     },
@@ -685,7 +628,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 28,
+      "community": 31,
       "norm_label": "edupay-app readme",
       "id": "readme_edupayapp"
     },
@@ -698,7 +641,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 28,
+      "community": 31,
       "norm_label": "\u110c\u1165\u11ab\u1112\u116a\u11ab\u1100\u1168\u1112\u116c\u11a8 (vite+react conversion plan)",
       "id": "plan_conversion"
     },
@@ -711,7 +654,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 53,
+      "community": 55,
       "norm_label": "tablecard \u2014 \u1107\u1165\u11b7\u110b\u116d\u11bc \u1111\u116d \u1105\u1166\u11ab\u1103\u1165 + \u1107\u1175\u11ab\u1100\u1167\u11af\u1100\u116a graceful('\u110c\u1169\u1112\u116c \u1100\u1167\u11af\u1100\u116a\u1100\u1161 \u110b\u1165\u11b9\u110b\u1165\u110b\u116d')",
       "id": "tablecard_TableCard"
     },
@@ -724,7 +667,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 54,
+      "community": 56,
       "norm_label": "src/mock/operia index \u2014 \u110c\u1165\u11bc\u110c\u1165\u11a8 \u1106\u1169\u11a8\u110b\u1165\u11b8 \u1106\u1162\u1111\u1175\u11bc + operia_kinds",
       "id": "operiaindex_results"
     },
@@ -733,7 +676,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L1",
-      "community": 8,
+      "community": 7,
       "norm_label": "package.json",
       "id": "package_json"
     },
@@ -742,7 +685,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L2",
-      "community": 8,
+      "community": 7,
       "norm_label": "name",
       "id": "edupay_app_package_name"
     },
@@ -751,7 +694,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L3",
-      "community": 8,
+      "community": 7,
       "norm_label": "version",
       "id": "edupay_app_package_version"
     },
@@ -760,7 +703,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L4",
-      "community": 8,
+      "community": 7,
       "norm_label": "private",
       "id": "edupay_app_package_private"
     },
@@ -769,7 +712,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L5",
-      "community": 8,
+      "community": 7,
       "norm_label": "type",
       "id": "edupay_app_package_type"
     },
@@ -778,7 +721,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L6",
-      "community": 8,
+      "community": 7,
       "norm_label": "description",
       "id": "edupay_app_package_description"
     },
@@ -787,7 +730,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L7",
-      "community": 8,
+      "community": 7,
       "norm_label": "scripts",
       "id": "edupay_app_package_scripts"
     },
@@ -796,7 +739,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L8",
-      "community": 8,
+      "community": 7,
       "norm_label": "dev",
       "id": "edupay_app_package_scripts_dev"
     },
@@ -805,7 +748,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L9",
-      "community": 8,
+      "community": 7,
       "norm_label": "build",
       "id": "edupay_app_package_scripts_build"
     },
@@ -814,7 +757,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L10",
-      "community": 8,
+      "community": 7,
       "norm_label": "preview",
       "id": "edupay_app_package_scripts_preview"
     },
@@ -823,7 +766,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L12",
-      "community": 8,
+      "community": 7,
       "norm_label": "dependencies",
       "id": "edupay_app_package_dependencies"
     },
@@ -832,7 +775,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L13",
-      "community": 8,
+      "community": 7,
       "norm_label": "alasql",
       "id": "edupay_app_package_dependencies_alasql"
     },
@@ -841,7 +784,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L14",
-      "community": 8,
+      "community": 7,
       "norm_label": "prop-types",
       "id": "edupay_app_package_dependencies_prop_types"
     },
@@ -850,7 +793,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L15",
-      "community": 8,
+      "community": 7,
       "norm_label": "react",
       "id": "edupay_app_package_dependencies_react"
     },
@@ -859,7 +802,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L16",
-      "community": 8,
+      "community": 7,
       "norm_label": "react-dom",
       "id": "edupay_app_package_dependencies_react_dom"
     },
@@ -868,7 +811,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L17",
-      "community": 8,
+      "community": 7,
       "norm_label": "recharts",
       "id": "edupay_app_package_dependencies_recharts"
     },
@@ -877,7 +820,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L19",
-      "community": 8,
+      "community": 7,
       "norm_label": "devdependencies",
       "id": "edupay_app_package_devdependencies"
     },
@@ -886,7 +829,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L20",
-      "community": 8,
+      "community": 7,
       "norm_label": "@vitejs/plugin-react",
       "id": "edupay_app_package_devdependencies_vitejs_plugin_react"
     },
@@ -895,7 +838,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L21",
-      "community": 8,
+      "community": 7,
       "norm_label": "autoprefixer",
       "id": "edupay_app_package_devdependencies_autoprefixer"
     },
@@ -904,7 +847,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L22",
-      "community": 8,
+      "community": 7,
       "norm_label": "postcss",
       "id": "edupay_app_package_devdependencies_postcss"
     },
@@ -913,7 +856,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L23",
-      "community": 8,
+      "community": 7,
       "norm_label": "tailwindcss",
       "id": "edupay_app_package_devdependencies_tailwindcss"
     },
@@ -922,7 +865,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L24",
-      "community": 8,
+      "community": 7,
       "norm_label": "vite",
       "id": "edupay_app_package_devdependencies_vite"
     },
@@ -931,7 +874,7 @@
       "file_type": "code",
       "source_file": "vite.config.js",
       "source_location": "L1",
-      "community": 55,
+      "community": 57,
       "norm_label": "vite.config.js",
       "id": "vite_config_js"
     },
@@ -940,7 +883,7 @@
       "file_type": "code",
       "source_file": "src/main.jsx",
       "source_location": "L1",
-      "community": 56,
+      "community": 58,
       "norm_label": "main.jsx",
       "id": "src_main_jsx"
     },
@@ -949,7 +892,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L1",
-      "community": 12,
+      "community": 11,
       "norm_label": "operia.js",
       "id": "src_api_operia_js"
     },
@@ -958,7 +901,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L30",
-      "community": 12,
+      "community": 11,
       "norm_label": "isoperiaaimode()",
       "id": "api_operia_isoperiaaimode"
     },
@@ -967,7 +910,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L36",
-      "community": 12,
+      "community": 11,
       "norm_label": "ensuretables()",
       "id": "api_operia_ensuretables"
     },
@@ -976,7 +919,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L43",
-      "community": 12,
+      "community": 11,
       "norm_label": "runsql()",
       "id": "api_operia_runsql"
     },
@@ -985,7 +928,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L53",
-      "community": 12,
+      "community": 11,
       "norm_label": "runknown()",
       "id": "api_operia_runknown"
     },
@@ -994,7 +937,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L61",
-      "community": 12,
+      "community": 11,
       "norm_label": "extractaliases()",
       "id": "api_operia_extractaliases"
     },
@@ -1003,7 +946,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L78",
-      "community": 12,
+      "community": 11,
       "norm_label": "knownprompt()",
       "id": "api_operia_knownprompt"
     },
@@ -1012,7 +955,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L86",
-      "community": 12,
+      "community": 11,
       "norm_label": "parsesinglesql()",
       "id": "api_operia_parsesinglesql"
     },
@@ -1021,7 +964,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L94",
-      "community": 12,
+      "community": 11,
       "norm_label": "runknownclaude()",
       "id": "api_operia_runknownclaude"
     },
@@ -1030,7 +973,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L118",
-      "community": 12,
+      "community": 11,
       "norm_label": "stripfence()",
       "id": "api_operia_stripfence"
     },
@@ -1039,7 +982,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L122",
-      "community": 12,
+      "community": 11,
       "norm_label": "runclaudesql()",
       "id": "api_operia_runclaudesql"
     },
@@ -1048,7 +991,7 @@
       "file_type": "code",
       "source_file": "src/api/operia.js",
       "source_location": "L139",
-      "community": 12,
+      "community": 11,
       "norm_label": "queryoperia()",
       "id": "api_operia_queryoperia"
     },
@@ -1318,7 +1261,7 @@
       "file_type": "code",
       "source_file": "src/charts/intentConfig.js",
       "source_location": "L1",
-      "community": 0,
+      "community": 16,
       "norm_label": "intentconfig.js",
       "id": "src_charts_intentconfig_js"
     },
@@ -1327,7 +1270,7 @@
       "file_type": "code",
       "source_file": "src/charts/intentConfig.js",
       "source_location": "L7",
-      "community": 0,
+      "community": 16,
       "norm_label": "intent_config",
       "id": "charts_intentconfig_intent_config"
     },
@@ -1336,7 +1279,7 @@
       "file_type": "code",
       "source_file": "src/charts/intentConfig.js",
       "source_location": "L141",
-      "community": 0,
+      "community": 16,
       "norm_label": "templatefor()",
       "id": "charts_intentconfig_templatefor"
     },
@@ -1345,7 +1288,7 @@
       "file_type": "code",
       "source_file": "src/charts/intentConfig.js",
       "source_location": "L144",
-      "community": 0,
+      "community": 16,
       "norm_label": "configfor()",
       "id": "charts_intentconfig_configfor"
     },
@@ -1354,7 +1297,7 @@
       "file_type": "code",
       "source_file": "src/charts/MapChartCard.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "mapchartcard.jsx",
       "id": "src_charts_mapchartcard_jsx"
     },
@@ -1363,7 +1306,7 @@
       "file_type": "code",
       "source_file": "src/charts/MapChartCard.jsx",
       "source_location": "L8",
-      "community": 0,
+      "community": 1,
       "norm_label": "cheongju",
       "id": "charts_mapchartcard_cheongju"
     },
@@ -1372,7 +1315,7 @@
       "file_type": "code",
       "source_file": "src/charts/MapChartCard.jsx",
       "source_location": "L11",
-      "community": 0,
+      "community": 1,
       "norm_label": "distm()",
       "id": "charts_mapchartcard_distm"
     },
@@ -1381,7 +1324,7 @@
       "file_type": "code",
       "source_file": "src/charts/MapChartCard.jsx",
       "source_location": "L20",
-      "community": 0,
+      "community": 1,
       "norm_label": "loadkakao()",
       "id": "charts_mapchartcard_loadkakao"
     },
@@ -1390,7 +1333,7 @@
       "file_type": "code",
       "source_file": "src/charts/MapChartCard.jsx",
       "source_location": "L38",
-      "community": 0,
+      "community": 1,
       "norm_label": "mapchartcard()",
       "id": "charts_mapchartcard_mapchartcard"
     },
@@ -1399,7 +1342,7 @@
       "file_type": "code",
       "source_file": "src/charts/registry.js",
       "source_location": "L1",
-      "community": 0,
+      "community": 16,
       "norm_label": "registry.js",
       "id": "src_charts_registry_js"
     },
@@ -1408,7 +1351,7 @@
       "file_type": "code",
       "source_file": "src/charts/registry.js",
       "source_location": "L6",
-      "community": 0,
+      "community": 16,
       "norm_label": "charttypeforintent()",
       "id": "charts_registry_charttypeforintent"
     },
@@ -1417,7 +1360,7 @@
       "file_type": "code",
       "source_file": "src/charts/registry.js",
       "source_location": "L11",
-      "community": 0,
+      "community": 16,
       "norm_label": "intent_chart",
       "id": "charts_registry_intent_chart"
     },
@@ -1426,7 +1369,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "util.jsx",
       "id": "src_charts_util_jsx"
     },
@@ -1435,7 +1378,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L4",
-      "community": 0,
+      "community": 1,
       "norm_label": "num()",
       "id": "charts_util_num"
     },
@@ -1444,7 +1387,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "won()",
       "id": "charts_util_won"
     },
@@ -1453,7 +1396,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L9",
-      "community": 14,
+      "community": 1,
       "norm_label": "monthlabel()",
       "id": "charts_util_monthlabel"
     },
@@ -1462,7 +1405,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L15",
-      "community": 14,
+      "community": 1,
       "norm_label": "daylabel()",
       "id": "charts_util_daylabel"
     },
@@ -1471,7 +1414,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L21",
-      "community": 0,
+      "community": 1,
       "norm_label": "chartshell()",
       "id": "charts_util_chartshell"
     },
@@ -1480,7 +1423,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L39",
-      "community": 0,
+      "community": 1,
       "norm_label": "insightbox()",
       "id": "charts_util_insightbox"
     },
@@ -1489,7 +1432,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L46",
-      "community": 0,
+      "community": 1,
       "norm_label": "donut_colors",
       "id": "charts_util_donut_colors"
     },
@@ -1498,7 +1441,7 @@
       "file_type": "code",
       "source_file": "src/charts/util.jsx",
       "source_location": "L47",
-      "community": 0,
+      "community": 1,
       "norm_label": "cat_emoji",
       "id": "charts_util_cat_emoji"
     },
@@ -1525,7 +1468,7 @@
       "file_type": "code",
       "source_file": "src/charts/reportPlan/ReportPlanRenderer.jsx",
       "source_location": "L15",
-      "community": 14,
+      "community": 1,
       "norm_label": "fmtlabel()",
       "id": "reportplan_reportplanrenderer_fmtlabel"
     },
@@ -1615,7 +1558,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/area.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "area.jsx",
       "id": "src_charts_templates_area_jsx"
     },
@@ -1624,7 +1567,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/area.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "areatemplate()",
       "id": "templates_area_areatemplate"
     },
@@ -1633,7 +1576,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/bar.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "bar.jsx",
       "id": "src_charts_templates_bar_jsx"
     },
@@ -1642,7 +1585,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/bar.jsx",
       "source_location": "L7",
-      "community": 0,
+      "community": 1,
       "norm_label": "means_color",
       "id": "templates_bar_means_color"
     },
@@ -1651,7 +1594,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/bar.jsx",
       "source_location": "L9",
-      "community": 0,
+      "community": 1,
       "norm_label": "bartemplate()",
       "id": "templates_bar_bartemplate"
     },
@@ -1660,7 +1603,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/barlist.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "barlist.jsx",
       "id": "src_charts_templates_barlist_jsx"
     },
@@ -1669,7 +1612,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/barlist.jsx",
       "source_location": "L12",
-      "community": 0,
+      "community": 1,
       "norm_label": "barlisttemplate()",
       "id": "templates_barlist_barlisttemplate"
     },
@@ -1678,7 +1621,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/compare.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "compare.jsx",
       "id": "src_charts_templates_compare_jsx"
     },
@@ -1687,7 +1630,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/compare.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "comparetemplate()",
       "id": "templates_compare_comparetemplate"
     },
@@ -1696,7 +1639,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/donut.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "donut.jsx",
       "id": "src_charts_templates_donut_jsx"
     },
@@ -1705,7 +1648,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/donut.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "donuttemplate()",
       "id": "templates_donut_donuttemplate"
     },
@@ -1714,7 +1657,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/index.js",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "index.js",
       "id": "src_charts_templates_index_js"
     },
@@ -1723,7 +1666,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/index.js",
       "source_location": "L17",
-      "community": 0,
+      "community": 1,
       "norm_label": "templates",
       "id": "templates_index_templates"
     },
@@ -1732,7 +1675,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/kpiCards.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "kpicards.jsx",
       "id": "src_charts_templates_kpicards_jsx"
     },
@@ -1741,7 +1684,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/kpiCards.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "tints",
       "id": "templates_kpicards_tints"
     },
@@ -1750,7 +1693,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/kpiCards.jsx",
       "source_location": "L7",
-      "community": 0,
+      "community": 1,
       "norm_label": "inks",
       "id": "templates_kpicards_inks"
     },
@@ -1759,7 +1702,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/kpiCards.jsx",
       "source_location": "L9",
-      "community": 0,
+      "community": 1,
       "norm_label": "kpicardstemplate()",
       "id": "templates_kpicards_kpicardstemplate"
     },
@@ -1768,7 +1711,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/line.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "line.jsx",
       "id": "src_charts_templates_line_jsx"
     },
@@ -1777,7 +1720,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/line.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "linetemplate()",
       "id": "templates_line_linetemplate"
     },
@@ -1786,7 +1729,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/list.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "list.jsx",
       "id": "src_charts_templates_list_jsx"
     },
@@ -1795,7 +1738,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/list.jsx",
       "source_location": "L5",
-      "community": 0,
+      "community": 1,
       "norm_label": "listtemplate()",
       "id": "templates_list_listtemplate"
     },
@@ -1804,7 +1747,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/map.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "map.jsx",
       "id": "src_charts_templates_map_jsx"
     },
@@ -1813,7 +1756,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/map.jsx",
       "source_location": "L4",
-      "community": 0,
+      "community": 1,
       "norm_label": "maptemplate()",
       "id": "templates_map_maptemplate"
     },
@@ -1822,7 +1765,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/pie.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "pie.jsx",
       "id": "src_charts_templates_pie_jsx"
     },
@@ -1831,7 +1774,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/pie.jsx",
       "source_location": "L7",
-      "community": 0,
+      "community": 1,
       "norm_label": "pietemplate()",
       "id": "templates_pie_pietemplate"
     },
@@ -1840,7 +1783,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/statList.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "statlist.jsx",
       "id": "src_charts_templates_statlist_jsx"
     },
@@ -1849,7 +1792,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/statList.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "statlisttemplate()",
       "id": "templates_statlist_statlisttemplate"
     },
@@ -1858,7 +1801,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/table.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "table.jsx",
       "id": "src_charts_templates_table_jsx"
     },
@@ -1867,7 +1810,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/table.jsx",
       "source_location": "L4",
-      "community": 0,
+      "community": 1,
       "norm_label": "tabletemplate()",
       "id": "templates_table_tabletemplate"
     },
@@ -1876,7 +1819,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/trend.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "trend.jsx",
       "id": "src_charts_templates_trend_jsx"
     },
@@ -1885,7 +1828,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/trend.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "trendtemplate()",
       "id": "templates_trend_trendtemplate"
     },
@@ -1894,7 +1837,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/txList.jsx",
       "source_location": "L1",
-      "community": 0,
+      "community": 1,
       "norm_label": "txlist.jsx",
       "id": "src_charts_templates_txlist_jsx"
     },
@@ -1903,7 +1846,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/txList.jsx",
       "source_location": "L6",
-      "community": 0,
+      "community": 1,
       "norm_label": "daymd()",
       "id": "templates_txlist_daymd"
     },
@@ -1912,7 +1855,7 @@
       "file_type": "code",
       "source_file": "src/charts/templates/txList.jsx",
       "source_location": "L11",
-      "community": 0,
+      "community": 1,
       "norm_label": "txlisttemplate()",
       "id": "templates_txlist_txlisttemplate"
     },
@@ -1921,7 +1864,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L1",
-      "community": 13,
+      "community": 12,
       "norm_label": "cards.jsx",
       "id": "src_components_cards_jsx"
     },
@@ -1930,7 +1873,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L14",
-      "community": 13,
+      "community": 12,
       "norm_label": "cardshell()",
       "id": "components_cards_cardshell"
     },
@@ -1939,7 +1882,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L30",
-      "community": 13,
+      "community": 12,
       "norm_label": "periodtabs()",
       "id": "components_cards_periodtabs"
     },
@@ -1948,7 +1891,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L45",
-      "community": 13,
+      "community": 12,
       "norm_label": "donutcard()",
       "id": "components_cards_donutcard"
     },
@@ -1957,7 +1900,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L96",
-      "community": 13,
+      "community": 12,
       "norm_label": "report_insight",
       "id": "components_cards_report_insight"
     },
@@ -1966,7 +1909,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L104",
-      "community": 13,
+      "community": 12,
       "norm_label": "barcard()",
       "id": "components_cards_barcard"
     },
@@ -1975,7 +1918,7 @@
       "file_type": "code",
       "source_file": "src/components/cards.jsx",
       "source_location": "L194",
-      "community": 13,
+      "community": 12,
       "norm_label": "inlinecard()",
       "id": "components_cards_inlinecard"
     },
@@ -1984,7 +1927,7 @@
       "file_type": "code",
       "source_file": "src/mock/operia/dataset.json",
       "source_location": "L1",
-      "community": 12,
+      "community": 11,
       "norm_label": "dataset.json",
       "id": "src_mock_operia_dataset_json"
     },
@@ -1993,7 +1936,7 @@
       "file_type": "code",
       "source_file": "src/mock/operia/dataset.json",
       "source_location": "L2",
-      "community": 12,
+      "community": 11,
       "norm_label": "tb_com_user",
       "id": "operia_dataset_tb_com_user"
     },
@@ -2002,7 +1945,7 @@
       "file_type": "code",
       "source_file": "src/mock/operia/dataset.json",
       "source_location": "L109",
-      "community": 12,
+      "community": 11,
       "norm_label": "tb_com_voucher",
       "id": "operia_dataset_tb_com_voucher"
     },
@@ -2011,7 +1954,7 @@
       "file_type": "code",
       "source_file": "src/mock/operia/dataset.json",
       "source_location": "L265",
-      "community": 12,
+      "community": 11,
       "norm_label": "tb_pay_dtl",
       "id": "operia_dataset_tb_pay_dtl"
     },
@@ -2020,7 +1963,7 @@
       "file_type": "code",
       "source_file": "src/mock/operia/dataset.json",
       "source_location": "L1287",
-      "community": 12,
+      "community": 11,
       "norm_label": "tb_beg",
       "id": "operia_dataset_tb_beg"
     },
@@ -2033,7 +1976,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "queryoperia (nl2sql client)",
       "id": "operia_queryOperia"
     },
@@ -2046,7 +1989,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "runknown (template sql engine)",
       "id": "operia_runKnown"
     },
@@ -2059,7 +2002,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "runknownclaude (claude nl2sql)",
       "id": "operia_runKnownClaude"
     },
@@ -2072,7 +2015,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "runclaudesql (free-form nl2sql)",
       "id": "operia_runClaudeSql"
     },
@@ -2085,7 +2028,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "runsql (alasql executor)",
       "id": "operia_runSql"
     },
@@ -2098,7 +2041,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "operia 3-mode priority (server > alasql ai > static mock)",
       "id": "operia_modeFallback"
     },
@@ -2111,7 +2054,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "getdatasource (channel factory)",
       "id": "datasource_getDataSource"
     },
@@ -2124,7 +2067,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "data source sse contract (data/result events)",
       "id": "datasource_contract"
     },
@@ -2137,7 +2080,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "mocksource adapter",
       "id": "datasource_mockSource"
     },
@@ -2150,7 +2093,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "backendsource adapter",
       "id": "datasource_backendSource"
     },
@@ -2163,7 +2106,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "operiasource adapter",
       "id": "datasource_operiaSource"
     },
@@ -2176,7 +2119,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "consumeeventstream (sse parser)",
       "id": "datasource_consumeEventStream"
     },
@@ -2189,7 +2132,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "computesummarystats (client-side stats)",
       "id": "datasource_computeSummaryStats"
     },
@@ -2202,7 +2145,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "3-channel single-contract architecture",
       "id": "datasource_threeChannel"
     },
@@ -2215,7 +2158,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 19,
+      "community": 21,
       "norm_label": "intent_config (intent presentation config)",
       "id": "charts_INTENT_CONFIG"
     },
@@ -2228,7 +2171,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 19,
+      "community": 21,
       "norm_label": "charttypeforintent registry",
       "id": "charts_registry"
     },
@@ -2241,7 +2184,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 18,
+      "community": 20,
       "norm_label": "reportplanrenderer (generic fallback renderer)",
       "id": "charts_ReportPlanRenderer"
     },
@@ -2254,7 +2197,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 30,
+      "community": 26,
       "norm_label": "mapchartcard (kakao map merchants)",
       "id": "charts_MapChartCard"
     },
@@ -2267,7 +2210,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 18,
+      "community": 20,
       "norm_label": "bartemplate (generic bar)",
       "id": "charts_BarTemplate"
     },
@@ -2280,7 +2223,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 18,
+      "community": 20,
       "norm_label": "areatemplate (generic area)",
       "id": "charts_AreaTemplate"
     },
@@ -2293,7 +2236,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 19,
+      "community": 21,
       "norm_label": "front decides viz, not response",
       "id": "charts_frontDecidesViz"
     },
@@ -2306,7 +2249,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 31,
+      "community": 32,
       "norm_label": "tb_com_pay_api_log (payment api log)",
       "id": "schema_TB_COM_PAY_API_LOG"
     },
@@ -2319,7 +2262,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "tb_com_pay_log (payment log)",
       "id": "schema_TB_COM_PAY_LOG"
     },
@@ -2332,7 +2275,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "tb_com_user (user accounts)",
       "id": "schema_TB_COM_USER"
     },
@@ -2345,7 +2288,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 30,
+      "community": 26,
       "norm_label": "merchant/voucher data concept",
       "id": "schema_TB_COM_VOUCHER_concept"
     },
@@ -2358,7 +2301,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "tb_com_account (member account balance)",
       "id": "schema_TB_COM_ACCOUNT"
     },
@@ -2371,7 +2314,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "tb_com_pocket (allowance ledger)",
       "id": "schema_TB_COM_POCKET"
     },
@@ -2384,7 +2327,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 31,
+      "community": 32,
       "norm_label": "edupay_db (mysql 8.0)",
       "id": "schema_edupay_db"
     },
@@ -2397,7 +2340,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 10,
       "norm_label": "alasql virtual schema (tb_pay_dtl, tb_beg)",
       "id": "operia_virtualSchema"
     },
@@ -2410,7 +2353,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "barlisttemplate",
       "id": "barlist_BarListTemplate"
     },
@@ -2423,7 +2366,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "comparetemplate",
       "id": "compare_CompareTemplate"
     },
@@ -2436,7 +2379,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "donuttemplate (\u1107\u1175\u110c\u116e\u11bc \u1103\u1169\u1102\u1165\u11ba)",
       "id": "donut_DonutTemplate"
     },
@@ -2449,7 +2392,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "templates \u1105\u1166\u110c\u1175\u1109\u1173\u1110\u1173\u1105\u1175",
       "id": "index_TEMPLATES"
     },
@@ -2462,7 +2405,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "kpicardstemplate (kpi \u110f\u1161\u1103\u1173 \u1100\u1173\u1105\u1175\u1103\u1173)",
       "id": "kpiCards_KpiCardsTemplate"
     },
@@ -2475,7 +2418,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "linetemplate (\u1101\u1165\u11a9\u110b\u1173\u11ab\u1109\u1165\u11ab)",
       "id": "line_LineTemplate"
     },
@@ -2488,7 +2431,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "listtemplate",
       "id": "list_ListTemplate"
     },
@@ -2501,7 +2444,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "maptemplate (\u110c\u1175\u1103\u1169)",
       "id": "map_MapTemplate"
     },
@@ -2514,7 +2457,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "pietemplate (\u1101\u116a\u11a8 \u110e\u1161\u11ab \u110b\u116f\u11ab\u1112\u1167\u11bc)",
       "id": "pie_PieTemplate"
     },
@@ -2527,7 +2470,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "statlisttemplate (\u1112\u1161\u11bc\u1106\u1169\u11a8\u1107\u1167\u11af \u110c\u1161\u11ab\u110b\u1162\u11a8 \u1105\u1175\u1109\u1173\u1110\u1173)",
       "id": "statList_StatListTemplate"
     },
@@ -2540,7 +2483,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "tabletemplate (\u1111\u1169\u11af\u1107\u1162\u11a8 \u1111\u116d)",
       "id": "table_TableTemplate"
     },
@@ -2553,7 +2496,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "trendtemplate (generic trend chart)",
       "id": "trend_TrendTemplate"
     },
@@ -2566,7 +2509,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "txlisttemplate (generic stacked-bar + tx list)",
       "id": "txList_TxListTemplate"
     },
@@ -2579,7 +2522,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "chartshell / insightbox / num (charts util)",
       "id": "templates_ChartShell"
     },
@@ -2592,7 +2535,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "donut_colors \u1111\u1161\u11af\u1105\u1166\u1110\u1173",
       "id": "templates_DONUT_COLORS"
     },
@@ -2605,7 +2548,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "\u110c\u1166\u1102\u1166\u1105\u1175\u11a8 (data, config) \u1110\u1166\u11b7\u1111\u1173\u11af\u1105\u1175\u11ba \u1100\u1168\u110b\u1163\u11a8",
       "id": "templates_genericTemplateContract"
     },
@@ -2618,7 +2561,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "inlinecard (non-data ui card router)",
       "id": "cards_InlineCard"
     },
@@ -2631,7 +2574,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "donutcard (category donut, edupay model)",
       "id": "cards_DonutCard"
     },
@@ -2644,7 +2587,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "barcard (spend report bar, operia result-first)",
       "id": "cards_BarCard"
     },
@@ -2657,7 +2600,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 15,
       "norm_label": "edupay \u1103\u1166\u110b\u1175\u1110\u1165 \u1106\u1169\u1103\u1166\u11af (\u1105\u1166\u1100\u1165\u1109\u1175 \u1111\u1169\u11af\u1107\u1162\u11a8)",
       "id": "cards_EDUPAY"
     },
@@ -2670,7 +2613,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "dataset.json (alasql 4+2 \u1110\u1166\u110b\u1175\u1107\u1173\u11af fixture)",
       "id": "dataset_fixture"
     },
@@ -2683,7 +2626,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "queries_nl2sql_10.reference.sql (\u110c\u1165\u11bc\u1103\u1161\u11b8 sql 10\u110c\u1169\u11bc)",
       "id": "refsql_nl2sql10"
     },
@@ -2696,7 +2639,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "datasource_\u1109\u1165\u11af\u1100\u1168.md (\u1103\u1166\u110b\u1175\u1110\u1165 \u110e\u1161\u11bc\u1100\u116e \u110e\u116e\u1109\u1161\u11bc\u1112\u116a)",
       "id": "ds_doc"
     },
@@ -2709,7 +2652,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "3\u110e\u1162\u1102\u1165\u11af \u1103\u1169\u11bc\u1112\u1167\u11bc (operia/backend/mock) \u1100\u1167\u11af\u110c\u1165\u11bc",
       "id": "ds_threeChannel"
     },
@@ -2722,7 +2665,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "\u1111\u1173\u1105\u1169\u11ab\u1110\u1173\u1100\u1161 \u110f\u1161\u1103\u1173 \u1100\u1167\u11af\u110c\u1165\u11bc + tabledata shaper (\u00a70.2 \u110c\u1162\u1112\u116a\u11a8\u110c\u1165\u11bc)",
       "id": "ds_frontDecidesCard"
     },
@@ -2735,7 +2678,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "reportplan = \u1111\u1169\u11af\u1107\u1162\u11a8 \u1105\u1166\u11ab\u1103\u1165 \u1100\u1167\u11bc\u1105\u1169",
       "id": "ds_reportPlanFallback"
     },
@@ -2748,7 +2691,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "getdatasource() \u1111\u1162\u11a8\u1110\u1169\u1105\u1175 (vite_data_source \u1107\u116e\u11ab\u1100\u1175)",
       "id": "ds_getDataSource"
     },
@@ -2761,7 +2704,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "shapeforintent(intent, tabledata, columnmetadata)",
       "id": "ds_shapeForIntent"
     },
@@ -2774,7 +2717,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "sse data/result \u110b\u1175\u1107\u1166\u11ab\u1110\u1173 \u1100\u1168\u110b\u1163\u11a8 (operia api \u1106\u1167\u11bc\u1109\u1166)",
       "id": "ds_sseContract"
     },
@@ -2787,7 +2730,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "mock_api_\u1109\u1165\u11af\u1100\u1168.md (\u110b\u1169\u1111\u1166\u1105\u1175\u110b\u1161 \u1106\u1169\u11a8\u110b\u1165\u11b8 \u110b\u1167\u11ab\u1103\u1169\u11bc)",
       "id": "mock_doc"
     },
@@ -2800,7 +2743,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "\u110b\u1169\u11b8\u1109\u1167\u11ab b \u2014 \u1111\u1173\u1105\u1169\u11ab\u1110\u1173 alasql \u1109\u1175\u11af\u1112\u1162\u11bc (sql\u1106\u1161\u11ab claude, \u1103\u1166\u110b\u1175\u1110\u1165\u1109\u1166\u11ba \u1106\u1175\u110c\u116e\u110b\u1175\u11b8)",
       "id": "mock_alasqlOptionB"
     },
@@ -2813,7 +2756,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "\u1100\u1161\u1109\u1161\u11bc \u1100\u1167\u11af\u110c\u1166 \u1110\u1166\u110b\u1175\u1107\u1173\u11af tb_pay_dtl / tb_beg / voucher \u110c\u116a\u1111\u116d",
       "id": "mock_virtualTables"
     },
@@ -2826,7 +2769,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "intent_chart \u2014 \u1111\u1173\u1105\u1169\u11ab\u1110\u1173\u1100\u1161 \u110c\u1175\u11af\u1106\u116e\u11ab\u110b\u1173\u1105\u1169 \u110e\u1161\u1110\u1173\u110b\u1172\u1112\u1167\u11bc \u1100\u1167\u11af\u110c\u1165\u11bc",
       "id": "mock_intentChart"
     },
@@ -2839,7 +2782,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "\u1107\u1162\u1111\u1169 \u1107\u1169\u110b\u1161\u11ab \u1111\u1173\u1105\u1169\u1111\u1161\u110b\u1175\u11af (claude off \u1107\u1175\u11af\u1103\u1173\u00b7\u110f\u1175 \u1107\u1165\u11ab\u1103\u1173\u11af \u110c\u1166\u110b\u116c)",
       "id": "mock_deploySecurity"
     },
@@ -2852,7 +2795,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "sql \u110e\u1175\u11b8 \u1102\u1169\u110e\u116e\u11af + \u1100\u1167\u11af\u1100\u116a(result) \u1110\u116e\u1106\u1167\u11bc\u1112\u116a",
       "id": "mock_sqlChip"
     },
@@ -2865,7 +2808,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "template_\u1109\u1165\u11af\u1100\u1168.md (\u110f\u1161\u1103\u1173 \u1110\u1166\u11b7\u1111\u1173\u11af\u1105\u1175\u11ba \u1105\u1166\u110c\u1175\u1109\u1173\u1110\u1173\u1105\u1175)",
       "id": "tpl_doc"
     },
@@ -2878,7 +2821,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "3\u1100\u1168\u110e\u1173\u11bc \u1107\u116e\u11ab\u1105\u1175 (queries.js shaper / intentconfig / templates)",
       "id": "tpl_threeLayer"
     },
@@ -2891,7 +2834,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "\u110c\u1175\u11af\u110b\u1174\u2194\u1110\u1166\u11b7\u1111\u1173\u11af\u1105\u1175\u11ba n:1 + config \u1103\u1161\u11ab\u110b\u1175\u11af \u1111\u1167\u11ab\u110c\u1175\u11b8 \u110c\u1175\u110c\u1165\u11b7",
       "id": "tpl_nToOne"
     },
@@ -2904,7 +2847,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "intent_config (intent\u1107\u1167\u11af template/title/insight)",
       "id": "tpl_intentConfig"
     },
@@ -2917,7 +2860,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 0,
       "norm_label": "\u1106\u1175\u110c\u1175\u110b\u116f\u11ab template id \u2192 table \u1111\u1169\u11af\u1107\u1162\u11a8 \u110e\u1165\u11af\u1112\u1161\u11a8",
       "id": "tpl_tableFallback"
     },
@@ -2930,7 +2873,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 0,
       "norm_label": "index.html (vite \u110b\u1166\u11ab\u1110\u1173\u1105\u1175 \u00b7 pretendard \u00b7 viewport-fit)",
       "id": "index_html_root"
     },
@@ -2939,7 +2882,7 @@
       "file_type": "code",
       "source_file": "App.jsx",
       "source_location": "L1",
-      "community": 1,
+      "community": 3,
       "norm_label": "app.jsx",
       "id": "app_jsx"
     },
@@ -2948,7 +2891,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L38",
-      "community": 1,
+      "community": 3,
       "norm_label": "querydatasource()",
       "id": "src_app_querydatasource"
     },
@@ -2957,7 +2900,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L99",
-      "community": 1,
+      "community": 3,
       "norm_label": "grades",
       "id": "src_app_grades"
     },
@@ -2966,7 +2909,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L100",
-      "community": 1,
+      "community": 3,
       "norm_label": "grade_labels",
       "id": "src_app_grade_labels"
     },
@@ -2975,7 +2918,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L102",
-      "community": 1,
+      "community": 3,
       "norm_label": "suggestions",
       "id": "src_app_suggestions"
     },
@@ -2984,7 +2927,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L112",
-      "community": 1,
+      "community": 3,
       "norm_label": "quick_queries",
       "id": "src_app_quick_queries"
     },
@@ -2993,7 +2936,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L121",
-      "community": 1,
+      "community": 3,
       "norm_label": "foxmark()",
       "id": "src_app_foxmark"
     },
@@ -3002,7 +2945,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L135",
-      "community": 1,
+      "community": 3,
       "norm_label": "sparkleicon()",
       "id": "src_app_sparkleicon"
     },
@@ -3011,7 +2954,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L148",
-      "community": 1,
+      "community": 3,
       "norm_label": "tabs",
       "id": "src_app_tabs"
     },
@@ -3020,7 +2963,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L151",
-      "community": 1,
+      "community": 3,
       "norm_label": "header()",
       "id": "src_app_header"
     },
@@ -3029,7 +2972,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L244",
-      "community": 1,
+      "community": 3,
       "norm_label": "comingsoon()",
       "id": "src_app_comingsoon"
     },
@@ -3038,7 +2981,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L264",
-      "community": 1,
+      "community": 3,
       "norm_label": "aiorb()",
       "id": "src_app_aiorb"
     },
@@ -3047,7 +2990,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L279",
-      "community": 1,
+      "community": 3,
       "norm_label": "introscreen()",
       "id": "src_app_introscreen"
     },
@@ -3056,7 +2999,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L348",
-      "community": 1,
+      "community": 3,
       "norm_label": "menuicons",
       "id": "src_app_menuicons"
     },
@@ -3065,7 +3008,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L400",
-      "community": 1,
+      "community": 3,
       "norm_label": "menuscreen()",
       "id": "src_app_menuscreen"
     },
@@ -3074,7 +3017,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L435",
-      "community": 1,
+      "community": 3,
       "norm_label": "webviewwelcome()",
       "id": "src_app_webviewwelcome"
     },
@@ -3083,7 +3026,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L450",
-      "community": 1,
+      "community": 3,
       "norm_label": "welcomescreen()",
       "id": "src_app_welcomescreen"
     },
@@ -3092,7 +3035,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L583",
-      "community": 1,
+      "community": 3,
       "norm_label": "bubble()",
       "id": "src_app_bubble"
     },
@@ -3101,7 +3044,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L644",
-      "community": 1,
+      "community": 3,
       "norm_label": "typing()",
       "id": "src_app_typing"
     },
@@ -3110,7 +3053,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L673",
-      "community": 1,
+      "community": 3,
       "norm_label": "favoritesbar()",
       "id": "src_app_favoritesbar"
     },
@@ -3119,7 +3062,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L739",
-      "community": 1,
+      "community": 3,
       "norm_label": "quickreplypanel()",
       "id": "src_app_quickreplypanel"
     },
@@ -3128,7 +3071,7 @@
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L855",
-      "community": 1,
+      "community": 3,
       "norm_label": "app()",
       "id": "src_app_app"
     },
@@ -3137,7 +3080,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L1",
-      "community": 7,
+      "community": 6,
       "norm_label": "chartrenderer.jsx",
       "id": "charts_chartrenderer_jsx"
     },
@@ -3146,7 +3089,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L15",
-      "community": 7,
+      "community": 6,
       "norm_label": "source_meta",
       "id": "charts_chartrenderer_source_meta"
     },
@@ -3155,7 +3098,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L23",
-      "community": 7,
+      "community": 6,
       "norm_label": "fmtcell()",
       "id": "charts_chartrenderer_fmtcell"
     },
@@ -3164,7 +3107,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L25",
-      "community": 7,
+      "community": 6,
       "norm_label": "isrows()",
       "id": "charts_chartrenderer_isrows"
     },
@@ -3173,7 +3116,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L26",
-      "community": 7,
+      "community": 6,
       "norm_label": "prettyjson()",
       "id": "charts_chartrenderer_prettyjson"
     },
@@ -3182,7 +3125,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L27",
-      "community": 7,
+      "community": 6,
       "norm_label": "jsonpre()",
       "id": "charts_chartrenderer_jsonpre"
     },
@@ -3191,7 +3134,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L31",
-      "community": 7,
+      "community": 6,
       "norm_label": "rowstable()",
       "id": "charts_chartrenderer_rowstable"
     },
@@ -3200,7 +3143,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L54",
-      "community": 7,
+      "community": 6,
       "norm_label": "rawrowsview()",
       "id": "charts_chartrenderer_rawrowsview"
     },
@@ -3209,7 +3152,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L73",
-      "community": 7,
+      "community": 6,
       "norm_label": "resultview()",
       "id": "charts_chartrenderer_resultview"
     },
@@ -3218,7 +3161,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L79",
-      "community": 7,
+      "community": 6,
       "norm_label": "sqlchip()",
       "id": "charts_chartrenderer_sqlchip"
     },
@@ -3227,7 +3170,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L159",
-      "community": 7,
+      "community": 6,
       "norm_label": "reporttabconfig()",
       "id": "charts_chartrenderer_reporttabconfig"
     },
@@ -3236,7 +3179,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L167",
-      "community": 7,
+      "community": 6,
       "norm_label": "reporttogglecard()",
       "id": "charts_chartrenderer_reporttogglecard"
     },
@@ -3245,7 +3188,7 @@
       "file_type": "code",
       "source_file": "charts/ChartRenderer.jsx",
       "source_location": "L215",
-      "community": 7,
+      "community": 6,
       "norm_label": "chartrenderer()",
       "id": "charts_chartrenderer_chartrenderer"
     },
@@ -3308,7 +3251,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L1",
-      "community": 7,
+      "community": 6,
       "norm_label": "shapeforintent.js",
       "id": "charts_shapeforintent_js"
     },
@@ -3317,7 +3260,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L13",
-      "community": 7,
+      "community": 6,
       "norm_label": "slots",
       "id": "charts_shapeforintent_slots"
     },
@@ -3326,7 +3269,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L29",
-      "community": 7,
+      "community": 6,
       "norm_label": "value_pref",
       "id": "charts_shapeforintent_value_pref"
     },
@@ -3335,7 +3278,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L38",
-      "community": 7,
+      "community": 6,
       "norm_label": "temporal_re",
       "id": "charts_shapeforintent_temporal_re"
     },
@@ -3344,7 +3287,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L40",
-      "community": 7,
+      "community": 6,
       "norm_label": "infertype()",
       "id": "charts_shapeforintent_infertype"
     },
@@ -3353,7 +3296,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L49",
-      "community": 7,
+      "community": 6,
       "norm_label": "roleof()",
       "id": "charts_shapeforintent_roleof"
     },
@@ -3362,7 +3305,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L61",
-      "community": 7,
+      "community": 6,
       "norm_label": "pickcandidate()",
       "id": "charts_shapeforintent_pickcandidate"
     },
@@ -3371,7 +3314,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L70",
-      "community": 7,
+      "community": 6,
       "norm_label": "normalizecolumns()",
       "id": "charts_shapeforintent_normalizecolumns"
     },
@@ -3380,7 +3323,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L107",
-      "community": 7,
+      "community": 6,
       "norm_label": "isvalidshape()",
       "id": "charts_shapeforintent_isvalidshape"
     },
@@ -3389,7 +3332,7 @@
       "file_type": "code",
       "source_file": "charts/shapeForIntent.js",
       "source_location": "L129",
-      "community": 7,
+      "community": 6,
       "norm_label": "shapeforintent()",
       "id": "charts_shapeforintent_shapeforintent"
     },
@@ -3402,7 +3345,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "querydatasource (sse bridge)",
       "id": "App_queryDataSource"
     },
@@ -3415,7 +3358,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "cardintent (\u110c\u1175\u11af\u1106\u116e\u11ab\u2192\u110f\u1161\u1103\u1173 \u1100\u1167\u11af\u110c\u1165\u11bc)",
       "id": "App_cardIntent"
     },
@@ -3428,7 +3371,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "send (\u110e\u1162\u1110\u1175\u11bc \u110c\u1165\u11ab\u1109\u1169\u11bc \u110b\u1169\u110f\u1166\u1109\u1173\u1110\u1173\u1105\u1166\u110b\u1175\u1110\u1165)",
       "id": "App_send"
     },
@@ -3441,7 +3384,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "cardquery (\u110f\u1161\u1103\u1173 \u1102\u1162\u1107\u116e lazy \u110c\u1175\u11af\u110b\u1174)",
       "id": "App_cardQuery"
     },
@@ -3454,7 +3397,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "bubble (chat message renderer)",
       "id": "App_Bubble"
     },
@@ -3467,7 +3410,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "periodscope (\u1100\u1175\u1100\u1161\u11ab \u1111\u1161\u1109\u1175\u11bc)",
       "id": "App_periodScope"
     },
@@ -3480,7 +3423,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "fallback (\u1105\u1169\u110f\u1165\u11af \u110b\u1173\u11bc\u1103\u1161\u11b8)",
       "id": "App_fallback"
     },
@@ -3493,7 +3436,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "chartrenderer (\u1103\u1166\u110b\u1175\u1110\u1165 \u110f\u1161\u1103\u1173 \u1105\u1166\u11ab\u1103\u1165 \u110c\u1175\u11ab\u110b\u1175\u11b8\u110c\u1165\u11b7)",
       "id": "ChartRenderer_ChartRenderer"
     },
@@ -3506,7 +3449,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "reporttogglecard (\u110b\u116f\u11af/\u110b\u1175\u11af \u1110\u1169\u1100\u1173\u11af \u110b\u1169\u110f\u1166\u1109\u1173\u1110\u1173\u1105\u1166\u110b\u1175\u1110\u1165)",
       "id": "ChartRenderer_ReportToggleCard"
     },
@@ -3519,7 +3462,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "sqlchip (sql \u110e\u1175\u11b8)",
       "id": "ChartRenderer_SqlChip"
     },
@@ -3532,7 +3475,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 10,
+      "community": 9,
       "norm_label": "\u110c\u1165\u11ab\u110b\u116d\u11bc \u110b\u116e\u1109\u1165\u11ab\u00b7reportplan/table \u1111\u1169\u11af\u1107\u1162\u11a8 \u1105\u1166\u11ab\u1103\u1165 \u1106\u1169\u1103\u1166\u11af",
       "id": "concept_dedicated_first_fallback"
     },
@@ -4031,7 +3974,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "workflow.md \u2014 edupay-app common dev spec",
       "id": "workflow_doc"
     },
@@ -4044,7 +3987,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "role separation harness (cowork/cli/playwright)",
       "id": "workflow_roleSeparation"
     },
@@ -4057,7 +4000,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "harness2 standard dev loop (design\u2192prompt\u2192code\u2192playwright)",
       "id": "workflow_standardLoop"
     },
@@ -4070,7 +4013,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "harness3 graphify rule (query freely, update manual-only)",
       "id": "workflow_graphifyRule"
     },
@@ -4083,7 +4026,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "\u00a74 cli prompt template (first line graphify query)",
       "id": "workflow_cliPromptTemplate"
     },
@@ -4096,7 +4039,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "\u00a77 dev mock pattern (vite_operia_api switch point)",
       "id": "workflow_devMockPattern"
     },
@@ -4109,7 +4052,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "\u00a76 playwright verification spec (localhost:5173, 10-query regression)",
       "id": "workflow_playwrightSpec"
     },
@@ -4122,7 +4065,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 8,
       "norm_label": "milestone: operia sim mode option b (front alasql on dataset.json)",
       "id": "workflow_simModeOptionB"
     },
@@ -4209,315 +4152,315 @@
       "file_type": "code",
       "source_file": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs",
       "source_location": "L1",
-      "id": "vite_config_js_timestamp_1782464930590_319bf3066aea_mjs",
-      "community": 57,
-      "norm_label": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs"
+      "community": 59,
+      "norm_label": "vite.config.js.timestamp-1782464930590-319bf3066aea.mjs",
+      "id": "vite_config_js_timestamp_1782464930590_319bf3066aea_mjs"
     },
     {
       "label": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
       "file_type": "code",
       "source_file": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
       "source_location": "L1",
-      "id": "vite_config_js_timestamp_1782464946205_0037bb8192259_mjs",
-      "community": 58,
-      "norm_label": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs"
+      "community": 60,
+      "norm_label": "vite.config.js.timestamp-1782464946205-0037bb8192259.mjs",
+      "id": "vite_config_js_timestamp_1782464946205_0037bb8192259_mjs"
     },
     {
       "label": "settings.local.json",
       "file_type": "code",
       "source_file": ".claude/settings.local.json",
       "source_location": "L1",
-      "id": "claude_settings_local_json",
-      "community": 20,
-      "norm_label": "settings.local.json"
+      "community": 22,
+      "norm_label": "settings.local.json",
+      "id": "claude_settings_local_json"
     },
     {
       "label": "permissions",
       "file_type": "code",
       "source_file": ".claude/settings.local.json",
       "source_location": "L2",
-      "id": "claude_settings_local_permissions",
-      "community": 20,
-      "norm_label": "permissions"
+      "community": 22,
+      "norm_label": "permissions",
+      "id": "claude_settings_local_permissions"
     },
     {
       "label": "allow",
       "file_type": "code",
       "source_file": ".claude/settings.local.json",
       "source_location": "L3",
-      "id": "claude_settings_local_permissions_allow",
-      "community": 20,
-      "norm_label": "allow"
+      "community": 22,
+      "norm_label": "allow",
+      "id": "claude_settings_local_permissions_allow"
     },
     {
       "label": "App.jsx",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L1",
-      "id": "src_app_jsx",
-      "community": 1,
-      "norm_label": "app.jsx"
+      "community": 3,
+      "norm_label": "app.jsx",
+      "id": "src_app_jsx"
     },
     {
       "label": "sanitizeAnswer()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L24",
-      "id": "src_app_sanitizeanswer",
-      "community": 1,
-      "norm_label": "sanitizeanswer()"
+      "community": 3,
+      "norm_label": "sanitizeanswer()",
+      "id": "src_app_sanitizeanswer"
     },
     {
       "label": "useSwipeReveal()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L479",
-      "id": "src_app_useswipereveal",
-      "community": 1,
-      "norm_label": "useswipereveal()"
+      "community": 3,
+      "norm_label": "useswipereveal()",
+      "id": "src_app_useswipereveal"
     },
     {
       "label": "UserBubble()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L538",
-      "id": "src_app_userbubble",
-      "community": 1,
-      "norm_label": "userbubble()"
+      "community": 3,
+      "norm_label": "userbubble()",
+      "id": "src_app_userbubble"
     },
     {
       "label": "isTechErrorMessage()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L576",
-      "id": "src_app_istecherrormessage",
-      "community": 1,
-      "norm_label": "istecherrormessage()"
+      "community": 3,
+      "norm_label": "istecherrormessage()",
+      "id": "src_app_istecherrormessage"
     },
     {
       "label": "LOADING_POOLS",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L624",
-      "id": "src_app_loading_pools",
-      "community": 1,
-      "norm_label": "loading_pools"
+      "community": 3,
+      "norm_label": "loading_pools",
+      "id": "src_app_loading_pools"
     },
     {
       "label": "poolKeyForIntent()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L633",
-      "id": "src_app_poolkeyforintent",
-      "community": 1,
-      "norm_label": "poolkeyforintent()"
+      "community": 3,
+      "norm_label": "poolkeyforintent()",
+      "id": "src_app_poolkeyforintent"
     },
     {
       "label": "FaqRow()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L696",
-      "id": "src_app_faqrow",
-      "community": 1,
-      "norm_label": "faqrow()"
+      "community": 3,
+      "norm_label": "faqrow()",
+      "id": "src_app_faqrow"
     },
     {
       "label": "UidDebugBadge()",
       "file_type": "code",
       "source_file": "src/App.jsx",
       "source_location": "L822",
-      "id": "src_app_uiddebugbadge",
-      "community": 1,
-      "norm_label": "uiddebugbadge()"
+      "community": 3,
+      "norm_label": "uiddebugbadge()",
+      "id": "src_app_uiddebugbadge"
     },
     {
       "label": "session.js",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L1",
-      "id": "src_api_session_js",
-      "community": 1,
-      "norm_label": "session.js"
+      "community": 3,
+      "norm_label": "session.js",
+      "id": "src_api_session_js"
     },
     {
       "label": "__recordSession()",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L21",
-      "id": "api_session_recordsession",
-      "community": 1,
-      "norm_label": "__recordsession()"
+      "community": 3,
+      "norm_label": "__recordsession()",
+      "id": "api_session_recordsession"
     },
     {
       "label": "__safeJson()",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L35",
-      "id": "api_session_safejson",
-      "community": 1,
-      "norm_label": "__safejson()"
+      "community": 3,
+      "norm_label": "__safejson()",
+      "id": "api_session_safejson"
     },
     {
       "label": "__LOC_PROBE_NAMES",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L41",
-      "id": "api_session_loc_probe_names",
-      "community": 1,
-      "norm_label": "__loc_probe_names"
+      "community": 3,
+      "norm_label": "__loc_probe_names",
+      "id": "api_session_loc_probe_names"
     },
     {
       "label": "__probeLocations()",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L42",
-      "id": "api_session_probelocations",
-      "community": 1,
-      "norm_label": "__probelocations()"
+      "community": 3,
+      "norm_label": "__probelocations()",
+      "id": "api_session_probelocations"
     },
     {
       "label": "resolveUserId()",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L57",
-      "id": "api_session_resolveuserid",
-      "community": 1,
-      "norm_label": "resolveuserid()"
+      "community": 3,
+      "norm_label": "resolveuserid()",
+      "id": "api_session_resolveuserid"
     },
     {
       "label": "getUserId()",
       "file_type": "code",
       "source_file": "src/api/session.js",
       "source_location": "L92",
-      "id": "api_session_getuserid",
-      "community": 1,
-      "norm_label": "getuserid()"
+      "community": 3,
+      "norm_label": "getuserid()",
+      "id": "api_session_getuserid"
     },
     {
       "label": "codeLabels.js",
       "file_type": "code",
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L1",
-      "id": "src_charts_codelabels_js",
       "community": 5,
-      "norm_label": "codelabels.js"
+      "norm_label": "codelabels.js",
+      "id": "src_charts_codelabels_js"
     },
     {
       "label": "canonChannel()",
       "file_type": "code",
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L23",
-      "id": "charts_codelabels_canonchannel",
       "community": 5,
-      "norm_label": "canonchannel()"
+      "norm_label": "canonchannel()",
+      "id": "charts_codelabels_canonchannel"
     },
     {
       "label": "spendcards.jsx",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L1",
-      "id": "src_components_spendcards_jsx",
-      "community": 13,
-      "norm_label": "spendcards.jsx"
+      "community": 12,
+      "norm_label": "spendcards.jsx",
+      "id": "src_components_spendcards_jsx"
     },
     {
       "label": "DailySpendCard()",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L7",
-      "id": "components_spendcards_dailyspendcard",
-      "community": 13,
-      "norm_label": "dailyspendcard()"
+      "community": 12,
+      "norm_label": "dailyspendcard()",
+      "id": "components_spendcards_dailyspendcard"
     },
     {
       "label": "RecordedCard()",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L76",
-      "id": "components_spendcards_recordedcard",
-      "community": 13,
-      "norm_label": "recordedcard()"
+      "community": 12,
+      "norm_label": "recordedcard()",
+      "id": "components_spendcards_recordedcard"
     },
     {
       "label": "PeriodReportCard()",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L112",
-      "id": "components_spendcards_periodreportcard",
-      "community": 13,
-      "norm_label": "periodreportcard()"
+      "community": 12,
+      "norm_label": "periodreportcard()",
+      "id": "components_spendcards_periodreportcard"
     },
     {
       "label": "CATSPEND_MATCH",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L189",
-      "id": "components_spendcards_catspend_match",
-      "community": 13,
-      "norm_label": "catspend_match"
+      "community": 12,
+      "norm_label": "catspend_match",
+      "id": "components_spendcards_catspend_match"
     },
     {
       "label": "CATSPEND_COLORS",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L198",
-      "id": "components_spendcards_catspend_colors",
-      "community": 13,
-      "norm_label": "catspend_colors"
+      "community": 12,
+      "norm_label": "catspend_colors",
+      "id": "components_spendcards_catspend_colors"
     },
     {
       "label": "CategoryDonut()",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L199",
-      "id": "components_spendcards_categorydonut",
-      "community": 13,
-      "norm_label": "categorydonut()"
+      "community": 12,
+      "norm_label": "categorydonut()",
+      "id": "components_spendcards_categorydonut"
     },
     {
       "label": "CategorySpendCard()",
       "file_type": "code",
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L245",
-      "id": "components_spendcards_categoryspendcard",
-      "community": 13,
-      "norm_label": "categoryspendcard()"
+      "community": 12,
+      "norm_label": "categoryspendcard()",
+      "id": "components_spendcards_categoryspendcard"
     },
     {
       "label": "queries.js",
       "file_type": "code",
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L1",
-      "id": "src_mock_operia_queries_js",
       "community": 5,
-      "norm_label": "queries.js"
+      "norm_label": "queries.js",
+      "id": "src_mock_operia_queries_js"
     },
     {
       "label": "monthKey()",
       "file_type": "code",
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L27",
-      "id": "operia_queries_monthkey",
       "community": 5,
-      "norm_label": "monthkey()"
+      "norm_label": "monthkey()",
+      "id": "operia_queries_monthkey"
     },
     {
       "label": "clipboard.js",
       "file_type": "code",
       "source_file": "src/util/clipboard.js",
       "source_location": "L1",
-      "id": "src_util_clipboard_js",
-      "community": 34,
-      "norm_label": "clipboard.js"
+      "community": 35,
+      "norm_label": "clipboard.js",
+      "id": "src_util_clipboard_js"
     },
     {
       "label": "copyText()",
       "file_type": "code",
       "source_file": "src/util/clipboard.js",
       "source_location": "L8",
-      "id": "util_clipboard_copytext",
-      "community": 34,
-      "norm_label": "copytext()"
+      "community": 35,
+      "norm_label": "copytext()",
+      "id": "util_clipboard_copytext"
     },
     {
       "label": "sanitizeAnswer (GPS privacy guard)",
@@ -4528,9 +4471,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_sanitizeAnswer",
-      "community": 10,
-      "norm_label": "sanitizeanswer (gps privacy guard)"
+      "community": 9,
+      "norm_label": "sanitizeanswer (gps privacy guard)",
+      "id": "App_sanitizeAnswer"
     },
     {
       "label": "useSwipeReveal hook",
@@ -4541,9 +4484,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_useSwipeReveal",
-      "community": 10,
-      "norm_label": "useswipereveal hook"
+      "community": 9,
+      "norm_label": "useswipereveal hook",
+      "id": "App_useSwipeReveal"
     },
     {
       "label": "isTechErrorMessage (network error copy)",
@@ -4554,9 +4497,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_isTechErrorMessage",
-      "community": 59,
-      "norm_label": "istecherrormessage (network error copy)"
+      "community": 61,
+      "norm_label": "istecherrormessage (network error copy)",
+      "id": "App_isTechErrorMessage"
     },
     {
       "label": "Typing (intent-based loading pool)",
@@ -4567,9 +4510,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_Typing",
-      "community": 3,
-      "norm_label": "typing (intent-based loading pool)"
+      "community": 0,
+      "norm_label": "typing (intent-based loading pool)",
+      "id": "App_Typing"
     },
     {
       "label": "COMPANY_ID (datasource context)",
@@ -4580,9 +4523,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_COMPANY_ID",
-      "community": 10,
-      "norm_label": "company_id (datasource context)"
+      "community": 9,
+      "norm_label": "company_id (datasource context)",
+      "id": "App_COMPANY_ID"
     },
     {
       "label": "WEBVIEW embed mode detection",
@@ -4593,9 +4536,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_WEBVIEW_mode",
-      "community": 10,
-      "norm_label": "webview embed mode detection"
+      "community": 9,
+      "norm_label": "webview embed mode detection",
+      "id": "App_WEBVIEW_mode"
     },
     {
       "label": "Phase A result->render bridge",
@@ -4606,9 +4549,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "App_phaseA_bridge",
-      "community": 10,
-      "norm_label": "phase a result->render bridge"
+      "community": 9,
+      "norm_label": "phase a result->render bridge",
+      "id": "App_phaseA_bridge"
     },
     {
       "label": "getUserId (cached session seam)",
@@ -4619,9 +4562,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "session_getUserId",
-      "community": 10,
-      "norm_label": "getuserid (cached session seam)"
+      "community": 9,
+      "norm_label": "getuserid (cached session seam)",
+      "id": "session_getUserId"
     },
     {
       "label": "resolveUserId (fallback chain)",
@@ -4632,9 +4575,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "session_resolveUserId",
-      "community": 10,
-      "norm_label": "resolveuserid (fallback chain)"
+      "community": 9,
+      "norm_label": "resolveuserid (fallback chain)",
+      "id": "session_resolveUserId"
     },
     {
       "label": "Flutter inappwebview getEduPayUser bridge",
@@ -4645,9 +4588,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "session_nativeBridge",
-      "community": 10,
-      "norm_label": "flutter inappwebview getedupayuser bridge"
+      "community": 9,
+      "norm_label": "flutter inappwebview getedupayuser bridge",
+      "id": "session_nativeBridge"
     },
     {
       "label": "CODE_LABELS dictionary",
@@ -4658,9 +4601,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "codeLabels_CODE_LABELS",
-      "community": 25,
-      "norm_label": "code_labels dictionary"
+      "community": 27,
+      "norm_label": "code_labels dictionary",
+      "id": "codeLabels_CODE_LABELS"
     },
     {
       "label": "labelFor / labelOfCode",
@@ -4671,9 +4614,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "codeLabels_labelFor",
-      "community": 25,
-      "norm_label": "labelfor / labelofcode"
+      "community": 27,
+      "norm_label": "labelfor / labelofcode",
+      "id": "codeLabels_labelFor"
     },
     {
       "label": "INTENT_CONFIG (presentation config)",
@@ -4684,9 +4627,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "intentConfig_INTENT_CONFIG",
-      "community": 3,
-      "norm_label": "intent_config (presentation config)"
+      "community": 0,
+      "norm_label": "intent_config (presentation config)",
+      "id": "intentConfig_INTENT_CONFIG"
     },
     {
       "label": "templateFor (intent->templateId)",
@@ -4697,9 +4640,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "intentConfig_templateFor",
-      "community": 3,
-      "norm_label": "templatefor (intent->templateid)"
+      "community": 0,
+      "norm_label": "templatefor (intent->templateid)",
+      "id": "intentConfig_templateFor"
     },
     {
       "label": "MapChartCard (Kakao map + fallback)",
@@ -4710,9 +4653,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "MapChartCard_component",
-      "community": 3,
-      "norm_label": "mapchartcard (kakao map + fallback)"
+      "community": 0,
+      "norm_label": "mapchartcard (kakao map + fallback)",
+      "id": "MapChartCard_component"
     },
     {
       "label": "loadKakao (SDK dynamic load)",
@@ -4723,9 +4666,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "MapChartCard_loadKakao",
-      "community": 3,
-      "norm_label": "loadkakao (sdk dynamic load)"
+      "community": 0,
+      "norm_label": "loadkakao (sdk dynamic load)",
+      "id": "MapChartCard_loadKakao"
     },
     {
       "label": "GPS >30km fallback to Cheongju policy",
@@ -4736,9 +4679,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "MapChartCard_geoPolicy",
-      "community": 10,
-      "norm_label": "gps >30km fallback to cheongju policy"
+      "community": 9,
+      "norm_label": "gps >30km fallback to cheongju policy",
+      "id": "MapChartCard_geoPolicy"
     },
     {
       "label": "ChartShell (card shell)",
@@ -4749,9 +4692,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "util_ChartShell",
-      "community": 3,
-      "norm_label": "chartshell (card shell)"
+      "community": 0,
+      "norm_label": "chartshell (card shell)",
+      "id": "util_ChartShell"
     },
     {
       "label": "InsightBox",
@@ -4762,9 +4705,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "util_InsightBox",
-      "community": 3,
-      "norm_label": "insightbox"
+      "community": 0,
+      "norm_label": "insightbox",
+      "id": "util_InsightBox"
     },
     {
       "label": "num / won formatters",
@@ -4775,9 +4718,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "util_numwon",
-      "community": 3,
-      "norm_label": "num / won formatters"
+      "community": 0,
+      "norm_label": "num / won formatters",
+      "id": "util_numwon"
     },
     {
       "label": "CAT_EMOJI map",
@@ -4788,9 +4731,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "util_CAT_EMOJI",
-      "community": 3,
-      "norm_label": "cat_emoji map"
+      "community": 0,
+      "norm_label": "cat_emoji map",
+      "id": "util_CAT_EMOJI"
     },
     {
       "label": "BarTemplate",
@@ -4801,9 +4744,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "bar_BarTemplate",
-      "community": 3,
-      "norm_label": "bartemplate"
+      "community": 0,
+      "norm_label": "bartemplate",
+      "id": "bar_BarTemplate"
     },
     {
       "label": "Vite config (port 5173, tunnel hosts)",
@@ -4814,9 +4757,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "viteconfig_default",
-      "community": 32,
-      "norm_label": "vite config (port 5173, tunnel hosts)"
+      "community": 33,
+      "norm_label": "vite config (port 5173, tunnel hosts)",
+      "id": "viteconfig_default"
     },
     {
       "label": "Claude settings.local (Playwright verify allowlist)",
@@ -4827,9 +4770,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "settings_local",
-      "community": 32,
-      "norm_label": "claude settings.local (playwright verify allowlist)"
+      "community": 33,
+      "norm_label": "claude settings.local (playwright verify allowlist)",
+      "id": "settings_local"
     },
     {
       "label": "Honest prev-null policy (no fabricated 0)",
@@ -4840,9 +4783,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "trend_honestPrevNull",
-      "community": 3,
-      "norm_label": "honest prev-null policy (no fabricated 0)"
+      "community": 0,
+      "norm_label": "honest prev-null policy (no fabricated 0)",
+      "id": "trend_honestPrevNull"
     },
     {
       "label": "Progressive reveal (limit + \ub354\ubcf4\uae30) pattern",
@@ -4853,9 +4796,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "txList_progressiveReveal",
-      "community": 3,
-      "norm_label": "progressive reveal (limit + \u1103\u1165\u1107\u1169\u1100\u1175) pattern"
+      "community": 0,
+      "norm_label": "progressive reveal (limit + \u1103\u1165\u1107\u1169\u1100\u1175) pattern",
+      "id": "txList_progressiveReveal"
     },
     {
       "label": "CardShell (inline data card wrapper)",
@@ -4866,9 +4809,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "cards_CardShell",
-      "community": 6,
-      "norm_label": "cardshell (inline data card wrapper)"
+      "community": 15,
+      "norm_label": "cardshell (inline data card wrapper)",
+      "id": "cards_CardShell"
     },
     {
       "label": "Single-path data-card render via ChartRenderer",
@@ -4879,9 +4822,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "cards_singlePathRender",
-      "community": 6,
-      "norm_label": "single-path data-card render via chartrenderer"
+      "community": 15,
+      "norm_label": "single-path data-card render via chartrenderer",
+      "id": "cards_singlePathRender"
     },
     {
       "label": "One-request=one-SQL=one-rows operia contract",
@@ -4892,9 +4835,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "queries_singleStatementContract",
       "community": 2,
-      "norm_label": "one-request=one-sql=one-rows operia contract"
+      "norm_label": "one-request=one-sql=one-rows operia contract",
+      "id": "queries_singleStatementContract"
     },
     {
       "label": "Positional date parsing (separator-agnostic digits)",
@@ -4905,9 +4848,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "queries_dateParsePositional",
       "community": 2,
-      "norm_label": "positional date parsing (separator-agnostic digits)"
+      "norm_label": "positional date parsing (separator-agnostic digits)",
+      "id": "queries_dateParsePositional"
     },
     {
       "label": "NOT_FUTURE payment cutoff guard",
@@ -4918,9 +4861,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "queries_notFutureCutoff",
       "community": 2,
-      "norm_label": "not_future payment cutoff guard"
+      "norm_label": "not_future payment cutoff guard",
+      "id": "queries_notFutureCutoff"
     },
     {
       "label": "Multi-shape input tolerance (mock vs backend)",
@@ -4931,9 +4874,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "queries_multiShapeTolerance",
       "community": 2,
-      "norm_label": "multi-shape input tolerance (mock vs backend)"
+      "norm_label": "multi-shape input tolerance (mock vs backend)",
+      "id": "queries_multiShapeTolerance"
     },
     {
       "label": "copyText (clipboard util with WebView fallback)",
@@ -4944,9 +4887,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "clipboard_copyText",
-      "community": 16,
-      "norm_label": "copytext (clipboard util with webview fallback)"
+      "community": 18,
+      "norm_label": "copytext (clipboard util with webview fallback)",
+      "id": "clipboard_copyText"
     },
     {
       "label": "execCommand copy fallback for legacy/non-https WebView",
@@ -4957,9 +4900,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "clipboard_execCommandFallback",
-      "community": 16,
-      "norm_label": "execcommand copy fallback for legacy/non-https webview"
+      "community": 18,
+      "norm_label": "execcommand copy fallback for legacy/non-https webview",
+      "id": "clipboard_execCommandFallback"
     },
     {
       "label": "aegis-dev000 review report (edupay-app)",
@@ -4970,9 +4913,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "aegisreport_review",
-      "community": 9,
-      "norm_label": "aegis-dev000 review report (edupay-app)"
+      "community": 8,
+      "norm_label": "aegis-dev000 review report (edupay-app)",
+      "id": "aegisreport_review"
     },
     {
       "label": "Frontend API key exposure (claude.js)",
@@ -4983,9 +4926,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "aegisreport_apiKeyExposure",
-      "community": 9,
-      "norm_label": "frontend api key exposure (claude.js)"
+      "community": 8,
+      "norm_label": "frontend api key exposure (claude.js)",
+      "id": "aegisreport_apiKeyExposure"
     },
     {
       "label": ".env.production git-tracked risk",
@@ -4996,9 +4939,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "aegisreport_envProductionTracked",
-      "community": 9,
-      "norm_label": ".env.production git-tracked risk"
+      "community": 8,
+      "norm_label": ".env.production git-tracked risk",
+      "id": "aegisreport_envProductionTracked"
     },
     {
       "label": "App.jsx 1197-line monolith (sequential-only)",
@@ -5009,9 +4952,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "aegisreport_appJsxMonolith",
-      "community": 9,
-      "norm_label": "app.jsx 1197-line monolith (sequential-only)"
+      "community": 8,
+      "norm_label": "app.jsx 1197-line monolith (sequential-only)",
+      "id": "aegisreport_appJsxMonolith"
     },
     {
       "label": "index.html (Vite entry, FOX PAY)",
@@ -5022,9 +4965,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "indexhtml_entry",
-      "community": 16,
-      "norm_label": "index.html (vite entry, fox pay)"
+      "community": 18,
+      "norm_label": "index.html (vite entry, fox pay)",
+      "id": "indexhtml_entry"
     },
     {
       "label": "WebView viewport/theme-color meta tuning",
@@ -5035,9 +4978,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "indexhtml_webviewMeta",
-      "community": 16,
-      "norm_label": "webview viewport/theme-color meta tuning"
+      "community": 18,
+      "norm_label": "webview viewport/theme-color meta tuning",
+      "id": "indexhtml_webviewMeta"
     },
     {
       "label": "WORKFLOW.md (edupay-app dev workflow)",
@@ -5048,9 +4991,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_spec",
-      "community": 9,
-      "norm_label": "workflow.md (edupay-app dev workflow)"
+      "community": 8,
+      "norm_label": "workflow.md (edupay-app dev workflow)",
+      "id": "workflow_spec"
     },
     {
       "label": "graphify context-economy rules (query vs update)",
@@ -5061,9 +5004,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_graphifyRules",
-      "community": 9,
-      "norm_label": "graphify context-economy rules (query vs update)"
+      "community": 8,
+      "norm_label": "graphify context-economy rules (query vs update)",
+      "id": "workflow_graphifyRules"
     },
     {
       "label": "DEV MOCK replacement-point pattern",
@@ -5074,9 +5017,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_devMock",
-      "community": 9,
-      "norm_label": "dev mock replacement-point pattern"
+      "community": 8,
+      "norm_label": "dev mock replacement-point pattern",
+      "id": "workflow_devMock"
     },
     {
       "label": "Foxedu server/DB/VPN credentials + deploy commands",
@@ -5087,9 +5030,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "serverinfo_creds",
-      "community": 9,
-      "norm_label": "foxedu server/db/vpn credentials + deploy commands"
+      "community": 8,
+      "norm_label": "foxedu server/db/vpn credentials + deploy commands",
+      "id": "serverinfo_creds"
     },
     {
       "label": "aegis-dev000 agent definition",
@@ -5100,9 +5043,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_aegisdev000",
-      "community": 9,
-      "norm_label": "aegis-dev000 agent definition"
+      "community": 8,
+      "norm_label": "aegis-dev000 agent definition",
+      "id": "agent_aegisdev000"
     },
     {
       "label": "SAFETY gate (C-grade no-autonomy)",
@@ -5113,9 +5056,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_safetyGate",
-      "community": 9,
-      "norm_label": "safety gate (c-grade no-autonomy)"
+      "community": 8,
+      "norm_label": "safety gate (c-grade no-autonomy)",
+      "id": "agent_safetyGate"
     },
     {
       "label": "SPECIALIST.md (development specialist doc)",
@@ -5126,9 +5069,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "specialist_doc",
-      "community": 9,
-      "norm_label": "specialist.md (development specialist doc)"
+      "community": 8,
+      "norm_label": "specialist.md (development specialist doc)",
+      "id": "specialist_doc"
     },
     {
       "label": "S7 verification integrity (exit-code measured)",
@@ -5139,9 +5082,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "specialist_S7_VIP",
-      "community": 9,
-      "norm_label": "s7 verification integrity (exit-code measured)"
+      "community": 8,
+      "norm_label": "s7 verification integrity (exit-code measured)",
+      "id": "specialist_S7_VIP"
     },
     {
       "label": "S4 parallel-conflict / concentrated-file sequencing",
@@ -5152,9 +5095,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "specialist_S4_PCM",
-      "community": 9,
-      "norm_label": "s4 parallel-conflict / concentrated-file sequencing"
+      "community": 8,
+      "norm_label": "s4 parallel-conflict / concentrated-file sequencing",
+      "id": "specialist_S4_PCM"
     },
     {
       "label": "codeLabels (labelOfCode/canonChannel)",
@@ -5165,9 +5108,178 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "queries_codeLabels",
       "community": 2,
-      "norm_label": "codelabels (labelofcode/canonchannel)"
+      "norm_label": "codelabels (labelofcode/canonchannel)",
+      "id": "queries_codeLabels"
+    },
+    {
+      "label": "\uc624\ud398\ub9ac\uc544 \uace8\ub4e0 SQL \uc218\uc815 \uc804\ub2ec (2026-07-02)",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_doc",
+      "community": 13,
+      "norm_label": "\u110b\u1169\u1111\u1166\u1105\u1175\u110b\u1161 \u1100\u1169\u11af\u1103\u1173\u11ab sql \u1109\u116e\u110c\u1165\u11bc \u110c\u1165\u11ab\u1103\u1161\u11af (2026-07-02)"
+    },
+    {
+      "label": "\uc624\ud398\ub9ac\uc544_\ud14c\uc2a4\ud2b8\ucf00\uc774\uc2a4_\uc5c5\ub85c\ub4dc_0702_\uc218\uc815.xlsx",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_upload_xlsx",
+      "community": 13,
+      "norm_label": "\u110b\u1169\u1111\u1166\u1105\u1175\u110b\u1161_\u1110\u1166\u1109\u1173\u1110\u1173\u110f\u1166\u110b\u1175\u1109\u1173_\u110b\u1165\u11b8\u1105\u1169\u1103\u1173_0702_\u1109\u116e\u110c\u1165\u11bc.xlsx"
+    },
+    {
+      "label": "\uc9c8\uc758 #1 \u2014 \ud604\uc7ac \uc0ac\uc6a9\ud560 \uc218 \uc788\ub294 \uae08\uc561",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 6-13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_q1_balance",
+      "community": 13,
+      "norm_label": "\u110c\u1175\u11af\u110b\u1174 #1 \u2014 \u1112\u1167\u11ab\u110c\u1162 \u1109\u1161\u110b\u116d\u11bc\u1112\u1161\u11af \u1109\u116e \u110b\u1175\u11bb\u1102\u1173\u11ab \u1100\u1173\u11b7\u110b\u1162\u11a8"
+    },
+    {
+      "label": "\uc794\uc561 3\ud56d\ubaa9 \ud589 \ucd9c\ub825 \ud615\ud0dc (item, balance, unit)",
+      "file_type": "rationale",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 8-13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_three_row_format",
+      "community": 13,
+      "norm_label": "\u110c\u1161\u11ab\u110b\u1162\u11a8 3\u1112\u1161\u11bc\u1106\u1169\u11a8 \u1112\u1162\u11bc \u110e\u116e\u11af\u1105\u1167\u11a8 \u1112\u1167\u11bc\u1110\u1162 (item, balance, unit)"
+    },
+    {
+      "label": "V_USER_ASSET \ubdf0 (ACCOUNT_BALANCE_AMT / CURRENT_POINT)",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 7-12",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_v_user_asset",
+      "community": 13,
+      "norm_label": "v_user_asset \u1107\u1172 (account_balance_amt / current_point)"
+    },
+    {
+      "label": "\ubc14\uc6b0\ucc98(\uc9c0\uc6d0\uae08) \uc0b0\uc2dd = TYPE_CD='S' \u2212 PAY_MEAN_CD='VOUCHER'",
+      "file_type": "rationale",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 10",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_voucher_balance",
+      "community": 13,
+      "norm_label": "\u1107\u1161\u110b\u116e\u110e\u1165(\u110c\u1175\u110b\u116f\u11ab\u1100\u1173\u11b7) \u1109\u1161\u11ab\u1109\u1175\u11a8 = type_cd='s' \u2212 pay_mean_cd='voucher'"
+    },
+    {
+      "label": "\uc6a9\ub3c8 \ucda9\uc804\uae08 \uc0b0\uc2dd = ACCOUNT_BALANCE_AMT \u2212 \ubc14\uc6b0\ucc98(\uc9c0\uc6d0\uae08)",
+      "file_type": "rationale",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 11-13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_allowance_balance",
+      "community": 13,
+      "norm_label": "\u110b\u116d\u11bc\u1103\u1169\u11ab \u110e\u116e\u11bc\u110c\u1165\u11ab\u1100\u1173\u11b7 \u1109\u1161\u11ab\u1109\u1175\u11a8 = account_balance_amt \u2212 \u1107\u1161\u110b\u116e\u110e\u1165(\u110c\u1175\u110b\u116f\u11ab\u1100\u1173\u11b7)"
+    },
+    {
+      "label": "\uc5d0\ub4c0\ud3ec\uc778\ud2b8 = CURRENT_POINT (\ub2e8\uc704 'P')",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 12",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_edupoint",
+      "community": 13,
+      "norm_label": "\u110b\u1166\u1103\u1172\u1111\u1169\u110b\u1175\u11ab\u1110\u1173 = current_point (\u1103\u1161\u11ab\u110b\u1171 'p')"
+    },
+    {
+      "label": "\uc9c8\uc758 \u2014 \uc6d4\ubcc4 \uc0ac\uc6a9 \ub0b4\uc5ed (DLNG_YM, SUM(DLNG_AMT))",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 16",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_q_monthly",
+      "community": 13,
+      "norm_label": "\u110c\u1175\u11af\u110b\u1174 \u2014 \u110b\u116f\u11af\u1107\u1167\u11af \u1109\u1161\u110b\u116d\u11bc \u1102\u1162\u110b\u1167\u11a8 (dlng_ym, sum(dlng_amt))"
+    },
+    {
+      "label": "\uc9c8\uc758 \u2014 \uadfc\ucc98 \uc0ac\uc6a9 \uac00\ub2a5 \uac00\ub9f9\uc810 (\uc9c0\ub3c4/\uac70\ub9ac)",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 17,22",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_q_nearby",
+      "community": 13,
+      "norm_label": "\u110c\u1175\u11af\u110b\u1174 \u2014 \u1100\u1173\u11ab\u110e\u1165 \u1109\u1161\u110b\u116d\u11bc \u1100\u1161\u1102\u1173\u11bc \u1100\u1161\u1106\u1162\u11bc\u110c\u1165\u11b7 (\u110c\u1175\u1103\u1169/\u1100\u1165\u1105\u1175)"
+    },
+    {
+      "label": "\uc9c8\uc758 \u2014 \uc0ac\uc6a9\ucc98\ubcc4 \ub0b4\uc5ed (MERCHANT_NM, SUM(DLNG_AMT))",
+      "file_type": "document",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 18",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_q_by_merchant",
+      "community": 13,
+      "norm_label": "\u110c\u1175\u11af\u110b\u1174 \u2014 \u1109\u1161\u110b\u116d\u11bc\u110e\u1165\u1107\u1167\u11af \u1102\u1162\u110b\u1167\u11a8 (merchant_nm, sum(dlng_amt))"
+    },
+    {
+      "label": "\ub514\ud3f4\ud2b8 FAQ \uce69 4\uac1c \ubc94\uc704",
+      "file_type": "rationale",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 21",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_default_faq_chips",
+      "community": 13,
+      "norm_label": "\u1103\u1175\u1111\u1169\u11af\u1110\u1173 faq \u110e\u1175\u11b8 4\u1100\u1162 \u1107\u1165\u11b7\u110b\u1171"
+    },
+    {
+      "label": "category_cd \ud504\ub860\ud2b8 \ud55c\uae00/\uc544\uc774\ucf58 \ub9e4\ud551",
+      "file_type": "rationale",
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 22",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "golden0702_category_cd_mapping",
+      "community": 13,
+      "norm_label": "category_cd \u1111\u1173\u1105\u1169\u11ab\u1110\u1173 \u1112\u1161\u11ab\u1100\u1173\u11af/\u110b\u1161\u110b\u1175\u110f\u1169\u11ab \u1106\u1162\u1111\u1175\u11bc"
     }
   ],
   "links": [
@@ -5318,8 +5430,8 @@
       "source_file": "src/components/cards.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "cards_InlineCard",
-      "target": "spendcards_RecordedCard"
+      "source": "spendcards_RecordedCard",
+      "target": "cards_InlineCard"
     },
     {
       "relation": "references",
@@ -6552,8 +6664,8 @@
       "source_location": "L62",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "charts_mapchartcard_mapchartcard",
-      "target": "charts_mapchartcard_distm"
+      "source": "charts_mapchartcard_distm",
+      "target": "charts_mapchartcard_mapchartcard"
     },
     {
       "relation": "imports",
@@ -6696,8 +6808,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_bar_jsx",
-      "target": "src_charts_util_jsx"
+      "source": "src_charts_util_jsx",
+      "target": "src_charts_templates_bar_jsx"
     },
     {
       "relation": "imports_from",
@@ -6707,8 +6819,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_barlist_jsx",
-      "target": "src_charts_util_jsx"
+      "source": "src_charts_util_jsx",
+      "target": "src_charts_templates_barlist_jsx"
     },
     {
       "relation": "imports_from",
@@ -6718,8 +6830,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_compare_jsx",
-      "target": "src_charts_util_jsx"
+      "source": "src_charts_util_jsx",
+      "target": "src_charts_templates_compare_jsx"
     },
     {
       "relation": "imports_from",
@@ -6762,8 +6874,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_list_jsx",
-      "target": "src_charts_util_jsx"
+      "source": "src_charts_util_jsx",
+      "target": "src_charts_templates_list_jsx"
     },
     {
       "relation": "imports_from",
@@ -6795,8 +6907,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_trend_jsx",
-      "target": "src_charts_util_jsx"
+      "source": "src_charts_util_jsx",
+      "target": "src_charts_templates_trend_jsx"
     },
     {
       "relation": "imports_from",
@@ -6806,8 +6918,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_txlist_jsx",
-      "target": "src_charts_util_jsx"
+      "source": "src_charts_util_jsx",
+      "target": "src_charts_templates_txlist_jsx"
     },
     {
       "relation": "calls",
@@ -6817,8 +6929,8 @@
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "charts_util_won",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "charts_util_won"
     },
     {
       "relation": "imports",
@@ -6828,8 +6940,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_bar_jsx",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "src_charts_templates_bar_jsx"
     },
     {
       "relation": "imports",
@@ -6839,8 +6951,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_barlist_jsx",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "src_charts_templates_barlist_jsx"
     },
     {
       "relation": "imports",
@@ -6850,8 +6962,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_compare_jsx",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "src_charts_templates_compare_jsx"
     },
     {
       "relation": "imports",
@@ -6894,8 +7006,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_list_jsx",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "src_charts_templates_list_jsx"
     },
     {
       "relation": "imports",
@@ -6927,8 +7039,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_trend_jsx",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "src_charts_templates_trend_jsx"
     },
     {
       "relation": "imports",
@@ -6938,8 +7050,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_txlist_jsx",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "src_charts_templates_txlist_jsx"
     },
     {
       "relation": "calls",
@@ -6949,8 +7061,8 @@
       "source_file": "src/charts/templates/barlist.jsx",
       "source_location": "L64",
       "weight": 1.0,
-      "source": "templates_barlist_barlisttemplate",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "templates_barlist_barlisttemplate"
     },
     {
       "relation": "calls",
@@ -6971,8 +7083,8 @@
       "source_file": "src/charts/templates/list.jsx",
       "source_location": "L19",
       "weight": 1.0,
-      "source": "templates_list_listtemplate",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "templates_list_listtemplate"
     },
     {
       "relation": "calls",
@@ -6982,8 +7094,8 @@
       "source_file": "src/charts/templates/trend.jsx",
       "source_location": "L26",
       "weight": 1.0,
-      "source": "templates_trend_trendtemplate",
-      "target": "charts_util_num"
+      "source": "charts_util_num",
+      "target": "templates_trend_trendtemplate"
     },
     {
       "relation": "imports",
@@ -7004,8 +7116,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_bar_jsx",
-      "target": "charts_util_won"
+      "source": "charts_util_won",
+      "target": "src_charts_templates_bar_jsx"
     },
     {
       "relation": "imports",
@@ -7081,8 +7193,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_bar_jsx",
-      "target": "charts_util_chartshell"
+      "source": "charts_util_chartshell",
+      "target": "src_charts_templates_bar_jsx"
     },
     {
       "relation": "imports",
@@ -7092,8 +7204,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_barlist_jsx",
-      "target": "charts_util_chartshell"
+      "source": "charts_util_chartshell",
+      "target": "src_charts_templates_barlist_jsx"
     },
     {
       "relation": "imports",
@@ -7103,8 +7215,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_compare_jsx",
-      "target": "charts_util_chartshell"
+      "source": "charts_util_chartshell",
+      "target": "src_charts_templates_compare_jsx"
     },
     {
       "relation": "imports",
@@ -7147,8 +7259,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_list_jsx",
-      "target": "charts_util_chartshell"
+      "source": "charts_util_chartshell",
+      "target": "src_charts_templates_list_jsx"
     },
     {
       "relation": "imports",
@@ -7180,8 +7292,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_trend_jsx",
-      "target": "charts_util_chartshell"
+      "source": "charts_util_chartshell",
+      "target": "src_charts_templates_trend_jsx"
     },
     {
       "relation": "imports",
@@ -7191,8 +7303,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_txlist_jsx",
-      "target": "charts_util_chartshell"
+      "source": "charts_util_chartshell",
+      "target": "src_charts_templates_txlist_jsx"
     },
     {
       "relation": "imports",
@@ -7224,8 +7336,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_bar_jsx",
-      "target": "charts_util_insightbox"
+      "source": "charts_util_insightbox",
+      "target": "src_charts_templates_bar_jsx"
     },
     {
       "relation": "imports",
@@ -7235,8 +7347,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_barlist_jsx",
-      "target": "charts_util_insightbox"
+      "source": "charts_util_insightbox",
+      "target": "src_charts_templates_barlist_jsx"
     },
     {
       "relation": "imports",
@@ -7246,8 +7358,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_compare_jsx",
-      "target": "charts_util_insightbox"
+      "source": "charts_util_insightbox",
+      "target": "src_charts_templates_compare_jsx"
     },
     {
       "relation": "imports",
@@ -7301,8 +7413,8 @@
       "source_location": "L2",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_trend_jsx",
-      "target": "charts_util_insightbox"
+      "source": "charts_util_insightbox",
+      "target": "src_charts_templates_trend_jsx"
     },
     {
       "relation": "imports",
@@ -7312,8 +7424,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_charts_templates_bar_jsx",
-      "target": "charts_util_donut_colors"
+      "source": "charts_util_donut_colors",
+      "target": "src_charts_templates_bar_jsx"
     },
     {
       "relation": "imports",
@@ -8100,9 +8212,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L3",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_components_cards_jsx",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_components_cards_jsx",
+      "target": "src_app_jsx"
     },
     {
       "relation": "imports_from",
@@ -8111,9 +8223,9 @@
       "source_file": "src/components/cards.jsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_cards_jsx",
-      "target": "src_components_spendcards_jsx",
-      "confidence_score": 1.0
+      "target": "src_components_spendcards_jsx"
     },
     {
       "relation": "imports",
@@ -8122,9 +8234,9 @@
       "source_file": "src/components/cards.jsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_cards_jsx",
-      "target": "components_spendcards_recordedcard",
-      "confidence_score": 1.0
+      "target": "components_spendcards_recordedcard"
     },
     {
       "relation": "imports",
@@ -8133,9 +8245,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L3",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "components_cards_inlinecard",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "components_cards_inlinecard",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -8554,8 +8666,8 @@
       "source_file": "src/charts/intentConfig.js",
       "source_location": "111",
       "weight": 1.0,
-      "source": "intentConfig_INTENT_CONFIG",
-      "target": "barlist_BarListTemplate"
+      "source": "barlist_BarListTemplate",
+      "target": "intentConfig_INTENT_CONFIG"
     },
     {
       "relation": "semantically_similar_to",
@@ -8614,8 +8726,8 @@
       "source_file": "src/charts/intentConfig.js",
       "source_location": "51",
       "weight": 1.0,
-      "source": "intentConfig_INTENT_CONFIG",
-      "target": "compare_CompareTemplate"
+      "source": "compare_CompareTemplate",
+      "target": "intentConfig_INTENT_CONFIG"
     },
     {
       "relation": "calls",
@@ -8824,8 +8936,8 @@
       "source_file": "src/charts/intentConfig.js",
       "source_location": "122",
       "weight": 1.0,
-      "source": "intentConfig_INTENT_CONFIG",
-      "target": "list_ListTemplate"
+      "source": "list_ListTemplate",
+      "target": "intentConfig_INTENT_CONFIG"
     },
     {
       "relation": "semantically_similar_to",
@@ -8934,8 +9046,8 @@
       "source_file": "src/charts/templates/trend.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "trend_honestPrevNull",
-      "target": "trend_TrendTemplate"
+      "source": "trend_TrendTemplate",
+      "target": "trend_honestPrevNull"
     },
     {
       "relation": "shares_data_with",
@@ -8944,8 +9056,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "queries_QUERIES",
-      "target": "trend_TrendTemplate"
+      "source": "trend_TrendTemplate",
+      "target": "queries_QUERIES"
     },
     {
       "relation": "calls",
@@ -8974,8 +9086,8 @@
       "source_file": "src/charts/templates/txList.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "txList_progressiveReveal",
-      "target": "txList_TxListTemplate"
+      "source": "txList_TxListTemplate",
+      "target": "txList_progressiveReveal"
     },
     {
       "relation": "shares_data_with",
@@ -8984,8 +9096,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "queries_QUERIES",
-      "target": "txList_TxListTemplate"
+      "source": "txList_TxListTemplate",
+      "target": "queries_QUERIES"
     },
     {
       "relation": "rationale_for",
@@ -9034,8 +9146,8 @@
       "source_file": "src/components/cards.jsx",
       "source_location": null,
       "weight": 1.0,
-      "source": "cards_singlePathRender",
-      "target": "cards_InlineCard"
+      "source": "cards_InlineCard",
+      "target": "cards_singlePathRender"
     },
     {
       "relation": "references",
@@ -9576,9 +9688,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L38",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_querydatasource",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_querydatasource",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9586,9 +9698,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L99",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_grades",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_grades",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9596,9 +9708,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L100",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_grade_labels",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_grade_labels",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9606,9 +9718,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L102",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_suggestions",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_suggestions",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9616,9 +9728,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L112",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_quick_queries",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_quick_queries",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9626,9 +9738,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L121",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_foxmark",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_foxmark",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9636,9 +9748,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L135",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_sparkleicon",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_sparkleicon",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9646,9 +9758,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L148",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_tabs",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_tabs",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9656,9 +9768,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L151",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_header",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_header",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9666,9 +9778,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L244",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_comingsoon",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_comingsoon",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9676,9 +9788,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L264",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_aiorb",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_aiorb",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9686,9 +9798,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L279",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_introscreen",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_introscreen",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9696,9 +9808,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L348",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_menuicons",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_menuicons",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9706,9 +9818,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L400",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_menuscreen",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_menuscreen",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9716,9 +9828,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L435",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_webviewwelcome",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_webviewwelcome",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9726,9 +9838,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L450",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_welcomescreen",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_welcomescreen",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9736,9 +9848,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L583",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_bubble",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_bubble",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9746,9 +9858,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L644",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_typing",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_typing",
+      "target": "src_app_jsx"
     },
     {
       "relation": "calls",
@@ -9757,9 +9869,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L645",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_typing",
-      "target": "src_app_poolkeyforintent",
-      "confidence_score": 1.0
+      "target": "src_app_poolkeyforintent"
     },
     {
       "relation": "contains",
@@ -9767,9 +9879,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L673",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_favoritesbar",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_favoritesbar",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9777,9 +9889,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L739",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_quickreplypanel",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_quickreplypanel",
+      "target": "src_app_jsx"
     },
     {
       "relation": "contains",
@@ -9787,9 +9899,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L855",
       "weight": 1.0,
-      "source": "src_app_jsx",
-      "target": "src_app_app",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_app_jsx"
     },
     {
       "relation": "imports_from",
@@ -10088,9 +10200,9 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L9",
       "weight": 1.0,
-      "source": "src_charts_codelabels_js",
-      "target": "charts_codelabels_code_labels",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_code_labels",
+      "target": "src_charts_codelabels_js"
     },
     {
       "relation": "contains",
@@ -10098,9 +10210,9 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L17",
       "weight": 1.0,
-      "source": "src_charts_codelabels_js",
-      "target": "charts_codelabels_channel_canon",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_channel_canon",
+      "target": "src_charts_codelabels_js"
     },
     {
       "relation": "calls",
@@ -10110,8 +10222,8 @@
       "source_location": "L50",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "charts_codelabels_labelfor",
-      "target": "charts_codelabels_haskorean"
+      "source": "charts_codelabels_haskorean",
+      "target": "charts_codelabels_labelfor"
     },
     {
       "relation": "contains",
@@ -10119,9 +10231,9 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L29",
       "weight": 1.0,
-      "source": "src_charts_codelabels_js",
-      "target": "charts_codelabels_haskorean",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_haskorean",
+      "target": "src_charts_codelabels_js"
     },
     {
       "relation": "calls",
@@ -10131,8 +10243,8 @@
       "source_location": "L51",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "charts_codelabels_labelfor",
-      "target": "charts_codelabels_labelofcode"
+      "source": "charts_codelabels_labelofcode",
+      "target": "charts_codelabels_labelfor"
     },
     {
       "relation": "contains",
@@ -10140,9 +10252,9 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L36",
       "weight": 1.0,
-      "source": "src_charts_codelabels_js",
-      "target": "charts_codelabels_labelofcode",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_labelofcode",
+      "target": "src_charts_codelabels_js"
     },
     {
       "relation": "imports",
@@ -10151,9 +10263,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L4",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "charts_codelabels_labelofcode",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_labelofcode",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "calls",
@@ -10163,8 +10275,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L51",
       "weight": 1.0,
-      "source": "operia_queries_meanslabel",
-      "target": "charts_codelabels_labelofcode"
+      "source": "charts_codelabels_labelofcode",
+      "target": "operia_queries_meanslabel"
     },
     {
       "relation": "contains",
@@ -10172,9 +10284,9 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L49",
       "weight": 1.0,
-      "source": "src_charts_codelabels_js",
-      "target": "charts_codelabels_labelfor",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_labelfor",
+      "target": "src_charts_codelabels_js"
     },
     {
       "relation": "contains",
@@ -10367,8 +10479,8 @@
       "source_file": "src/App.jsx",
       "source_location": "36",
       "weight": 1.0,
-      "source": "App_phaseA_bridge",
-      "target": "App_queryDataSource"
+      "source": "App_queryDataSource",
+      "target": "App_phaseA_bridge"
     },
     {
       "relation": "shares_data_with",
@@ -10646,9 +10758,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L9",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_round",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_round",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10656,9 +10768,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L10",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_mean",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_mean",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10666,9 +10778,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L11",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_withpct",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_withpct",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10676,9 +10788,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L16",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_sumby",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_sumby",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "calls",
@@ -10688,8 +10800,8 @@
       "source_location": "L25",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "operia_queries_mlabel",
-      "target": "operia_queries_digits"
+      "source": "operia_queries_digits",
+      "target": "operia_queries_mlabel"
     },
     {
       "relation": "calls",
@@ -10699,8 +10811,8 @@
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "operia_queries_dlabel",
-      "target": "operia_queries_digits"
+      "source": "operia_queries_digits",
+      "target": "operia_queries_dlabel"
     },
     {
       "relation": "calls",
@@ -10710,8 +10822,8 @@
       "source_location": "L30",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "operia_queries_toisodate",
-      "target": "operia_queries_digits"
+      "source": "operia_queries_digits",
+      "target": "operia_queries_toisodate"
     },
     {
       "relation": "contains",
@@ -10719,9 +10831,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L24",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_digits",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_digits",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "calls",
@@ -10730,9 +10842,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L27",
       "weight": 1.0,
-      "source": "operia_queries_monthkey",
-      "target": "operia_queries_digits",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_digits",
+      "target": "operia_queries_monthkey"
     },
     {
       "relation": "contains",
@@ -10740,9 +10852,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L25",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_mlabel",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_mlabel",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "calls",
@@ -10752,8 +10864,8 @@
       "source_location": "L46",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "operia_queries_last7days",
-      "target": "operia_queries_dlabel"
+      "source": "operia_queries_dlabel",
+      "target": "operia_queries_last7days"
     },
     {
       "relation": "contains",
@@ -10761,9 +10873,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L28",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_dlabel",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_dlabel",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10771,9 +10883,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L30",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_toisodate",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_toisodate",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "calls",
@@ -10783,8 +10895,8 @@
       "source_location": "L32",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "operia_queries_ymdof",
-      "target": "operia_queries_pad2"
+      "source": "operia_queries_pad2",
+      "target": "operia_queries_ymdof"
     },
     {
       "relation": "contains",
@@ -10792,9 +10904,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L31",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_pad2",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_pad2",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "calls",
@@ -10804,8 +10916,8 @@
       "source_location": "L40",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "operia_queries_last7days",
-      "target": "operia_queries_ymdof"
+      "source": "operia_queries_ymdof",
+      "target": "operia_queries_last7days"
     },
     {
       "relation": "contains",
@@ -10813,9 +10925,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L32",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_ymdof",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_ymdof",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10823,9 +10935,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L34",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_today",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_today",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10833,9 +10945,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L38",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_last7days",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_last7days",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10843,9 +10955,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L51",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_meanslabel",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_meanslabel",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -10853,9 +10965,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L53",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_queries",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "operia_queries_queries",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "references",
@@ -11034,8 +11146,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "queries_singleStatementContract",
-      "target": "queries_QUERIES"
+      "source": "queries_QUERIES",
+      "target": "queries_singleStatementContract"
     },
     {
       "relation": "rationale_for",
@@ -11044,8 +11156,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "queries_dateParsePositional",
-      "target": "queries_QUERIES"
+      "source": "queries_QUERIES",
+      "target": "queries_dateParsePositional"
     },
     {
       "relation": "rationale_for",
@@ -11054,8 +11166,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "queries_notFutureCutoff",
-      "target": "queries_QUERIES"
+      "source": "queries_QUERIES",
+      "target": "queries_notFutureCutoff"
     },
     {
       "relation": "rationale_for",
@@ -11064,8 +11176,8 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "queries_multiShapeTolerance",
-      "target": "queries_QUERIES"
+      "source": "queries_QUERIES",
+      "target": "queries_multiShapeTolerance"
     },
     {
       "relation": "conceptually_related_to",
@@ -11074,8 +11186,8 @@
       "source_file": "WORKFLOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "workflow_devMock",
-      "target": "queries_QUERIES"
+      "source": "queries_QUERIES",
+      "target": "workflow_devMock"
     },
     {
       "relation": "calls",
@@ -11494,8 +11606,8 @@
       "source_file": "WORKFLOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "workflow_spec",
-      "target": "workflow_roleSeparation"
+      "source": "workflow_roleSeparation",
+      "target": "workflow_spec"
     },
     {
       "relation": "semantically_similar_to",
@@ -11504,8 +11616,8 @@
       "source_file": ".claude/agents/SPECIALIST.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "specialist_S7_VIP",
-      "target": "workflow_roleSeparation"
+      "source": "workflow_roleSeparation",
+      "target": "specialist_S7_VIP"
     },
     {
       "relation": "references",
@@ -11563,9 +11675,9 @@
       "source_file": ".claude/settings.local.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "claude_settings_local_json",
-      "target": "claude_settings_local_permissions",
-      "confidence_score": 1.0
+      "target": "claude_settings_local_permissions"
     },
     {
       "relation": "contains",
@@ -11573,9 +11685,9 @@
       "source_file": ".claude/settings.local.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "claude_settings_local_permissions",
-      "target": "claude_settings_local_permissions_allow",
-      "confidence_score": 1.0
+      "target": "claude_settings_local_permissions_allow"
     },
     {
       "relation": "imports_from",
@@ -11584,9 +11696,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_api_session_js",
-      "confidence_score": 1.0
+      "target": "src_api_session_js"
     },
     {
       "relation": "imports",
@@ -11595,9 +11707,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "api_session_getuserid",
-      "confidence_score": 1.0
+      "target": "api_session_getuserid"
     },
     {
       "relation": "contains",
@@ -11605,9 +11717,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_sanitizeanswer",
-      "confidence_score": 1.0
+      "target": "src_app_sanitizeanswer"
     },
     {
       "relation": "contains",
@@ -11615,9 +11727,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L479",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_useswipereveal",
-      "confidence_score": 1.0
+      "target": "src_app_useswipereveal"
     },
     {
       "relation": "contains",
@@ -11625,9 +11737,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L538",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_userbubble",
-      "confidence_score": 1.0
+      "target": "src_app_userbubble"
     },
     {
       "relation": "contains",
@@ -11635,9 +11747,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L576",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_istecherrormessage",
-      "confidence_score": 1.0
+      "target": "src_app_istecherrormessage"
     },
     {
       "relation": "contains",
@@ -11645,9 +11757,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L624",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_loading_pools",
-      "confidence_score": 1.0
+      "target": "src_app_loading_pools"
     },
     {
       "relation": "contains",
@@ -11655,9 +11767,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L633",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_poolkeyforintent",
-      "confidence_score": 1.0
+      "target": "src_app_poolkeyforintent"
     },
     {
       "relation": "contains",
@@ -11665,9 +11777,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L696",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_faqrow",
-      "confidence_score": 1.0
+      "target": "src_app_faqrow"
     },
     {
       "relation": "contains",
@@ -11675,9 +11787,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L822",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app_jsx",
-      "target": "src_app_uiddebugbadge",
-      "confidence_score": 1.0
+      "target": "src_app_uiddebugbadge"
     },
     {
       "relation": "calls",
@@ -11686,9 +11798,9 @@
       "source_file": "src/App.jsx",
       "source_location": "L698",
       "weight": 1.0,
-      "source": "src_app_faqrow",
-      "target": "src_app_useswipereveal",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_app_useswipereveal",
+      "target": "src_app_faqrow"
     },
     {
       "relation": "contains",
@@ -11696,9 +11808,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_api_session_js",
-      "target": "api_session_recordsession",
-      "confidence_score": 1.0
+      "target": "api_session_recordsession"
     },
     {
       "relation": "contains",
@@ -11706,9 +11818,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_api_session_js",
-      "target": "api_session_safejson",
-      "confidence_score": 1.0
+      "target": "api_session_safejson"
     },
     {
       "relation": "contains",
@@ -11716,9 +11828,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_api_session_js",
-      "target": "api_session_loc_probe_names",
-      "confidence_score": 1.0
+      "target": "api_session_loc_probe_names"
     },
     {
       "relation": "contains",
@@ -11726,9 +11838,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_api_session_js",
-      "target": "api_session_probelocations",
-      "confidence_score": 1.0
+      "target": "api_session_probelocations"
     },
     {
       "relation": "contains",
@@ -11736,9 +11848,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_api_session_js",
-      "target": "api_session_resolveuserid",
-      "confidence_score": 1.0
+      "target": "api_session_resolveuserid"
     },
     {
       "relation": "contains",
@@ -11746,9 +11858,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_api_session_js",
-      "target": "api_session_getuserid",
-      "confidence_score": 1.0
+      "target": "api_session_getuserid"
     },
     {
       "relation": "calls",
@@ -11757,9 +11869,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L67",
       "weight": 1.0,
-      "source": "api_session_resolveuserid",
-      "target": "api_session_recordsession",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "api_session_recordsession",
+      "target": "api_session_resolveuserid"
     },
     {
       "relation": "calls",
@@ -11768,9 +11880,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L49",
       "weight": 1.0,
-      "source": "api_session_probelocations",
-      "target": "api_session_safejson",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "api_session_safejson",
+      "target": "api_session_probelocations"
     },
     {
       "relation": "calls",
@@ -11779,9 +11891,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L66",
       "weight": 1.0,
-      "source": "api_session_resolveuserid",
-      "target": "api_session_safejson",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "api_session_safejson",
+      "target": "api_session_resolveuserid"
     },
     {
       "relation": "calls",
@@ -11790,9 +11902,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L67",
       "weight": 1.0,
-      "source": "api_session_resolveuserid",
-      "target": "api_session_probelocations",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "api_session_probelocations",
+      "target": "api_session_resolveuserid"
     },
     {
       "relation": "calls",
@@ -11801,9 +11913,9 @@
       "source_file": "src/api/session.js",
       "source_location": "L93",
       "weight": 1.0,
-      "source": "api_session_getuserid",
-      "target": "api_session_resolveuserid",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "api_session_resolveuserid",
+      "target": "api_session_getuserid"
     },
     {
       "relation": "contains",
@@ -11811,9 +11923,9 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_charts_codelabels_js",
-      "target": "charts_codelabels_canonchannel",
-      "confidence_score": 1.0
+      "target": "charts_codelabels_canonchannel"
     },
     {
       "relation": "imports_from",
@@ -11822,9 +11934,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L4",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "src_charts_codelabels_js",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "src_charts_codelabels_js",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "imports",
@@ -11833,9 +11945,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L4",
       "weight": 1.0,
-      "source": "src_mock_operia_queries_js",
-      "target": "charts_codelabels_canonchannel",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "charts_codelabels_canonchannel",
+      "target": "src_mock_operia_queries_js"
     },
     {
       "relation": "contains",
@@ -11843,9 +11955,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_dailyspendcard",
-      "confidence_score": 1.0
+      "target": "components_spendcards_dailyspendcard"
     },
     {
       "relation": "contains",
@@ -11853,9 +11965,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_recordedcard",
-      "confidence_score": 1.0
+      "target": "components_spendcards_recordedcard"
     },
     {
       "relation": "contains",
@@ -11863,9 +11975,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_periodreportcard",
-      "confidence_score": 1.0
+      "target": "components_spendcards_periodreportcard"
     },
     {
       "relation": "contains",
@@ -11873,9 +11985,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L189",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_catspend_match",
-      "confidence_score": 1.0
+      "target": "components_spendcards_catspend_match"
     },
     {
       "relation": "contains",
@@ -11883,9 +11995,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L198",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_catspend_colors",
-      "confidence_score": 1.0
+      "target": "components_spendcards_catspend_colors"
     },
     {
       "relation": "contains",
@@ -11893,9 +12005,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L199",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_categorydonut",
-      "confidence_score": 1.0
+      "target": "components_spendcards_categorydonut"
     },
     {
       "relation": "contains",
@@ -11903,9 +12015,9 @@
       "source_file": "src/components/spendcards.jsx",
       "source_location": "L245",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_spendcards_jsx",
-      "target": "components_spendcards_categoryspendcard",
-      "confidence_score": 1.0
+      "target": "components_spendcards_categoryspendcard"
     },
     {
       "relation": "contains",
@@ -11913,9 +12025,9 @@
       "source_file": "src/mock/operia/queries.js",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_mock_operia_queries_js",
-      "target": "operia_queries_monthkey",
-      "confidence_score": 1.0
+      "target": "operia_queries_monthkey"
     },
     {
       "relation": "contains",
@@ -11923,9 +12035,9 @@
       "source_file": "src/util/clipboard.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_util_clipboard_js",
-      "target": "util_clipboard_copytext",
-      "confidence_score": 1.0
+      "target": "util_clipboard_copytext"
     },
     {
       "relation": "conceptually_related_to",
@@ -11954,8 +12066,8 @@
       "source_file": "src/api/session.js",
       "source_location": "3",
       "weight": 1.0,
-      "source": "session_nativeBridge",
-      "target": "App_WEBVIEW_mode"
+      "source": "App_WEBVIEW_mode",
+      "target": "session_nativeBridge"
     },
     {
       "relation": "calls",
@@ -11984,8 +12096,8 @@
       "source_file": "src/charts/codeLabels.js",
       "source_location": "39",
       "weight": 1.0,
-      "source": "codeLabels_labelFor",
-      "target": "codeLabels_CODE_LABELS"
+      "source": "codeLabels_CODE_LABELS",
+      "target": "codeLabels_labelFor"
     },
     {
       "relation": "references",
@@ -12014,8 +12126,8 @@
       "source_file": "src/charts/intentConfig.js",
       "source_location": "142",
       "weight": 1.0,
-      "source": "intentConfig_templateFor",
-      "target": "intentConfig_INTENT_CONFIG"
+      "source": "intentConfig_INTENT_CONFIG",
+      "target": "intentConfig_templateFor"
     },
     {
       "relation": "calls",
@@ -12064,8 +12176,8 @@
       "source_file": "src/charts/MapChartCard.jsx",
       "source_location": "59",
       "weight": 1.0,
-      "source": "MapChartCard_geoPolicy",
-      "target": "MapChartCard_component"
+      "source": "MapChartCard_component",
+      "target": "MapChartCard_geoPolicy"
     },
     {
       "relation": "calls",
@@ -12074,8 +12186,8 @@
       "source_file": "src/charts/templates/bar.jsx",
       "source_location": "28",
       "weight": 1.0,
-      "source": "bar_BarTemplate",
-      "target": "util_ChartShell"
+      "source": "util_ChartShell",
+      "target": "bar_BarTemplate"
     },
     {
       "relation": "calls",
@@ -12084,8 +12196,8 @@
       "source_file": "src/charts/templates/bar.jsx",
       "source_location": "77",
       "weight": 1.0,
-      "source": "bar_BarTemplate",
-      "target": "util_InsightBox"
+      "source": "util_InsightBox",
+      "target": "bar_BarTemplate"
     },
     {
       "relation": "conceptually_related_to",
@@ -12094,8 +12206,8 @@
       "source_file": ".claude/settings.local.json",
       "source_location": "7",
       "weight": 1.0,
-      "source": "settings_local",
-      "target": "viteconfig_default"
+      "source": "viteconfig_default",
+      "target": "settings_local"
     },
     {
       "relation": "rationale_for",
@@ -12104,8 +12216,8 @@
       "source_file": "src/util/clipboard.js",
       "source_location": null,
       "weight": 1.0,
-      "source": "clipboard_execCommandFallback",
-      "target": "clipboard_copyText"
+      "source": "clipboard_copyText",
+      "target": "clipboard_execCommandFallback"
     },
     {
       "relation": "conceptually_related_to",
@@ -12174,8 +12286,8 @@
       "source_file": ".claude/agents/aegis-dev000.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_safetyGate",
-      "target": "aegisreport_apiKeyExposure"
+      "source": "aegisreport_apiKeyExposure",
+      "target": "agent_safetyGate"
     },
     {
       "relation": "conceptually_related_to",
@@ -12184,8 +12296,8 @@
       "source_file": "\ud3ed\uc2a4\uc5d0\ub4c0 \uc11c\ubc84.txt",
       "source_location": null,
       "weight": 1.0,
-      "source": "serverinfo_creds",
-      "target": "aegisreport_envProductionTracked"
+      "source": "aegisreport_envProductionTracked",
+      "target": "serverinfo_creds"
     },
     {
       "relation": "cites",
@@ -12266,94 +12378,227 @@
       "weight": 1.0,
       "source": "specialist_doc",
       "target": "specialist_S4_PCM"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 3",
+      "weight": 1.0,
+      "source": "golden0702_doc",
+      "target": "golden0702_upload_xlsx"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 6-13",
+      "weight": 1.0,
+      "source": "golden0702_doc",
+      "target": "golden0702_q1_balance"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 16",
+      "weight": 1.0,
+      "source": "golden0702_doc",
+      "target": "golden0702_q_monthly"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 17",
+      "weight": 1.0,
+      "source": "golden0702_doc",
+      "target": "golden0702_q_nearby"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 18",
+      "weight": 1.0,
+      "source": "golden0702_doc",
+      "target": "golden0702_q_by_merchant"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 8",
+      "weight": 1.0,
+      "source": "golden0702_three_row_format",
+      "target": "golden0702_q1_balance"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 7",
+      "weight": 1.0,
+      "source": "golden0702_q1_balance",
+      "target": "golden0702_v_user_asset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 21",
+      "weight": 1.0,
+      "source": "golden0702_default_faq_chips",
+      "target": "golden0702_q1_balance"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 9-10",
+      "weight": 1.0,
+      "source": "golden0702_three_row_format",
+      "target": "golden0702_voucher_balance"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 9-11",
+      "weight": 1.0,
+      "source": "golden0702_three_row_format",
+      "target": "golden0702_allowance_balance"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 9-12",
+      "weight": 1.0,
+      "source": "golden0702_three_row_format",
+      "target": "golden0702_edupoint"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 10",
+      "weight": 1.0,
+      "source": "golden0702_voucher_balance",
+      "target": "golden0702_v_user_asset"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 11",
+      "weight": 1.0,
+      "source": "golden0702_allowance_balance",
+      "target": "golden0702_v_user_asset"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 12",
+      "weight": 1.0,
+      "source": "golden0702_edupoint",
+      "target": "golden0702_v_user_asset"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "lines 10-11",
+      "weight": 1.0,
+      "source": "golden0702_voucher_balance",
+      "target": "golden0702_allowance_balance"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 21",
+      "weight": 1.0,
+      "source": "golden0702_default_faq_chips",
+      "target": "golden0702_q_monthly"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 21",
+      "weight": 1.0,
+      "source": "golden0702_default_faq_chips",
+      "target": "golden0702_q_nearby"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 22",
+      "weight": 1.0,
+      "source": "golden0702_category_cd_mapping",
+      "target": "golden0702_q_nearby"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md",
+      "source_location": "line 21",
+      "weight": 1.0,
+      "source": "golden0702_default_faq_chips",
+      "target": "golden0702_q_by_merchant"
     }
   ],
   "hyperedges": [
     {
-      "id": "generic_chart_template_family",
-      "label": "Generic chart template family driven by INTENT_CONFIG",
+      "id": "balance_three_item_decomposition",
+      "label": "\uc794\uc561 3\ud56d\ubaa9 \ubd84\ud574 (\ubc14\uc6b0\ucc98\u00b7\uc6a9\ub3c8\u00b7\uc5d0\ub4c0\ud3ec\uc778\ud2b8)",
       "nodes": [
-        "intentConfig_INTENT_CONFIG",
-        "bar_BarTemplate",
-        "barlist_BarListTemplate",
-        "compare_CompareTemplate",
-        "list_ListTemplate"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "src/charts/intentConfig.js"
-    },
-    {
-      "id": "chart_shell_shared_ui",
-      "label": "ChartShell + InsightBox shared card UI across templates",
-      "nodes": [
-        "util_ChartShell",
-        "util_InsightBox",
-        "bar_BarTemplate",
-        "barlist_BarListTemplate",
-        "MapChartCard_component"
-      ],
-      "relation": "form",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "src/charts/util.jsx"
-    },
-    {
-      "id": "datasource_query_flow",
-      "label": "Datasource query flow: userId + companyId context -> SSE -> Bubble render",
-      "nodes": [
-        "App_queryDataSource",
-        "session_getUserId",
-        "App_sanitizeAnswer",
-        "App_Bubble"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "src/App.jsx"
-    },
-    {
-      "id": "operia_intent_render_pipeline",
-      "label": "Operia intent SQL/shape to chart-template render",
-      "nodes": [
-        "queries_QUERIES",
-        "trend_TrendTemplate",
-        "txList_TxListTemplate",
-        "queries_codeLabels"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "src/mock/operia/queries.js"
-    },
-    {
-      "id": "aegis_dev_governance",
-      "label": "aegis-dev000 governance: agent, specialist standards, review, safety",
-      "nodes": [
-        "agent_aegisdev000",
-        "specialist_doc",
-        "aegisreport_review",
-        "agent_safetyGate"
+        "golden0702_three_row_format",
+        "golden0702_voucher_balance",
+        "golden0702_allowance_balance",
+        "golden0702_edupoint"
       ],
       "relation": "form",
       "confidence": "EXTRACTED",
-      "confidence_score": 0.75,
-      "source_file": ".claude/agents/aegis-dev000.md"
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md"
     },
     {
-      "id": "webview_compat_stack",
-      "label": "WebView compatibility: viewport meta, clipboard fallback, deploy target",
+      "id": "golden_sql_four_faq_scope",
+      "label": "\ub514\ud3f4\ud2b8 FAQ \uce69 \uace8\ub4e0 SQL 4\uc885",
       "nodes": [
-        "indexhtml_webviewMeta",
-        "clipboard_execCommandFallback",
-        "serverinfo_creds"
+        "golden0702_q1_balance",
+        "golden0702_q_monthly",
+        "golden0702_q_nearby",
+        "golden0702_q_by_merchant"
       ],
       "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.65,
-      "source_file": "src/util/clipboard.js"
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "\uace8\ub4e0sql/\uc624\ud398\ub9ac\uc544_\uace8\ub4e0\uc218\uc815_\uc804\ub2ec_0702.md"
     }
   ],
-  "built_at_commit": "2bcd5d5433445c4636ca8b280861d6ac44e00998"
+  "built_at_commit": "67994d7dcae1dbe4f5276ed8456a2fb248b6bb54"
 }
