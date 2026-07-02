@@ -432,16 +432,25 @@ function MenuScreen({ onPick }) {
 
 }
 
-/* ── webview 빈 채팅 인사 (AI 첫 말풍선처럼) — 실제 메시지는 아님 ───────── */
-function WebviewWelcome() {
+/* ── webview 진입 랜딩 (카카오뱅크 AI 스타일 중앙 정렬) — 실제 메시지는 아님 ─────────
+   빈 대화(진입/새 대화)에서만 노출: 로고 + "{userName}님 반가워요"(2줄, 볼드) + 핵심질의 4개 칩(중앙정렬).
+   userName 없으면 "반가워요"로 폴백. 전송되면 started=true → 숨김(호출부 조건). */
+function IntroLanding({ userName, onPick }) {
   return (
-    <div className="flex gap-2 items-start edupay-fade">
-      <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
-      style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
-      </div>
-      <div className="max-w-[85%] bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm">
-        {"안녕! 난 너의 금융친구야 😊\n이번 달 소비, 같이 살펴볼까?\n아래 추천 질문에서 골라보거나 직접 물어봐 👇"}
+    <div className="flex-1 flex flex-col items-center pt-14 px-6 edupay-fade">
+      <SparkleIcon size={68} />
+      <h2 className="mt-6 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
+        {userName ? <>{userName}님<br />반가워요</> : "반가워요"}
+      </h2>
+      {/* 핵심질의 4개 칩 — 세로 스택, 가로 중앙정렬, 넉넉한 간격. 인사말과의 간격 확대(iPhone에서 붙어보임 방지). 탭 → 전송 */}
+      <div className="mt-14 w-full flex flex-col items-center gap-3">
+        {QUICK_QUERIES.map((q, i) =>
+        <button key={i} onClick={() => onPick(q.text)}
+        className="flex items-center gap-2 px-5 py-3 rounded-full text-[14px] font-semibold whitespace-nowrap bg-[#F3F4F6] text-gray-700 active:bg-violet-50 active:text-violet-600 active:scale-95 transition">
+            <span className="text-[16px]">{q.icon}</span>
+            {q.text}
+          </button>
+        )}
       </div>
     </div>);
 
@@ -736,69 +745,27 @@ function FaqRow({ item, isLast, onPick, onRequestDelete, isOpen, onOpen, onClose
 
 }
 
-/* ── 입력창 위 빠른 질문 패널 (접기/펼치기 + 추가/삭제) ──────────── */
-function QuickReplyPanel({ onPick, open, setOpen, items, onDelete, onReset, openKey, setOpenKey }) {
-  // open/접힘은 App이 소유(컨트롤드): 최초 펼침, 대화 시작·전송·채팅 탭 시 접힘. 더보기/접기·세로 스와이프로 토글.
-  // 첫 등장은 edupay-slide-up(아래→위), 펼침/접힘은 edupay-faq-grid(grid-template-rows 높이 슬라이드).
-  // items/onDelete/onReset 는 App 소유(컨트롤드 + localStorage 영속). onPick(전송) 동작 불변.
-  // 추가는 인라인 입력행 대신 '내 질문 말풍선 long-press'(App.registerFaqFromBubble)로 이동 → 여기선 +추가 UI 없음.
-  // [세로 스와이프] 핸들/헤더에서 아래로 끌면 접기(open=false), 위로 끌면 펼치기(open=true).
-  //   행 가로 삭제스와이프와는 별개 영역(헤더)이고 세로 우세일 때만 처리 → 충돌 없음.
-  // pointerdown 시 document 에 move/up 리스너 부착 → 손가락이 헤더(접힘 시 ≈17px)를 벗어나도 모든 move 수신.
-  //   setPointerCapture 는 일부 환경(헤드리스 등)에서 합성 move 를 리다이렉트 못해 끊기므로 쓰지 않는다.
-  //   탭(이동<8px)은 move 가 처리 분기에 안 닿아 토글 보존, swiped 로 스와이프 직후 토글만 1회 억제.
-  const sw = React.useRef({ y0: 0, x0: 0, decided: false, vert: false, swiped: false, docMove: null, docUp: null });
-  React.useEffect(() => () => {
-    if (sw.current.docMove) document.removeEventListener("pointermove", sw.current.docMove);
-    if (sw.current.docUp) document.removeEventListener("pointerup", sw.current.docUp);
-  }, []);
-  const onHdrDown = (e) => {
-    const s = sw.current;
-    s.y0 = e.clientY; s.x0 = e.clientX; s.decided = false; s.vert = false; s.swiped = false;
-    if (s.docMove) { document.removeEventListener("pointermove", s.docMove); document.removeEventListener("pointerup", s.docUp); }
-    s.docMove = (ev) => {
-      const dy = ev.clientY - s.y0, dx = ev.clientX - s.x0;
-      if (!s.decided) {
-        if (Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
-        s.decided = true; s.vert = Math.abs(dy) > Math.abs(dx); // 세로 우세일 때만 스와이프
-      }
-      if (!s.vert) return;
-      if (dy > 28) { setOpenKey(null); setOpen(false); s.swiped = true; s.end(); }   // 아래로 → 접기
-      else if (dy < -28) { setOpen(true); s.swiped = true; s.end(); }                 // 위로 → 펼치기
-    };
-    s.docUp = () => s.end();
-    s.end = () => {
-      if (s.docMove) document.removeEventListener("pointermove", s.docMove);
-      if (s.docUp) document.removeEventListener("pointerup", s.docUp);
-      s.docMove = null; s.docUp = null;
-    };
-    document.addEventListener("pointermove", s.docMove);
-    document.addEventListener("pointerup", s.docUp);
-  };
-  // 핸들/헤더 탭: 세로 스와이프 직후엔 토글 억제(swiped 1회 소비). 열린 삭제행도 닫음.
-  const hdrTapToggle = () => { if (sw.current.swiped) { sw.current.swiped = false; return; } setOpenKey(null); setOpen((o) => !o); };
+/* ── 즐겨찾기 팝업 (입력창 왼쪽 ★ 버튼으로 토글) ────────────────────
+   즐겨찾기(사용자 등록분)만 노출. 최신 등록 최상단(prepend된 favItems 그대로).
+   항목 탭 → 질문 전송 + 팝업 닫힘. 스와이프 삭제는 FaqRow 재사용(핵심질의 패널과 동일 패턴).
+   비었을 때 안내문 노출. 배경(딤) 탭 → 닫힘. */
+function FavoritesPopup({ items, onPick, onDelete, openKey, setOpenKey, onClose }) {
+  // 뒤 배경: 블러·딤 없이 완전 투명(뒤 화면 선명). 오버레이(inset-0)는 '밖 탭 = 닫힘'만 담당.
   return (
-    <div className="shrink-0 bg-white rounded-t-2xl edupay-slide-up" style={{ boxShadow: "0 -6px 18px -8px rgba(45,40,112,0.16)" }}>
-      {/* 핸들+헤더: 탭=펼침/접힘 토글, 세로 스와이프=접기/펼치기. (열린 삭제행도 닫음) */}
-      <div onPointerDown={onHdrDown} style={{ touchAction: "none" }}>
-        <button onClick={hdrTapToggle}
-        className="w-full flex items-center justify-center pt-2 pb-1.5 active:opacity-60 transition" aria-label={open ? "질문 접기" : "질문 더보기"}>
-          <span className="w-9 h-1 rounded-full bg-gray-300"></span>
-        </button>
-        <div className="px-4 pb-1.5 flex items-center justify-between">
-          <span className="text-[11.5px] font-bold text-gray-400">자주 묻는 질문</span>
-          <button onClick={hdrTapToggle} className="text-[11.5px] font-bold text-violet-500 active:opacity-60">{open ? "접기" : "더보기"}</button>
-        </div>
-      </div>
-      <div className={"edupay-faq-grid" + (open ? " is-open" : "")}>
-        <div className="edupay-faq-clip">
-          <div className="edupay-faq-inner px-2 pb-1.5">
+    <div className="absolute inset-0 z-40" onClick={onClose}>
+      {/* 시트: 입력바 위에 뜨도록 하단 여백(mb) 확보. 딤 대신 테두리+은은한 그림자로 자연스럽게 도드라짐. */}
+      <div className="absolute left-0 right-0 bottom-0 edupay-slide-up" onClick={(e) => e.stopPropagation()}>
+        <div className="mx-3 mb-[74px] bg-white rounded-2xl overflow-hidden border border-gray-200/80 transition"
+        style={{ boxShadow: "0 12px 32px -10px rgba(45,40,112,0.22), 0 2px 8px -2px rgba(45,40,112,0.10)" }}>
+          <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-gray-100">
+            <span className="text-[13px] font-bold text-gray-700">⭐ 즐겨찾기</span>
+            <button onClick={onClose} aria-label="닫기"
+            className="w-6 h-6 flex items-center justify-center text-gray-400 text-[20px] leading-none active:opacity-60">×</button>
+          </div>
+          <div className="max-h-[46vh] overflow-y-auto edupay-noscroll py-1">
             {items.length === 0 ?
-            /* 비움 상태: 안내 + 기본값 복구 */
-            <div className="flex flex-col items-center gap-2.5 px-4 py-5 text-center">
-              <span className="text-[12.5px] text-gray-400 leading-relaxed">등록된 질문이 없어요.<br />질문을 추가하거나 기본값으로 되돌릴 수 있어요.</span>
-              <button onClick={onReset}
-                className="px-4 py-2 rounded-xl text-[12.5px] font-bold text-violet-600 bg-violet-50 active:scale-95 transition">기본값으로 되돌리기</button>
+            <div className="px-6 py-9 text-center">
+              <span className="text-[12.5px] text-gray-400 leading-relaxed">질문을 꾹 눌러<br />즐겨찾기에 추가해봐</span>
             </div> :
 
             items.map((s, i) =>
@@ -843,7 +810,16 @@ function App() {
   }, []);
   // 패널 숨김 = (visualViewport 지원 시) 키보드 열림 / (미지원 폴백) 입력 포커스
   const faqHidden = (typeof window !== "undefined" && window.visualViewport) ? keyboardOpen : inputFocused;
-  const [faqOpen, setFaqOpen] = useState(true); // 자주 묻는 질문 펼침 상태(App이 소유) — 최초 펼침, 대화/탭/전송 시 접힘
+  const [faqOpen, setFaqOpen] = useState(true); // (레거시) 키보드 가시성 계산에만 관여, 하단 패널 제거됨
+  const [favOpen, setFavOpen] = useState(false); // 즐겨찾기 팝업 열림 상태 — 입력창 왼쪽 ★ 버튼으로 토글
+  // [진입 랜딩] 인사 표시용 이름 — 세션에 name 등 표시이름 필드가 없으므로 getUserId() 결과(userId) 사용.
+  //   폴백: name(없음) → userId → null(→ "반가워요"). getUserId 는 캐시 Promise(session.js).
+  const [userName, setUserName] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    getUserId().then((u) => { if (alive) setUserName(u || null); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
   const [typing, setTyping] = useState(false);
   const [typingIntent, setTypingIntent] = useState(null); // 로딩 말풍선 문구 풀 선택용(send 에서 cardIntent 결과 저장)
   const [ledger, setLedger] = useState(() => DATA.ledgerSeed.map((x) => ({ ...x })));
@@ -875,56 +851,59 @@ function App() {
     if (faqToastTimerRef.current) clearTimeout(faqToastTimerRef.current);
     faqToastTimerRef.current = setTimeout(() => setFaqToast(null), 1600);
   };
-  // [FAQ] 자주 묻는 질문 — DB 없이 localStorage("edupay_faq_v1") 영속(웹뷰용 데모). 형식: [{icon,text}].
-  //   초기값: 저장본 있으면 parse(배열·필드 유효성 정리), 없거나 파싱 실패 시 시드(QUICK_QUERIES) 폴백.
-  const [faqItems, setFaqItems] = useState(() => {
-    try {
-      const raw = localStorage.getItem("edupay_faq_v1");
-      if (raw) {
+  // [즐겨찾기] 사용자 등록 질문 — DB 없이 localStorage("edupay_favorites_v1") 영속(웹뷰용 데모). 형식: [{icon,text}].
+  //   초기값: 키 존재 시 저장본 그대로(빈 배열도 '다 지운 상태'로 존중 → 재시드 금지),
+  //           키 없음(신규)일 때만 핵심질의 4개(QUICK_QUERIES 순서)로 시드. 시드/랜딩 모두 같은 QUICK_QUERIES 참조.
+  //   정렬: 최신 등록이 배열 앞(prepend). 구 키(edupay_faq_v1: 핵심질의 시드본)는 더는 사용하지 않음.
+  const [favItems, setFavItems] = useState(() => {
+    let raw = null;
+    try { raw = localStorage.getItem("edupay_favorites_v1"); } catch (e) {}
+    if (raw != null) {
+      // 키 존재 → 저장값 사용(재시드 금지). 손상/비배열이면 빈 배열.
+      try {
         const arr = JSON.parse(raw);
         if (Array.isArray(arr)) {
-          const cleaned = arr
+          return arr
             .filter((x) => x && typeof x.text === "string" && x.text.trim())
             .map((x) => ({ icon: x.icon || "💬", text: String(x.text).trim() }));
-          return cleaned; // 빈 배열도 '사용자가 다 지운 상태'로 존중(비움 UI 노출)
         }
-      }
-    } catch (e) {}
+      } catch (e) {}
+      return [];
+    }
+    // 키 없음(신규) → 핵심질의 4개로 시드(QUICK_QUERIES 순서 그대로)
     return QUICK_QUERIES.map((x) => ({ ...x }));
   });
-  // faqItems 변경 시마다 저장(프라이빗 모드/차단 대비 try/catch).
+  // favItems 변경 시마다 저장(프라이빗 모드/차단 대비 try/catch).
   useEffect(() => {
-    try { localStorage.setItem("edupay_faq_v1", JSON.stringify(faqItems)); } catch (e) {}
-  }, [faqItems]);
-  // [FAQ] 스와이프로 '열린'(삭제 버튼 노출) 행 단일 소스. 행 key=item.text. null=모두 닫힘.
+    try { localStorage.setItem("edupay_favorites_v1", JSON.stringify(favItems)); } catch (e) {}
+  }, [favItems]);
+  // [즐겨찾기] 스와이프로 '열린'(삭제 버튼 노출) 행 단일 소스. 행 key=item.text. null=모두 닫힘.
   const [openFaqKey, setOpenFaqKey] = useState(null);
-  // 추가: trim·빈값/중복(text 동일)·길이(≤40) 검증. 성공 시 true 반환(패널이 입력행 닫기 판단).
-  const addFaq = (text) => {
+  // 추가: trim·빈값/중복(text 동일)·길이(≤40) 검증. 성공 시 true 반환. 최신 등록이 맨 위(prepend).
+  const addFav = (text) => {
     const t = (text || "").trim().slice(0, 40);
     if (!t) return false;
-    if (faqItems.some((x) => x.text === t)) return false;
-    setFaqItems((prev) => [...prev, { icon: "💬", text: t }]);
+    if (favItems.some((x) => x.text === t)) return false;
+    setFavItems((prev) => [{ icon: "💬", text: t }, ...prev]);
     return true;
   };
   // 삭제(가로 스와이프 → 빨간 '삭제' 버튼 탭): 2단계 제스처가 곧 확인이므로 window.confirm 없이 즉시 제거.
-  //   setFaqItems → faqItems useEffect 가 localStorage("edupay_faq_v1") 자동 갱신. 열린 키도 초기화.
-  const deleteFaq = (item) => {
+  //   setFavItems → favItems useEffect 가 localStorage("edupay_favorites_v1") 자동 갱신. 열린 키도 초기화.
+  const deleteFav = (item) => {
     if (!item || !item.text) return;
-    setFaqItems((prev) => prev.filter((x) => x.text !== item.text));
+    setFavItems((prev) => prev.filter((x) => x.text !== item.text));
     setOpenFaqKey((k) => (k === item.text ? null : k));
   };
-  // 사용자(role==='user') 말풍선 long-press → 등록 확인창(faqConfirm) 표시. '등록' 선택 시에만 register 실행(오등록 방지).
+  // 사용자(role==='user') 말풍선 long-press → 등록 확인창(faqConfirm) 표시. '추가' 선택 시에만 register 실행(오등록 방지).
   const [faqConfirm, setFaqConfirm] = useState(null); // 확인 대기 텍스트(string) | null
   const askRegisterFaq = (text) => { const t = (text || "").trim(); if (t) setFaqConfirm(t); };
-  // 확인창 '등록' 확정 시: addFaq(trim·중복·40자) → 성공/중복 토스트.
+  // 확인창 '추가' 확정 시: addFav(trim·중복·40자) → 성공/중복 토스트.
   const registerFaqFromBubble = (text) => {
     const t = (text || "").trim();
     if (!t) return;
-    const ok = addFaq(t);
-    showFaqToast(ok ? "자주 묻는 질문에 등록했어" : "이미 등록된 질문이야");
+    const ok = addFav(t);
+    showFaqToast(ok ? "즐겨찾기에 추가했어" : "이미 즐겨찾기에 있어");
   };
-  // 시드 기본값으로 복구.
-  const resetFaq = () => setFaqItems(QUICK_QUERIES.map((x) => ({ ...x })));
 
   const scrollRef = useRef(null);
   const started = messages.length > 0;
@@ -1273,7 +1252,7 @@ function App() {
   async function send(text) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
-    setFaqOpen(false); // 전송 시 FAQ 패널 접힘(펼친 채 질문해도 응답 안 가림)
+    setFavOpen(false); // 전송 시 즐겨찾기 팝업 닫힘
     setInput("");
     const history = messages;
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
@@ -1394,18 +1373,28 @@ function App() {
       {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
-        <div ref={scrollRef} onPointerDown={() => faqOpen && setFaqOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
-          {WEBVIEW && !started && <WebviewWelcome />}
+        <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
+          {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
+          {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
           {typing && <Typing intent={typingIntent} />}
           <div className="h-1"></div>
         </div>
         }
 
-      {(started || WEBVIEW) && !faqHidden && <QuickReplyPanel onPick={send} open={faqOpen} setOpen={setFaqOpen} items={faqItems} onDelete={deleteFaq} onReset={resetFaq} openKey={openFaqKey} setOpenKey={setOpenFaqKey} />}
-      {/* 입력 바: relative z-10 으로 QuickReplyPanel 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
+      {/* 즐겨찾기 팝업: 입력창 왼쪽 ★ 버튼으로 토글. 하단 FAQ 접이식 패널은 제거됨. */}
+      {favOpen && <FavoritesPopup items={favItems} onPick={(t) => { send(t); setFavOpen(false); }} onDelete={deleteFav} openKey={openFaqKey} setOpenKey={setOpenFaqKey} onClose={() => { setFavOpen(false); setOpenFaqKey(null); }} />}
+      {/* 입력 바: relative z-10 으로 팝업 시트 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
+          {/* ★ 즐겨찾기 버튼 (ChatGPT '+' 위치) */}
+          <button onClick={() => setFavOpen((o) => !o)} aria-label="즐겨찾기"
+            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-[#F3F4F6] transition active:scale-90"
+            style={{ color: favOpen ? "#5B4DD6" : "#8B8FA3" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill={favOpen ? "#5B4DD6" : "none"} stroke="currentColor" strokeWidth="2">
+              <path d="M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.72.99-5.8-4.21-4.1 5.82-.85z" strokeLinejoin="round" />
+            </svg>
+          </button>
           <div className="flex-1 min-w-0 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">
             <input
                 value={input}
@@ -1438,13 +1427,13 @@ function App() {
       <div className="absolute inset-0 z-[60] flex items-center justify-center px-8" style={{ background: "rgba(45,40,112,0.32)" }}
         onClick={() => setFaqConfirm(null)}>
         <div className="w-full max-w-[300px] bg-white rounded-2xl p-5 shadow-xl edupay-fade" onClick={(e) => e.stopPropagation()}>
-          <p className="text-[14px] font-bold text-gray-800 leading-relaxed">이 질문을 '자주 묻는 질문'에 등록할까?</p>
+          <p className="text-[14px] font-bold text-gray-800 leading-relaxed">이 질문을 즐겨찾기에 추가할까?</p>
           <p className="mt-2 text-[12.5px] text-gray-500 leading-relaxed break-words">{faqConfirm}</p>
           <div className="mt-4 flex gap-2">
             <button onClick={() => setFaqConfirm(null)}
               className="flex-1 h-10 rounded-xl text-[13px] font-bold text-gray-500 bg-[#F3F4F6] active:scale-95 transition">취소</button>
             <button onClick={() => { registerFaqFromBubble(faqConfirm); setFaqConfirm(null); }}
-              className="flex-1 h-10 rounded-xl text-[13px] font-bold text-white active:scale-95 transition" style={{ background: "#5B4DD6" }}>등록</button>
+              className="flex-1 h-10 rounded-xl text-[13px] font-bold text-white active:scale-95 transition" style={{ background: "#5B4DD6" }}>추가</button>
           </div>
         </div>
       </div>
