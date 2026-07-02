@@ -6,6 +6,7 @@ import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
 import { isOperiaAiMode } from "./api/operia";
 import { getDataSource, activeChannelName } from "./api/datasource";
+import { resetOperiaSession } from "./api/datasource/operia";
 import { getUserId } from "./api/session";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { OPERIA_KINDS } from "./mock/operia";
@@ -969,12 +970,14 @@ function App() {
   }, [messages]);
 
   function newChat() {
+    resetOperiaSession(); // 새 대화 = 새 세션(다음 질문에서 lazy 생성)
     setMessages([]);
     setActiveId(null);
     setShowHistory(false);
     setEntered(true);
   }
   function selectConvo(c) {
+    resetOperiaSession(); // 다른 대화 로드 → 그 대화용 세션을 새로 lazy 생성
     setMessages(c.messages);
     setActiveId(c.id);
     setShowHistory(false);
@@ -982,7 +985,7 @@ function App() {
   }
   function deleteConvo(id) {
     setConvos((prev) => prev.filter((c) => c.id !== id));
-    if (id === activeId) {setMessages([]);setActiveId(null);}
+    if (id === activeId) {resetOperiaSession();setMessages([]);setActiveId(null);}
   }
 
   const CARD_KINDS = ["spending", "report", "ledger", "recommend", "quiz"];
@@ -1371,7 +1374,7 @@ function App() {
     style={{ maxWidth: 390 }}>
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
-      canBack={tab === "금융친구" && entered} onBack={() => { if (started) { setMessages([]); setActiveId(null); } else { setEntered(false); } }}
+      canBack={tab === "금융친구" && entered} onBack={() => { if (started) { resetOperiaSession(); setMessages([]); setActiveId(null); } else { setEntered(false); } }}
       onHistory={tab === "금융친구" ? () => setShowHistory(true) : null}
       aiFeature={aiFeature} aiEnabled={aiEnabled} onToggleAi={toggleAi} />
       }

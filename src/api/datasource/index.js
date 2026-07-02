@@ -29,7 +29,7 @@ function warnFallback(name, reason) {
 export function getDataSource() {
   switch (SOURCE) {
     case "operia":
-      if (!import.meta.env.VITE_OPERIA_API) { warnFallback("operia", "VITE_OPERIA_API 미설정"); return mockSource; }
+      // 상대경로(/api) + nginx 프록시 → base URL env 불필요. operia 선택이면 그대로 활성.
       return operiaSource;
     case "backend":
       if (!import.meta.env.VITE_BACKEND_API) { warnFallback("backend", "VITE_BACKEND_API 미설정"); return mockSource; }
@@ -44,7 +44,7 @@ export function getDataSource() {
 /** 현재 활성 채널명(폴백 반영). dev 표식/로그용. → "operia" | "backend" | "mock" */
 export function activeChannelName() {
   switch (SOURCE) {
-    case "operia": return import.meta.env.VITE_OPERIA_API ? "operia" : "mock";
+    case "operia": return "operia"; // 상대경로 프록시 — base env 불요, 항상 operia
     case "backend": return import.meta.env.VITE_BACKEND_API ? "backend" : "mock";
     default: return "mock";
   }
