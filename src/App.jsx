@@ -1,4 +1,7 @@
 import React from "react";
+// [브랜드 에셋] Vite가 URL로 번들 — 하드코딩 경로 금지. 로고는 icons/(프로젝트 root 하위)에서 import.
+import logoFoxpay from "../icons/logo_foxpay.svg";           // 컬러 워드마크(170×62) — 흰 배경 랜딩용
+import aiAvatar from "../icons/ai_avatar.png"; // 원형 AI 아바타(자체 보라 배경+흰 심볼)
 import { EDUPAY, dragScroll } from "./data/edupay";
 import { InlineCard } from "./components/cards";
 import { RecommendModal } from "./components/recommend";
@@ -143,6 +146,14 @@ function SparkleIcon({ size = 88 }) {
         fill="#fff" strokeLinejoin="round" stroke="#fff" strokeWidth="1.2" />
       </svg>
     </div>);
+
+}
+
+/* ── 채팅 AI 아바타 — 보라 라운드 사각 + 브랜드 심볼(launcher). Bubble/Typing 공통. ── */
+function AiAvatar() {
+  // 업체 제공 원형 아바타(자체 배경 O) — 보라 라운드사각/그라데이션·내부 심볼 없이 원형 이미지 그대로. 크기·여백은 기존과 동일.
+  return (
+    <img src={aiAvatar} alt="" className="w-7 h-7 rounded-full shrink-0 object-cover mt-0.5" />);
 
 }
 
@@ -438,7 +449,7 @@ function MenuScreen({ onPick }) {
 function IntroLanding({ userName, onPick }) {
   return (
     <div className="flex-1 flex flex-col items-center pt-14 px-6 edupay-fade">
-      <SparkleIcon size={68} />
+      <img src={logoFoxpay} alt="FOX PAY" className="w-[150px] h-auto" />
       <h2 className="mt-6 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
         {userName ? <>{userName}님<br />반가워요</> : "반가워요"}
       </h2>
@@ -603,10 +614,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex gap-2 items-start">
-        <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
-        style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
-        </div>
+        <AiAvatar />
         <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
           {msg.text &&
           <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm" style={{ WebkitTouchCallout: "none" }}>
@@ -663,10 +671,7 @@ function Typing({ intent }) {
   const msg = pool[idx % pool.length];
   return (
     <div className="flex gap-2 items-start edupay-fade">
-      <div className="w-7 h-7 rounded-[9px] shrink-0 flex items-center justify-center mt-0.5"
-      style={{ background: "linear-gradient(140deg,#6E61DE,#5B4DD6)" }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5l4 3h8l4-3-1.6 7.2A8 8 0 0 1 12 19a8 8 0 0 1-6.4-6.8L4 5Z" fill="#fff" /><circle cx="9.5" cy="11.5" r="1.2" fill="#5B4DD6" /><circle cx="14.5" cy="11.5" r="1.2" fill="#5B4DD6" /></svg>
-      </div>
+      <AiAvatar />
       <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2 items-center">
         <span className="text-[13px] text-gray-500 leading-snug">{msg}</span>
         <span className="flex gap-1 items-center shrink-0">
@@ -830,6 +835,18 @@ function App() {
   });
   const [activeId, setActiveId] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
+  // [웹뷰 대화 진입점] 엣지 핀 팝오버(＋새 대화 / 🕘 지난 대화) · 새 대화 확인창 · 스크롤 시 핀 축소.
+  //   히스토리 시트(showHistory)·newChat·selectConvo·deleteConvo 로직은 재사용, 진입점 UI만 추가.
+  const [histPop, setHistPop] = useState(false);     // 핀 팝오버 열림
+  const [newChatAsk, setNewChatAsk] = useState(false); // 새 대화 확인창
+  const [pinMini, setPinMini] = useState(false);     // 채팅 스크롤 y>24 → 핀 원형 축소
+  const [pinXY, setPinXY] = useState(null);          // 핀 위치 {left,top}px | null(기본=우측 상단). localStorage 저장 안 함
+  const [pinDragging, setPinDragging] = useState(false); // 드래그 중(전환 애니 끔)
+  const pinDragRef = useRef({ active: false, moved: false });
+  const pinBtnRef = useRef(null);                    // 핀 DOM(드래그 중 transform 직접 적용용)
+  const [popPos, setPopPos] = useState(null);        // 팝오버 위치 {left|right, top, origin} | null(기본=우측 상단)
+  const [pinMinimized, setPinMinimized] = useState(false); // 핀을 가장자리 밖으로 밀면 얇은 탭으로 접힘
+  const [pinEdge, setPinEdge] = useState("right");   // 접힌 방향('left'|'right')
   // AI(Claude) 답변 — VITE_AI_ENABLED=true 일 때만 기능/토글 노출. 런타임 토글은 localStorage 유지
   const aiFeature = isAiFeatureOn();
   const [aiEnabled, setAiEnabled] = useState(() => getAiEnabled());
@@ -966,6 +983,139 @@ function App() {
     setConvos((prev) => prev.filter((c) => c.id !== id));
     if (id === activeId) {resetOperiaSession();setMessages([]);setActiveId(null);}
   }
+
+  // [웹뷰 재진입 리셋] 네이티브가 웹뷰를 살려둔 채 재사용 → 숨겨졌다 다시 보일 때(뒤로가기 후 메뉴 재진입)
+  //   대화중이면 newChat()으로 초기화면(랜딩) 리셋. 직전 대화는 자동저장 useEffect로 이미 히스토리에 남아 유실 없음.
+  //   startedRef 로 최신 대화 상태를 읽어(리스너 1회 등록) stale closure 회피. WEBVIEW에서만 동작.
+  const startedRef = useRef(started);
+  startedRef.current = started;
+  const wasHiddenRef = useRef(false);
+  useEffect(() => {
+    if (!WEBVIEW) return;
+    const resetToLanding = () => {
+      // 재진입 시 started 무관하게 열려 있던 모든 오버레이를 먼저 닫는다(랜딩에서 ★ 즐겨찾기 팝업만 연 경우 포함).
+      setFavOpen(false); setHistPop(false); setNewChatAsk(false); setShowHistory(false);
+      setFaqConfirm(null); setOpenFaqKey(null);
+      setPinXY(null); setPinMinimized(false);           // 핀 위치·접힘 항상 기본(우측 상단 전체 핀)으로 복귀
+      if (!startedRef.current) return;                  // 대화 없으면 종료(오버레이는 이미 닫힘)
+      newChat();                                        // 대화중이면 랜딩 리셋(직전 대화는 자동저장됨)
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") { wasHiddenRef.current = true; return; }
+      if (document.visibilityState === "visible" && wasHiddenRef.current) {
+        wasHiddenRef.current = false;
+        resetToLanding();
+      }
+    };
+    const onPageShow = (e) => { if (e && e.persisted) resetToLanding(); }; // bfcache 복귀 대비
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, []);
+
+  // [핀 드래그+스냅] pointer 이동 6px 미만=탭(팝오버 토글), 이상=드래그. 채팅영역 clamp 후 놓으면 가까운 좌/우 가장자리 스냅.
+  //   위치는 pinXY(메모리)만 — localStorage 저장 안 함. 재진입 리셋 시 setPinXY(null)로 기본 복귀.
+  const PIN_M = 12; // 가장자리 여백
+  const onPinDown = (e) => {
+    const btn = e.currentTarget;
+    const pr = btn.getBoundingClientRect();
+    const par = btn.offsetParent ? btn.offsetParent.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    pinDragRef.current = { active: true, moved: false, startX: e.clientX, startY: e.clientY,
+      baseLeft: pr.left - par.left, baseTop: pr.top - par.top, parentW: par.width, parentH: par.height,
+      pinW: pr.width, pinH: pr.height, lastLeft: pr.left - par.left, lastTop: pr.top - par.top };
+    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+    setPinDragging(true);
+  };
+  const onPinMove = (e) => {
+    const d = pinDragRef.current; if (!d.active) return;
+    const dx = e.clientX - d.startX, dy = e.clientY - d.startY;
+    if (!d.moved && Math.abs(dx) + Math.abs(dy) < 6) return; // 임계값 미만 → 탭으로 간주
+    d.moved = true;
+    // 좌우는 가장자리 밖으로 살짝 밀 수 있게 clamp 완화(접기 트리거용). 세로는 화면 안 유지.
+    const OVER = d.pinW * 0.7;
+    const left = Math.max(-OVER, Math.min(d.baseLeft + dx, d.parentW - d.pinW + OVER));
+    const top = Math.max(PIN_M, Math.min(d.baseTop + dy, d.parentH - d.pinH - PIN_M));
+    d.lastLeft = left; d.lastTop = top;
+    // 드래그 중엔 리렌더(setPinXY) 대신 핀 DOM에 transform 직접 적용(rAF 스로틀) → 끊김 없이 부드럽게 추종.
+    d.tx = left - d.baseLeft; d.ty = top - d.baseTop;
+    if (d.raf == null) {
+      d.raf = requestAnimationFrame(() => {
+        d.raf = null;
+        const node = pinBtnRef.current;
+        if (node) node.style.transform = `translate3d(${d.tx}px, ${d.ty}px, 0)`;
+      });
+    }
+  };
+  const onPinUp = () => {
+    const d = pinDragRef.current; if (!d.active) return;
+    d.active = false;
+    if (d.raf != null) { cancelAnimationFrame(d.raf); d.raf = null; }
+    const node = pinBtnRef.current;
+    if (d.moved) {
+      // 릴리즈 시 핀이 가장자리 밖으로 절반 이상 밀렸으면 → 얇은 탭으로 최소화(접기).
+      const offLeft = d.lastLeft <= -d.pinW / 2;
+      const offRight = d.lastLeft >= d.parentW - d.pinW / 2;
+      if (offLeft || offRight) {
+        if (node) node.style.transform = "";
+        const edge = offLeft ? "left" : "right";
+        // 복원 시 전체 핀이 그 가장자리·현재 높이로 오도록 pinXY 저장.
+        setPinXY({ left: edge === "left" ? PIN_M : (d.parentW - d.pinW - PIN_M), top: d.lastTop });
+        setPinEdge(edge);
+        setPinMinimized(true);
+        setHistPop(false);
+        setPinDragging(false);
+        return;
+      }
+      // 놓을 때 가까운 좌/우 가장자리로 스냅(세로 유지)
+      const center = d.lastLeft + d.pinW / 2;
+      const snapLeft = center < d.parentW / 2 ? PIN_M : (d.parentW - d.pinW - PIN_M);
+      if (node) {
+        // 릴리즈 지점을 left/top 으로 고정 + transform 제거(점프 방지) → reflow 후 스냅으로 transition(부드러운 안착).
+        node.style.transition = "none";
+        node.style.transform = "";
+        node.style.right = "";
+        node.style.left = d.lastLeft + "px";
+        node.style.top = d.lastTop + "px";
+        void node.offsetWidth; // 릴리즈 지점을 transition 시작값으로 커밋
+        node.style.transition = "left .22s ease, top .22s ease, width .2s ease, padding .2s ease";
+        node.style.left = snapLeft + "px";
+      }
+      setPinXY({ left: snapLeft, top: d.lastTop }); // 상태는 스냅 위치만 커밋(React 소유 복귀)
+    } else if (node) {
+      node.style.transform = ""; // 탭(미이동)이면 잔여 transform 정리
+    }
+    setPinDragging(false);
+  };
+  const onPinClick = () => {
+    if (pinDragRef.current.moved) { pinDragRef.current.moved = false; return; } // 드래그였으면 팝오버 토글 안 함
+    setNewChatAsk(false); setShowHistory(false);
+    if (histPop) { setHistPop(false); return; }
+    // 팝오버를 핀 현재 위치 바로 아래에 배치(핀을 좌/하단으로 옮겨도 따라옴). 핀 rect 기준 좌/우 정렬 + clamp.
+    const node = pinBtnRef.current;
+    if (node) {
+      const par = node.offsetParent ? node.offsetParent.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth };
+      const r = node.getBoundingClientRect();
+      const pinLeft = r.left - par.left, pinTop = r.top - par.top, pinW = r.width;
+      const GAP = 8, POP_W = 156, M = 12;
+      const top = pinTop + r.height + GAP;
+      const isLeft = (pinLeft + pinW / 2) < par.width / 2;
+      if (isLeft) {
+        const left = Math.max(M, Math.min(pinLeft, par.width - POP_W - M));
+        setPopPos({ left, top, origin: "top left" });
+      } else {
+        const right = Math.max(M, Math.min(par.width - (pinLeft + pinW), par.width - POP_W - M));
+        setPopPos({ right, top, origin: "top right" });
+      }
+    } else {
+      setPopPos(null); // 폴백: 기본 우측 상단
+    }
+    setHistPop(true);
+  };
+  // 접힌 탭 탭 → 전체 핀 복원(저장된 가장자리·높이). 복원 후 다시 드래그/탭(팝오버) 정상. 접힌 상태에선 팝오버 안 열림.
+  const restorePin = () => { setPinMinimized(false); setHistPop(false); };
 
   const CARD_KINDS = ["spending", "report", "ledger", "recommend", "quiz"];
 
@@ -1373,7 +1523,9 @@ function App() {
       {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
-        <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
+        <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)}
+          onScroll={(e) => { if (WEBVIEW) setPinMini(e.currentTarget.scrollTop > 24); }}
+          className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
@@ -1422,11 +1574,13 @@ function App() {
 
       {modal && <RecommendModal content={modal} grade={grade} onClose={() => setModal(null)} />}
 
-      {/* [FAQ 등록 확인창] 말풍선 long-press → '등록' 선택 시에만 추가. 앱 일관 UI(중앙 카드), 배경 탭=취소. */}
+      {/* [FAQ 등록 확인창] 말풍선 long-press → '등록' 선택 시에만 추가. 딤/블러 없음(투명 오버레이, 밖 탭=취소). 카드는 테두리+그림자로 시인성 확보(새 대화 확인창과 동일). */}
       {faqConfirm &&
-      <div className="absolute inset-0 z-[60] flex items-center justify-center px-8" style={{ background: "rgba(45,40,112,0.32)" }}
+      <div className="absolute inset-0 z-[60] flex items-center justify-center px-8"
         onClick={() => setFaqConfirm(null)}>
-        <div className="w-full max-w-[300px] bg-white rounded-2xl p-5 shadow-xl edupay-fade" onClick={(e) => e.stopPropagation()}>
+        <div className="w-full max-w-[300px] bg-white rounded-2xl p-5 border border-gray-200 edupay-fade"
+          style={{ boxShadow: "0 18px 44px -12px rgba(17,17,27,0.30), 0 4px 12px -4px rgba(17,17,27,0.12)" }}
+          onClick={(e) => e.stopPropagation()}>
           <p className="text-[14px] font-bold text-gray-800 leading-relaxed">이 질문을 즐겨찾기에 추가할까?</p>
           <p className="mt-2 text-[12.5px] text-gray-500 leading-relaxed break-words">{faqConfirm}</p>
           <div className="mt-4 flex gap-2">
@@ -1437,6 +1591,82 @@ function App() {
           </div>
         </div>
       </div>
+      }
+      {/* [웹뷰] 대화 기록 진입점 — 우측 상단 엣지 핀 + 팝오버 + 새 대화 확인창. 비웹뷰는 헤더 '대화 기록' 버튼 사용(불변). */}
+      {WEBVIEW && entered && tab === "금융친구" &&
+      <>
+        {/* 엣지 핀: 드래그로 이동+가장자리 스냅. 탭(6px 미만)=팝오버 토글. 스크롤 y>24 → 44px 원형 축소. 가장자리 밖으로 밀면 접힘. */}
+        {!pinMinimized &&
+        <button ref={pinBtnRef} onClick={onPinClick} onPointerDown={onPinDown} onPointerMove={onPinMove}
+          onPointerUp={onPinUp} onPointerCancel={onPinUp}
+          aria-label="대화 메뉴"
+          className="absolute z-20 flex items-center justify-center gap-1.5 text-white font-bold text-[13px] rounded-full active:scale-95"
+          style={{
+            ...(pinXY ? { left: pinXY.left, top: pinXY.top } : { right: 12, top: "max(env(safe-area-inset-top), 12px)" }),
+            height: 44, width: pinMini ? 44 : "auto", padding: pinMini ? 0 : "0 14px",
+            background: "rgba(91,77,214,0.92)",
+            boxShadow: "0 4px 14px rgba(91,77,214,0.35)",
+            touchAction: "none", willChange: "transform",
+            transition: pinDragging ? "none" : "left .22s ease, top .22s ease, width .2s ease, padding .2s ease" }}>
+          <span className="text-[15px]">🕘</span>
+          {!pinMini && <span>대화</span>}
+        </button>
+        }
+        {/* 접힘 탭: 가장자리에 얇은 반투명 손잡이만 살짝. 탭하면 전체 핀 복원(팝오버 안 열림). */}
+        {pinMinimized &&
+        <button onClick={restorePin} aria-label="대화 메뉴 펼치기"
+          className="absolute z-20 flex items-center justify-center text-white font-bold active:scale-95"
+          style={{
+            top: pinXY ? pinXY.top : "max(env(safe-area-inset-top), 12px)",
+            ...(pinEdge === "left" ? { left: 0, borderRadius: "0 10px 10px 0" } : { right: 0, borderRadius: "10px 0 0 10px" }),
+            width: 14, height: 48, fontSize: 11,
+            background: "rgba(91,77,214,0.45)",
+            boxShadow: "0 2px 8px rgba(91,77,214,0.22)",
+            touchAction: "none",
+            transition: "background .2s ease" }}>
+          <span style={{ opacity: 0.9 }}>{pinEdge === "left" ? "›" : "‹"}</span>
+        </button>
+        }
+        {/* 팝오버: 바깥(투명 오버레이) 탭 → 닫힘. */}
+        {histPop &&
+        <>
+          <div className="absolute inset-0 z-[30]" onClick={() => setHistPop(false)}></div>
+          <div className="absolute z-[31] bg-white rounded-2xl overflow-hidden edupay-fade"
+            style={{ ...(popPos
+                ? { left: popPos.left, right: popPos.right, top: popPos.top }
+                : { right: 12, top: "calc(max(env(safe-area-inset-top), 12px) + 52px)" }),
+              minWidth: 156, boxShadow: "0 12px 34px rgba(17,17,27,0.22)", transformOrigin: popPos ? popPos.origin : "top right" }}>
+            <button onClick={() => { setHistPop(false); setNewChatAsk(true); }}
+              className="w-full flex items-center gap-2.5 px-4 py-3 text-[14px] font-semibold text-gray-800 active:bg-violet-50 transition text-left">
+              <span className="text-[15px] w-4 text-center">＋</span>새 대화
+            </button>
+            <div className="h-px bg-gray-100 mx-2"></div>
+            <button onClick={() => { setHistPop(false); setShowHistory(true); }}
+              className="w-full flex items-center gap-2.5 px-4 py-3 text-[14px] font-semibold text-gray-800 active:bg-violet-50 transition text-left">
+              <span className="text-[15px] w-4 text-center">🕘</span>지난 대화
+            </button>
+          </div>
+        </>
+        }
+        {/* 새 대화 확인창 — 딤/블러 없음(투명 오버레이, 밖 탭=닫기). 카드는 테두리+그림자로 시인성 확보. */}
+        {newChatAsk &&
+        <div className="absolute inset-0 z-[60] flex items-center justify-center px-8"
+          onClick={() => setNewChatAsk(false)}>
+          <div className="w-full max-w-[300px] bg-white rounded-2xl p-5 border border-gray-200 edupay-fade text-center"
+            style={{ boxShadow: "0 18px 44px -12px rgba(17,17,27,0.30), 0 4px 12px -4px rgba(17,17,27,0.12)" }}
+            onClick={(e) => e.stopPropagation()}>
+            <h4 className="text-[16px] font-extrabold text-gray-900">새 대화를 시작할까?</h4>
+            <p className="mt-2 text-[13px] text-gray-500 leading-relaxed">지금 대화는 <b className="text-gray-600">지난 대화</b>에 저장돼.<br />새로 시작하면 화면이 초기화돼요.</p>
+            <div className="mt-5 flex gap-2.5">
+              <button onClick={() => setNewChatAsk(false)}
+                className="flex-1 h-11 rounded-xl text-[14px] font-bold text-gray-500 bg-[#F3F4F6] active:scale-95 transition">취소</button>
+              <button onClick={() => { setNewChatAsk(false); newChat(); }}
+                className="flex-1 h-11 rounded-xl text-[14px] font-bold text-white active:scale-95 transition" style={{ background: "#5B4DD6" }}>새로 시작</button>
+            </div>
+          </div>
+        </div>
+        }
+      </>
       }
       {showHistory &&
       <HistoryDrawer convos={convos} activeId={activeId}

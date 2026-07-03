@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에듀페이 금융친구 · 대화 메뉴 배치 비교 데모</title>
+<style>
+  :root{
+    --primary:#5B4DD6; --primary-weak:#F5F4FF; --primary-line:#E4E0FB;
+    --teal:#14B8A6; --slate:#64748B; --purple:#A78BFA;
+    --ink:#111827; --sub:#6B7280; --line:#EEF0F2; --bg:#F3F4F6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif;
+    background:#E9EAEE;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:22px 12px 60px;gap:14px;}
+
+  /* 컨트롤 */
+  .tabs{display:flex;gap:6px;background:#fff;padding:6px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.06);flex-wrap:wrap;justify-content:center;}
+  .tabs button{border:none;background:none;font-size:13px;font-weight:700;color:#6b7280;padding:9px 14px;border-radius:10px;cursor:pointer;transition:.15s;}
+  .tabs button.active{background:var(--primary);color:#fff;}
+  .tools{display:flex;gap:8px;}
+  .tools button{border:1px solid #d8dae0;background:#fff;color:#374151;font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer;}
+  .tools button.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .caption{font-size:12.5px;color:#5b5f68;text-align:center;max-width:400px;line-height:1.55;min-height:34px;}
+  .caption b{color:var(--primary);}
+
+  /* 폰 */
+  .phone{width:390px;max-width:100%;height:800px;background:#fff;border-radius:36px;
+    box-shadow:0 20px 60px rgba(30,27,75,.18);overflow:hidden;position:relative;display:flex;flex-direction:column;border:1px solid #e5e7eb;}
+
+  /* 벤더 헤더 */
+  .vhead{height:56px;flex:0 0 56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:relative;z-index:5;background:#fff;}
+  .vhead .back,.vhead .menu{font-size:22px;color:#111827;width:32px;text-align:center;}
+  .vhead .title{font-size:18px;font-weight:800;}
+  .lockbadge{position:absolute;top:7px;right:12px;background:#FEE2E2;color:#DC2626;font-size:9.5px;font-weight:700;padding:3px 7px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;}
+  .anno .lockbadge{opacity:1;} .anno .vhead{background:#fafafa;}
+
+  /* 서브헤더 (모드2) */
+  .subhead{flex:0 0 44px;height:44px;display:none;align-items:center;justify-content:space-between;padding:0 18px;
+    background:var(--primary-weak);border-bottom:1px solid var(--primary-line);overflow:hidden;
+    transition:height .28s ease,opacity .2s ease,flex-basis .28s ease;position:relative;z-index:4;}
+  .mode-2 .subhead{display:flex;}
+  .subhead.hide{height:0;flex-basis:0;opacity:0;border-bottom-color:transparent;}
+  .subhead button{background:none;border:none;font-size:14px;font-weight:700;color:var(--primary);cursor:pointer;display:flex;align-items:center;gap:5px;padding:6px 4px;}
+  .anno.mode-2 .subhead:not(.hide){outline:2px dashed var(--primary);outline-offset:-2px;}
+
+  /* 채팅 */
+  .chatwrap{flex:1;position:relative;overflow:hidden;}
+  .chat{position:absolute;inset:0;overflow-y:auto;padding:20px 18px 20px;background:#fff;}
+  .userbubble{max-width:78%;margin-left:auto;background:#E0DEFF;color:#111827;font-size:14px;padding:11px 16px;border-radius:18px 18px 4px 18px;margin-bottom:18px;}
+  .foxrow{display:flex;gap:8px;align-items:flex-start;margin-bottom:18px;}
+  .foxava{width:34px;height:34px;flex:0 0 34px;background:var(--primary);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .card{flex:1;background:#fff;border:1px solid #ECEAF9;border-radius:18px;padding:16px 16px 14px;box-shadow:0 4px 18px rgba(80,46,245,.05);}
+  .textcard{flex:1;background:#F8F7FE;border-radius:16px;padding:13px 15px;font-size:14px;line-height:1.5;color:#2b2545;}
+  .chip{display:inline-block;background:#ECEAFF;color:var(--primary);font-size:11px;font-weight:700;padding:5px 11px;border-radius:10px;margin-bottom:9px;}
+  .card h3{font-size:19px;font-weight:800;}
+  .card .csub{font-size:12.5px;color:var(--sub);margin-top:2px;}
+  .toggle{display:inline-flex;background:#F1F0F9;border-radius:999px;padding:4px;margin:12px 0 4px;}
+  .toggle span{font-size:12.5px;font-weight:700;padding:5px 15px;border-radius:999px;color:var(--sub);}
+  .toggle span.on{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .bars{display:flex;justify-content:space-around;align-items:flex-end;height:140px;margin:14px 4px 4px;}
+  .barcol{display:flex;flex-direction:column;align-items:center;gap:7px;width:52px;}
+  .barcol .val{font-size:12.5px;font-weight:800;}
+  .bar{width:15px;border-radius:8px;background:#CFC9F7;}
+  .bar.hi{background:var(--primary);}
+  .barcol .mon{font-size:11.5px;color:var(--sub);}
+  .pmtitle{font-size:12.5px;color:var(--sub);margin:14px 0 8px;}
+  .stack{display:flex;height:10px;border-radius:6px;overflow:hidden;gap:2px;}
+  .stack i{display:block;}
+  .legrow{display:flex;align-items:center;margin-top:12px;font-size:14.5px;}
+  .legrow .dot{width:9px;height:9px;border-radius:50%;margin-right:9px;}
+  .legrow .nm{font-weight:600;}
+  .legrow .pct{margin-left:auto;color:var(--sub);font-size:12.5px;margin-right:12px;}
+  .legrow .amt{font-weight:800;min-width:74px;text-align:right;}
+  .tip{background:var(--primary-weak);border-radius:14px;padding:13px 15px;margin-top:14px;font-size:13.5px;line-height:1.55;color:#2b2545;}
+
+  /* 빈 상태 */
+  .empty{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:14px;padding:0 24px;}
+  .empty .bigfox{width:60px;height:60px;background:var(--primary);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+  .empty h2{font-size:18px;font-weight:800;}
+  .empty p{font-size:13.5px;color:var(--sub);line-height:1.5;}
+  .qchips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px;}
+  .qchips button{background:var(--primary-weak);border:1px solid var(--primary-line);color:var(--primary);font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer;}
+
+  /* 엣지 핀 (모드3) */
+  .pin{position:absolute;top:66px;right:14px;display:none;align-items:center;gap:6px;
+    background:rgba(91,77,214,.92);color:#fff;font-size:13px;font-weight:700;
+    padding:9px 14px;border-radius:999px;cursor:pointer;z-index:8;
+    box-shadow:0 4px 14px rgba(91,77,214,.35);transition:.25s;backdrop-filter:blur(4px);}
+  .mode-3 .pin{display:flex;}
+  .pin.mini{padding:0;width:44px;height:44px;justify-content:center;gap:0;}
+  .pin.mini .pintext{display:none;}
+  .anno.mode-3 .pin{outline:2px dashed #fff;outline-offset:2px;}
+
+  /* 입력바 */
+  .inputbar{flex:0 0 68px;display:flex;align-items:center;gap:10px;padding:0 16px;border-top:1px solid var(--line);background:#fff;z-index:5;}
+  .ibtn{width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;color:#9ca3af;cursor:pointer;}
+  #inputPlus{display:none;background:var(--primary-weak);color:var(--primary);font-weight:800;font-size:22px;}
+  .mode-1 #inputStar{display:none;} .mode-1 #inputPlus{display:flex;}
+  .anno.mode-1 #inputPlus{outline:2px dashed var(--primary);outline-offset:2px;}
+  .field{flex:1;height:44px;background:var(--bg);border-radius:22px;display:flex;align-items:center;padding:0 18px;color:#9ca3af;font-size:14px;}
+  .send{width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:#C9C6F0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+
+  /* 공용 시트/다이얼로그 */
+  .overlay{position:absolute;inset:0;background:rgba(17,17,27,.42);opacity:0;pointer-events:none;transition:.25s;z-index:20;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;transform:translateY(100%);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:21;max-height:74%;display:flex;flex-direction:column;padding-bottom:12px;}
+  .sheet.show{transform:translateY(0);}
+  .grab{width:40px;height:4px;background:#D1D5DB;border-radius:2px;margin:12px auto 8px;}
+  .sheethead{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 12px;}
+  .sheethead h3{font-size:16px;font-weight:800;}
+  .sheethead .x{font-size:18px;color:#9ca3af;cursor:pointer;padding:4px;}
+  .slist{overflow-y:auto;padding:0 16px 4px;}
+  .sitem{padding:13px 16px;border-radius:14px;cursor:pointer;}
+  .sitem:active,.sitem.cur{background:#F7F6FF;}
+  .sitem .st{font-size:14px;font-weight:700;}
+  .sitem .sm{font-size:12px;color:var(--sub);margin-top:3px;}
+
+  /* 액션시트 항목(모드1) */
+  .aitem{display:flex;align-items:center;gap:12px;padding:15px 22px;font-size:15px;font-weight:600;cursor:pointer;}
+  .aitem:active{background:#F7F6FF;}
+  .aitem .ico{font-size:18px;width:24px;text-align:center;}
+  .adiv{height:1px;background:var(--line);margin:2px 20px;}
+  .acancel{margin:8px 16px 0;padding:14px;border-radius:14px;background:var(--bg);color:#374151;font-size:14px;font-weight:700;text-align:center;cursor:pointer;}
+
+  /* 핀 팝오버(모드3) */
+  .popover{position:absolute;top:112px;right:14px;background:#fff;border-radius:16px;box-shadow:0 12px 34px rgba(17,17,27,.22);
+    z-index:22;overflow:hidden;transform:scale(.9);transform-origin:top right;opacity:0;pointer-events:none;transition:.16s;min-width:150px;}
+  .popover.show{transform:scale(1);opacity:1;pointer-events:auto;}
+  .popover .pi{padding:13px 16px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:9px;}
+  .popover .pi:active{background:#F7F6FF;}
+
+  /* 새 대화 확인 */
+  .dim2{position:absolute;inset:0;background:rgba(17,17,27,.42);display:none;align-items:center;justify-content:center;z-index:30;padding:32px;}
+  .dim2.show{display:flex;}
+  .dialog{background:#fff;border-radius:20px;padding:24px 22px 18px;width:100%;text-align:center;}
+  .dialog h4{font-size:16px;font-weight:800;}
+  .dialog p{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.5;}
+  .dbtns{display:flex;gap:10px;margin-top:20px;}
+  .dbtns button{flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;}
+  .dbtns .cancel{background:var(--bg);color:#374151;} .dbtns .ok{background:var(--primary);color:#fff;}
+
+  .toast{position:absolute;bottom:86px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(17,17,27,.88);color:#fff;font-size:13px;padding:10px 16px;border-radius:999px;opacity:0;transition:.25s;z-index:40;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+  <div class="tabs">
+    <button data-mode="1" class="active">① 입력창 ＋ 통합</button>
+    <button data-mode="2">② 자동 숨김 서브헤더</button>
+    <button data-mode="3">③ 엣지 핀</button>
+  </div>
+  <div class="tools">
+    <button id="annoBtn">🔍 영역 표시</button>
+    <button onclick="resetView()">↺ 초기화</button>
+  </div>
+  <div class="caption" id="caption"></div>
+
+  <div class="phone mode-1" id="phone">
+
+    <div class="vhead">
+      <div class="back">‹</div>
+      <div class="title">소비패턴분석</div>
+      <div class="menu">≡</div>
+      <div class="lockbadge">🔒 벤더 소유 · 수정 불가</div>
+    </div>
+
+    <div class="subhead" id="subhead">
+      <button onclick="askNew()">＋ 새 대화</button>
+      <button onclick="openSheet()">🕘 지난 대화</button>
+    </div>
+
+    <div class="chatwrap">
+      <!-- 엣지 핀 -->
+      <div class="pin" id="pin" onclick="togglePop(event)">
+        <span>🕘</span><span class="pintext">대화</span>
+      </div>
+
+      <div class="chat" id="chat">
+        <div id="convo">
+          <div class="userbubble">월별 사용 내역 알려줘</div>
+          <div class="foxrow">
+            <div class="foxava">🦊</div>
+            <div class="card">
+              <span class="chip">최근 3개월</span>
+              <h3>월별 사용 내역</h3>
+              <div class="csub">FOX PAY 결제 · 월별 추이</div>
+              <div class="toggle"><span class="on">월별</span><span>일별</span></div>
+              <div class="bars">
+                <div class="barcol"><span class="val">3.8만</span><div class="bar" style="height:98px"></div><span class="mon">4월</span></div>
+                <div class="barcol"><span class="val">3.1만</span><div class="bar" style="height:80px"></div><span class="mon">5월</span></div>
+                <div class="barcol"><span class="val">4.5만</span><div class="bar hi" style="height:118px"></div><span class="mon">6월</span></div>
+              </div>
+              <div class="pmtitle">결제수단별 · 합계</div>
+              <div class="stack"><i class="s1" style="background:var(--teal);width:49%"></i><i class="s2" style="background:var(--slate);width:33%"></i><i class="s3" style="background:var(--purple);width:18%"></i></div>
+              <div class="legrow"><span class="dot" style="background:var(--teal)"></span><span class="nm">바우처(지원금)</span><span class="pct">49%</span><span class="amt">56,200원</span></div>
+              <div class="legrow"><span class="dot" style="background:var(--slate)"></span><span class="nm">부모카드</span><span class="pct">33%</span><span class="amt">37,900원</span></div>
+              <div class="legrow"><span class="dot" style="background:var(--purple)"></span><span class="nm">조르기</span><span class="pct">18%</span><span class="amt">20,000원</span></div>
+              <div class="tip">💡 5월보다 14,700원(48%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪</div>
+            </div>
+          </div>
+
+          <div class="userbubble">이번 주 편의점 얼마 썼어?</div>
+          <div class="foxrow">
+            <div class="foxava">🦊</div>
+            <div class="textcard">이번 주 편의점 결제는 <b>8,400원</b>이야. 지난주보다 1,200원 줄었어 👍 (용돈충전금 기준)</div>
+          </div>
+          <div style="height:20px"></div>
+        </div>
+
+        <div class="empty" id="empty">
+          <div class="bigfox">🦊</div>
+          <h2>안녕! 나 폭스야</h2>
+          <p>돈 관련해서 궁금한 거 있으면<br>편하게 물어봐 👇</p>
+          <div class="qchips">
+            <button>6월 얼마 썼어?</button>
+            <button>이번 주 편의점</button>
+            <button>지원금 잔액</button>
+            <button>에듀포인트 확인</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="inputbar">
+      <div class="ibtn" id="inputStar">☆</div>
+      <div class="ibtn" id="inputPlus" onclick="openAction()">＋</div>
+      <div class="field">메시지를 입력하세요</div>
+      <div class="send">→</div>
+    </div>
+
+    <!-- 핀 팝오버 -->
+    <div class="popover" id="popover">
+      <div class="pi" onclick="closePop();askNew()">＋ 새 대화</div>
+      <div class="pi" onclick="closePop();openSheet()">🕘 지난 대화</div>
+    </div>
+
+    <!-- 공용 오버레이 -->
+    <div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+    <!-- 지난 대화 바텀시트 -->
+    <div class="sheet" id="sheet">
+      <div class="grab"></div>
+      <div class="sheethead"><h3>🕘 지난 대화</h3><div class="x" onclick="closeSheet()">✕</div></div>
+      <div class="slist">
+        <div class="sitem cur" onclick="loadSession('6월 소비 분석')"><div class="st">6월 소비 얼마나 썼어?</div><div class="sm">지원금 · 부모카드 분석 · 오늘</div></div>
+        <div class="sitem" onclick="loadSession('편의점 지출')"><div class="st">이번 주 편의점 얼마 썼지</div><div class="sm">용돈충전금 · 어제</div></div>
+        <div class="sitem" onclick="loadSession('에듀포인트')"><div class="st">에듀포인트 얼마 모았어?</div><div class="sm">에듀포인트 · 3일 전</div></div>
+        <div class="sitem" onclick="loadSession('지원금 잔액')"><div class="st">지원금 잔액 알려줘</div><div class="sm">지원금 · 5일 전</div></div>
+      </div>
+    </div>
+
+    <!-- 액션시트(모드1) -->
+    <div class="sheet" id="actionSheet">
+      <div class="grab"></div>
+      <div class="aitem" onclick="closeAction();askNew()"><span class="ico">＋</span>새 대화</div>
+      <div class="aitem" onclick="closeAction();openSheet()"><span class="ico">🕘</span>지난 대화</div>
+      <div class="adiv"></div>
+      <div class="aitem" onclick="closeAction();toast('추천질문(즐겨찾기) 열기')"><span class="ico">☆</span>추천질문 · 즐겨찾기</div>
+      <div class="acancel" onclick="closeAction()">닫기</div>
+    </div>
+
+    <!-- 새 대화 확인 -->
+    <div class="dim2" id="dim2">
+      <div class="dialog">
+        <h4>새 대화를 시작할까?</h4>
+        <p>지금 대화는 <b>지난 대화</b>에 저장돼.<br>새로 시작하면 화면이 초기화돼요.</p>
+        <div class="dbtns"><button class="cancel" onclick="hideDialog()">취소</button><button class="ok" onclick="startNew()">새로 시작</button></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  const phone=$('phone'), chat=$('chat');
+  let mode=1;
+
+  const captions={
+    1:'입력창 왼쪽 <b>＋</b>를 누르면 액션시트가 올라옵니다. 대화 영역 손실 <b>0px</b> · 학생 친숙도 최상.',
+    2:'상단 서브헤더가 있지만, <b>아래로 스크롤하면 숨고</b> 위로 올리면 다시 나옵니다. 읽는 동안 공간 회복.',
+    3:'우측 상단 <b>핀</b>을 누르면 메뉴가 열립니다. 스크롤하면 작은 원으로 접혀요. (카드 겹침 주의)'
+  };
+
+  // 탭 전환
+  document.querySelectorAll('.tabs button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      setMode(+b.dataset.mode);
+    };
+  });
+  function setMode(m){
+    mode=m;
+    phone.classList.remove('mode-1','mode-2','mode-3');
+    phone.classList.add('mode-'+m);
+    $('caption').innerHTML=captions[m];
+    closeAll(); $('subhead').classList.remove('hide'); $('pin').classList.remove('mini');
+    chat.scrollTop=0;
+  }
+  setMode(1);
+
+  // 영역 표시
+  $('annoBtn').onclick=function(){ phone.classList.toggle('anno'); this.classList.toggle('active'); };
+
+  // 스크롤: 모드2 자동숨김 / 모드3 핀 축소
+  let lastY=0;
+  chat.addEventListener('scroll',()=>{
+    const y=chat.scrollTop;
+    if(mode===2){
+      if(y>24 && y>lastY) $('subhead').classList.add('hide');
+      else if(y<lastY) $('subhead').classList.remove('hide');
+    }
+    if(mode===3){
+      if(y>24) $('pin').classList.add('mini'); else $('pin').classList.remove('mini');
+    }
+    lastY=y;
+  });
+
+  // 오버레이 필요 시 표시
+  function showOverlay(){ $('overlay').classList.add('show'); }
+  function hideOverlay(){ $('overlay').classList.remove('show'); }
+
+  // 지난 대화 시트
+  function openSheet(){ closePop(); showOverlay(); $('sheet').classList.add('show'); }
+  function closeSheet(){ $('sheet').classList.remove('show'); if(!$('actionSheet').classList.contains('show'))hideOverlay(); }
+  function loadSession(n){ closeSheet(); toast('"'+n+'" 대화를 불러왔어요'); }
+
+  // 액션시트(모드1)
+  function openAction(){ showOverlay(); $('actionSheet').classList.add('show'); }
+  function closeAction(){ $('actionSheet').classList.remove('show'); if(!$('sheet').classList.contains('show'))hideOverlay(); }
+
+  // 핀 팝오버(모드3)
+  function togglePop(e){ e.stopPropagation(); $('popover').classList.toggle('show'); }
+  function closePop(){ $('popover').classList.remove('show'); }
+
+  // 새 대화
+  function askNew(){ $('dim2').classList.add('show'); }
+  function hideDialog(){ $('dim2').classList.remove('show'); }
+  function startNew(){ hideDialog(); $('convo').style.display='none'; $('empty').style.display='flex'; toast('새 대화를 시작했어요 🦊'); }
+
+  function resetView(){ $('convo').style.display='block'; $('empty').style.display='none'; closeAll(); }
+  function closeAll(){ closeSheet(); closeAction(); closePop(); hideDialog(); hideOverlay(); }
+
+  // 바깥 탭으로 팝오버 닫기
+  document.addEventListener('click',()=>closePop());
+
+  let tt; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),1700); }
+</script>
+</body>
+</html>
