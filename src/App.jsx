@@ -636,7 +636,8 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
       <div className="flex gap-2 items-start">
         <AiAvatar />
         <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
-          {msg.text &&
+          {/* 카드 응답(isChart)은 카드 섹션만 — 카드 위 answer 텍스트 버블 숨김. 텍스트만/에러/빈결과(카드 없음)는 그대로 표시. */}
+          {msg.text && !isChart &&
           <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm" style={{ WebkitTouchCallout: "none" }}>
             {msg.text}
           </div>
