@@ -53,8 +53,15 @@
       "input_tokens": 66500,
       "output_tokens": 7400,
       "files": 80
+    },
+    {
+      "date": "2026-07-03T13:02:29.784748+00:00",
+      "input_tokens": 140843,
+      "output_tokens": 0,
+      "files": 32,
+      "kind": "update"
     }
   ],
-  "total_input_tokens": 957201,
+  "total_input_tokens": 1098044,
   "total_output_tokens": 7400
 }

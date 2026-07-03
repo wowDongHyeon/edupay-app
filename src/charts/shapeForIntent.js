@@ -40,8 +40,8 @@ const VALUE_PREF = {
 const LABEL_PREF = {
   name:     { prefer: /merchant_nm|_nm$|name/i, exclude: /_no$|_id$/i },
   merchant: { prefer: /merchant_nm|_nm$|name/i, exclude: /_no$|_id$/i },
-  addr:     { prefer: /addr|address|주소/i },
-  category: { prefer: /categor|biz|item|업종|종목/i },
+  addr:     { prefer: /addr|address|주소/i, exclude: /_no$|_id$/i },
+  category: { prefer: /categor|biz|item|업종|종목/i, exclude: /_no$|_id$/i },
 };
 
 // 날짜 패턴(시간축 판정): YYYY-MM / YYYY-MM-DD / YYYYMM / YYYYMMDD
@@ -82,9 +82,11 @@ function pickCandidate(slot, byRole, used) {
   const lpref = LABEL_PREF[slot.n];
   if (lpref) {
     const filtered = lpref.exclude ? avail.filter((c) => !lpref.exclude.test(c)) : avail;
-    const pool = filtered.length ? filtered : avail; // 전부 제외되면 원복(빈 슬롯 방지)
-    const hit = pool.find((c) => lpref.prefer.test(c));
-    return hit || pool[0];
+    const hit = filtered.find((c) => lpref.prefer.test(c));
+    if (hit) return hit;                       // 식별자(_no/_id) 제외 후 prefer 우선(예: category←CATEGORY_NM)
+    if (filtered.length) return filtered[0];   // prefer 없으면 비식별자 첫 후보(예: category←ADDR)
+    // 남은 후보가 전부 식별자: 선택 슬롯(category/addr)은 비워 MERCHANT_NO 누출 방지, 필수 슬롯(name)만 원복
+    return slot.opt ? null : avail[0];
   }
   return avail[0];
 }

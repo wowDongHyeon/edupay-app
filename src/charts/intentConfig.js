@@ -26,8 +26,8 @@ export const INTENT_CONFIG = {
           if (cur && prev && prev.value) {
             const diff = cur.value - prev.value, pct = Math.round(Math.abs(diff) / prev.value * 100);
             const msg = diff >= 0
-              ? `${prev.label}보다 ${won(diff)}(${pct}%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪`
-              : `${prev.label}보다 ${won(-diff)}(${pct}%) 덜 썼어. 잘하고 있어 👏`;
+              ? `${cur.label}은 ${prev.label}보다 ${won(diff)}(${pct}%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪`
+              : `${cur.label}은 ${prev.label}보다 ${won(-diff)}(${pct}%) 덜 썼어. 잘하고 있어 👏`;
             return msg + note;
           }
           if (cur) return `${cur.label}에 ${won(cur.value)} 썼어.${note || " 계획해서 써보자 📊"}`;

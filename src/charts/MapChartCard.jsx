@@ -84,8 +84,15 @@ export function MapChartCard({ result, title, subtitle, badge }) {
       if (cancelled || !mapRef.current) return;
       const ctr = new kakao.maps.LatLng(myPos.lat, myPos.lng);
       const map = new kakao.maps.Map(mapRef.current, { center: ctr, level: 5, draggable: true });
-      const bounds = new kakao.maps.LatLngBounds();
-      bounds.extend(ctr);
+      // 첫 화면 = 내 위치 중심 + 가까운 N개가 보이는 줌. 내 위치 '대칭' bounds(반경 = 가까운 N개까지 최대 Δ, 최소반경 클램프)
+      //   → 매장이 한쪽에 몰려도 내 위치가 항상 화면 중앙. 전체 fit(모든 매장)로 구석에 밀리던 문제 해결.
+      const NEAR_N = 4; // 가까운 매장 3~5개(+내 위치)가 함께 보이게
+      const near = list.filter((m) => m.lat != null).slice(0, NEAR_N);
+      let dLat = 0.003, dLng = 0.004; // 최소 반경(~300m 상당) — 매장이 몰려도 과확대 방지
+      near.forEach((m) => { dLat = Math.max(dLat, Math.abs(m.lat - myPos.lat)); dLng = Math.max(dLng, Math.abs(m.lng - myPos.lng)); });
+      const viewBounds = new kakao.maps.LatLngBounds();
+      viewBounds.extend(new kakao.maps.LatLng(myPos.lat - dLat, myPos.lng - dLng));
+      viewBounds.extend(new kakao.maps.LatLng(myPos.lat + dLat, myPos.lng + dLng));
       // 내 위치 점
       const meColor = realLoc ? "#4A8DD6" : "#5B4DD6";
       new kakao.maps.CustomOverlay({
@@ -96,7 +103,6 @@ export function MapChartCard({ result, title, subtitle, badge }) {
       list.forEach((m) => {
         if (m.lat == null) return;
         const pos = new kakao.maps.LatLng(m.lat, m.lng);
-        bounds.extend(pos);
         new kakao.maps.Marker({ map, position: pos, title: m.name });
         new kakao.maps.CustomOverlay({
           map, position: pos, yAnchor: 2.35, zIndex: 4,
@@ -106,12 +112,13 @@ export function MapChartCard({ result, title, subtitle, badge }) {
       // 가맹점(+가까운 내 위치) 기준으로 맞춤. 원거리 GPS는 위에서 청주로 대체돼 줌아웃되지 않음.
       // 레벨 클램프: 너무 넓으면(>6) 동네 단위로, 한 점에 몰리면(<4) 과확대 방지.
       const applyBounds = () => {
-        if (!list.some((m) => m.lat != null)) return;
+        if (!near.length) return;
         try {
-          map.setBounds(bounds, 28, 28, 28, 28);
+          map.setBounds(viewBounds, 28, 28, 28, 28); // 내 위치 대칭 bounds → 내 위치가 화면 중앙
           const lv = map.getLevel();
           if (lv > 6) map.setLevel(6);
           else if (lv < 4) map.setLevel(4);
+          map.setCenter(ctr); // 레벨 클램프 후에도 내 위치를 중앙에 고정
         } catch (e) {}
       };
       applyBounds();
