@@ -34,6 +34,16 @@ const VALUE_PREF = {
   students: /stu|student|count|cnt|num|인원/i,
 };
 
+// 범주(category) 슬롯 이름 선호: 여러 varchar 후보 중 슬롯 의미에 맞는 컬럼 선택(VALUE_PREF의 category판).
+//   prefer = 우선 매칭, exclude = 후보에서 제외(이름/범주 슬롯에서 MERCHANT_NO 등 식별자 _no/_id 배제).
+//   예) merchantMap 이 MERCHANT_NO/MERCHANT_NM/ADDR/CATEGORY_NM 를 모두 varchar 로 줄 때 name←MERCHANT_NM(NO 아님).
+const LABEL_PREF = {
+  name:     { prefer: /merchant_nm|_nm$|name/i, exclude: /_no$|_id$/i },
+  merchant: { prefer: /merchant_nm|_nm$|name/i, exclude: /_no$|_id$/i },
+  addr:     { prefer: /addr|address|주소/i },
+  category: { prefer: /categor|biz|item|업종|종목/i },
+};
+
 // 날짜 패턴(시간축 판정): YYYY-MM / YYYY-MM-DD / YYYYMM / YYYYMMDD
 const TEMPORAL_RE = [/^\d{4}-\d{2}(-\d{2})?$/, /^\d{6}(\d{2})?$/];
 
@@ -61,12 +71,21 @@ function roleOf(column, type, rows) {
   return "category";
 }
 
-// 슬롯에 채울 컬럼 선택: 같은 역할 후보 중 슬롯 선호(VALUE_PREF) 매칭 우선, 없으면 첫 미사용.
+// 슬롯에 채울 컬럼 선택: 같은 역할 후보 중 슬롯 선호(VALUE_PREF/LABEL_PREF) 매칭 우선, 없으면 첫 미사용.
 function pickCandidate(slot, byRole, used) {
   const avail = (byRole[slot.role] || []).filter((c) => !used.has(c));
   if (!avail.length) return null;
+  // value 슬롯: 측정값 선호(기존 동작 불변)
   const pref = VALUE_PREF[slot.n];
   if (pref) { const hit = avail.find((c) => pref.test(c)); if (hit) return hit; }
+  // category 슬롯: 이름 힌트 — 식별자(_no/_id) 제외 후 prefer 우선(예: name←MERCHANT_NM, MERCHANT_NO 배제)
+  const lpref = LABEL_PREF[slot.n];
+  if (lpref) {
+    const filtered = lpref.exclude ? avail.filter((c) => !lpref.exclude.test(c)) : avail;
+    const pool = filtered.length ? filtered : avail; // 전부 제외되면 원복(빈 슬롯 방지)
+    const hit = pool.find((c) => lpref.prefer.test(c));
+    return hit || pool[0];
+  }
   return avail[0];
 }
 

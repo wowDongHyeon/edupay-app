@@ -58,7 +58,9 @@ export const QUERIES = {
     shape: (rows) => {
       const hasMeans = rows.some((r) => r.means != null);
       return {
-        series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).map((x) => ({ label: mLabel(x.month), value: x.amount })),
+        // key(YYYY-MM) = 진행중 당월 판정용(insight). label/value 는 기존과 동일(bar 템플릿은 label/value 만 사용).
+        series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).map((x) => ({ label: mLabel(x.month), value: x.amount, key: monthKey(x.month) })),
+        currentMonthKey: monthKey(TODAY), // 오늘(DATA.TODAY) 기준 현재월 — 마지막 막대가 진행중 당월인지 판정(insight)
         breakdown: hasMeans
           ? withPct(sumBy(rows, "means").sort((a, b) => b.amount - a.amount))
               .map((x) => ({ label: meansLabel(x.means), value: x.amount, pct: x.pct, key: x.means }))

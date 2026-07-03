@@ -12,16 +12,26 @@ export const INTENT_CONFIG = {
     tabs: {
       month: {
         title: "월별 사용 내역", subtitle: "FOX PAY 결제 · 월별 추이", badge: "최근 3개월",
+        // 진행 중 당월(마지막 막대 key === 오늘 YYYYMM)은 완결월과 단순 비교하지 않는다.
+        //   → 비교는 완결월끼리(당월 제외, 예 6월 vs 5월) + "당월 집계 중" 안내. 완결월 1개뿐이면 비교 생략.
+        //   → 과거만 조회(마지막이 현재월 아님)면 기존대로 마지막 vs 직전 비교. 금액/증감 계산 로직은 유지.
         insight: (d) => {
           const s = d.series || [];
-          const cur = s[s.length - 1], prev = s[s.length - 2];
+          if (!s.length) return "";
+          const last = s[s.length - 1];
+          const inProgress = !!(d.currentMonthKey && last.key === d.currentMonthKey);
+          const pool = inProgress ? s.slice(0, -1) : s; // 비교 대상 = 완결월(진행중이면 당월 제외)
+          const cur = pool[pool.length - 1], prev = pool[pool.length - 2];
+          const note = inProgress ? ` ${last.label}은 아직 집계 중이에요.` : "";
           if (cur && prev && prev.value) {
             const diff = cur.value - prev.value, pct = Math.round(Math.abs(diff) / prev.value * 100);
-            return diff >= 0
+            const msg = diff >= 0
               ? `${prev.label}보다 ${won(diff)}(${pct}%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪`
               : `${prev.label}보다 ${won(-diff)}(${pct}%) 덜 썼어. 잘하고 있어 👏`;
+            return msg + note;
           }
-          return cur ? `${cur.label}에 ${won(cur.value)} 썼어. 계획해서 써보자 📊` : "";
+          if (cur) return `${cur.label}에 ${won(cur.value)} 썼어.${note || " 계획해서 써보자 📊"}`;
+          return `${last.label}에 지금까지 ${won(last.value)} 썼어. 아직 집계 중이야 📊`;
         },
       },
       day: {

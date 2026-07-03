@@ -221,10 +221,16 @@ function ReportToggleCard({ initialShaped, initialRows, sql, source, onCardQuery
   }, [active, onActiveSql]);
 
   const Bar = TEMPLATES.bar;
+  // 배지: 월 탭은 실제 막대(월) 수 기준 "최근 N개월"(1개면 "이번 달"). 일 탭은 기존("최근 7일") 유지.
+  const cfg = reportTabConfig(tab);
+  const monthCount = active && active.data && Array.isArray(active.data.series) ? active.data.series.length : 0;
+  const badge = tab === "month" && monthCount > 0
+    ? (monthCount <= 1 ? "이번 달" : `최근 ${monthCount}개월`)
+    : cfg.badge;
   return (
     <Bar
       data={active && active.data}
-      config={reportTabConfig(tab)}
+      config={{ ...cfg, badge }}
       tab={tab} onTab={onTab}
       loading={tab === "day" && loading}
       error={tab === "day" && error && !cache.day}
