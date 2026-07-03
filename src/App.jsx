@@ -35,6 +35,14 @@ function sanitizeAnswer(text) {
     .trim();
 }
 
+// operia summary 로그에서 실제 SQL 블록만 추출([AG8_NL2SQL_SQL] 뒤 ```sql … ```). 없으면 null. (로그 전체 노출 금지)
+function extractOperiaSql(summary) {
+  if (!summary || typeof summary !== "string") return null;
+  const m = summary.match(/\[AG8_NL2SQL_SQL\][\s\S]*?```sql\s*([\s\S]*?)```/i);
+  const sql = m && m[1] ? m[1].trim() : "";
+  return sql || null;
+}
+
 // 데이터 질문 1건 → 데이터창구 어댑터의 SSE 이벤트(data 청크 → result) 소비.
 // StreamState: data 의 tableData 를 rows 에 누적, isLast 로 종료. 데이터 확정 시 computeSummaryStats 계산(§4.4, §8).
 // ★Phase A 브리지: result 이벤트를 "기존 렌더가 기대하는 입력"{ result, rawRows, sql, source } 로 변환해 resolve.
@@ -63,7 +71,11 @@ function queryDataSource(userInput, intent, scope) {
             settled = true;
             // 데이터 확정 → 클라가 summaryStats 계산(§4.4). ★bridge 제거(§0.2): 표준 계약(tableData+reportPlan)만 소비.
             const columnMetadata = state.columnMetadata || (e && e.columnMetadata) || [];
-            const summaryStats = computeSummaryStats(state.rows, columnMetadata);
+            // summaryStats: operia payload(e.summaryStats) 우선, 없으면 클라 계산(§4.4). mock/backend 는 미전송 → 항상 클라 계산(회귀 0).
+            const payloadStats = e && e.summaryStats;
+            const hasPayloadStats = payloadStats && typeof payloadStats === "object"
+              && ((Array.isArray(payloadStats.groups) && payloadStats.groups.length) || (Array.isArray(payloadStats.columns) && payloadStats.columns.length));
+            const summaryStats = hasPayloadStats ? payloadStats : computeSummaryStats(state.rows, columnMetadata);
             const qi = (e && e.queryInfo) || {};
             resolve({
               tableData: state.rows,       // 전용 2개(report/map)는 ChartRenderer 가 shape, generic 은 reportPlan 렌더
@@ -71,8 +83,9 @@ function queryDataSource(userInput, intent, scope) {
               reportPlan: e && e.reportPlan,
               summaryStats,
               answer: sanitizeAnswer((e && e.answer) || ""),
-              sql: qi.sql || null,         // §9 SQL 칩
+              sql: qi.sql || extractOperiaSql(e && e.summary) || null,         // §9 SQL 칩(operia 는 summary 로그에서 추출)
               source: qi.source || "api",  // 칩 라벨용(mock=template, backend/operia=자기 값)
+              queryInfo: qi,               // §9 sql 없을 때(operia) "조회 조건" 칩용(조건/분류기준/정렬기준/지표 한글 키)
               unsupported: !!(e && e.unsupported),
               message: sanitizeAnswer((e && e.answer) || ""),
               success: !(e && e.success === false),
@@ -99,6 +112,13 @@ function queryDataSource(userInput, intent, scope) {
 const WEBVIEW =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("view") === "webview";
+
+// [개발용 디버그 표시 토글] 독립 플래그 2개(단일 출처). 기본 OFF(데모/실배포 깔끔), .env.local 에서 개별 ON.
+//   VITE_SHOW_SQL          → SQL/조회조건 칩 노출 여부
+//   VITE_SHOW_SOURCE_BADGE → "operia · balance" 데이터소스 배지 토스트 여부
+// 파싱: 'true' 문자열만 true(미설정/그 외 = false).
+const SHOW_SQL = import.meta.env.VITE_SHOW_SQL === "true";
+const SHOW_SOURCE_BADGE = import.meta.env.VITE_SHOW_SOURCE_BADGE === "true";
 
 const GRADES = ["초등", "중학", "고등"];
 const GRADE_LABELS = { "초등": "초등학생", "중학": "중학생", "고등": "고등학생" };
@@ -633,7 +653,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
         </div>
       </div>
       {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
-      {isChart && <SqlChip sql={chip.sql} source={chip.source} rawRows={chip.rawRows} />}
+      {isChart && SHOW_SQL && <SqlChip sql={chip.sql} source={chip.source} rawRows={chip.rawRows} queryInfo={msg.queryInfo} />}
     </div>);
 
 }
@@ -854,7 +874,7 @@ function App() {
   // [개발용] 응답 경로 디버그 토스트 (API / 로컬). dev 모드에서만 표시
   const [apiToast, setApiToast] = useState(null);
   const showApiToast = (msg, kind = "info") => {
-    if (!import.meta.env.DEV) return;
+    if (!SHOW_SOURCE_BADGE) return;
     const id = Date.now();
     setApiToast({ msg, kind, id });
     setTimeout(() => setApiToast((cur) => (cur && cur.id === id ? null : cur)), 2600);
@@ -1444,7 +1464,7 @@ function App() {
           // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
           if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
           // answer 말풍선(§6/§9): 있으면 카드 위 텍스트, 없으면 생략(10개 intent 는 빈 answer → 기존과 동일, 시각 보존).
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats }]);
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
         } catch (e) {
           console.error("[데이터] 호출 오류:", e);
           showApiToast("데이터 오류", "error");

@@ -48,9 +48,13 @@ function inferType(rows, col) {
 // 시간축은 type=date 뿐 아니라 '값 패턴'(YYYY-MM[-DD]/YYYYMM[DD])으로도 인식(backend 월/일축이 varchar 로 와도 처리, §6-1·작업A).
 function roleOf(column, type, rows) {
   const name = String(column || "").toLowerCase();
+  // ★ 좌표는 숫자형(value) 판정보다 먼저(컬럼명 기준). operia LATITUDE/LONGITUDE(decimal)도 여기서 coord 로 확정.
   if (name === "lat" || name === "lng" || name === "lon" || name === "longitude" || name === "latitude") return "coord";
-  if (type === "date" || type === "datetime") return "temporal";
-  if (type === "integer" || type === "decimal") return "value";
+  const t = String(type || "").toLowerCase();
+  if (t === "date" || t === "datetime" || t === "timestamp") return "temporal";
+  // ★ 숫자형 전부 value: operia bigint 잔액 + int/number/numeric/double/float/real 및 정수/실수 변형. 소문자화 후 매칭.
+  if (["integer", "decimal", "bigint", "int", "number", "numeric", "double", "float", "real", "smallint", "tinyint", "long"].includes(t)
+    || /(^|[^a-z])(integer|int|bigint|smallint|tinyint|decimal|numeric|number|double|float|real)([^a-z]|$)/.test(t)) return "value";
   const sample = rows.map((r) => r[column]).find((v) => v != null);
   const s = sample == null ? "" : String(sample);
   if (TEMPORAL_RE.some((re) => re.test(s))) return "temporal";

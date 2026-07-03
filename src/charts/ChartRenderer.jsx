@@ -75,10 +75,25 @@ function ResultView({ result }) {
   return jsonPre(prettyJson(result));
 }
 
-// §9 SQL 칩 — 카드 밖(아바타 아래)에서 렌더. 클릭 토글로 바로 아래 인라인 펼침. 바깥탭/ESC 닫힘. sql 없으면 렌더 안 함.
-export function SqlChip({ sql, source, result, rawRows }) {
+// §9 조회조건 뷰 — operia 는 sql 대신 queryInfo(한글 키: 조건/분류기준/정렬기준/지표)를 준다.
+//   sql/source 제외한 한글 키를 순회해 `키: 값(배열은 쉼표 join)`으로 표시.
+function QueryInfoView({ queryInfo }) {
+  const entries = Object.entries(queryInfo || {}).filter(([k, v]) => !["sql", "source"].includes(k) && v != null);
+  if (!entries.length) return jsonPre("(조회 조건 정보 없음)");
+  return (
+    <div className="px-3 py-2.5 text-[11px] leading-relaxed text-violet-50 space-y-1.5 max-h-64 overflow-auto edupay-noscroll">
+      {entries.map(([k, v]) => (
+        <div key={k}><span className="font-bold text-violet-200/80">{k}</span>: <span className="break-words">{Array.isArray(v) ? v.join(", ") : (typeof v === "object" ? JSON.stringify(v) : String(v))}</span></div>
+      ))}
+    </div>
+  );
+}
+
+// §9 SQL/조회조건 칩 — 카드 밖(아바타 아래)에서 렌더. 클릭 토글로 바로 아래 인라인 펼침. 바깥탭/ESC 닫힘.
+//   sql 있으면 SQL 칩, 없고 queryInfo 있으면 "조회 조건" 칩, 둘 다 없으면 렌더 안 함.
+export function SqlChip({ sql, source, result, rawRows, queryInfo }) {
   const [pinned, setPinned] = useState(false);
-  const [tab, setTab] = useState("sql");
+  const [tab, setTab] = useState(sql ? "sql" : "info");
   const ref = useRef(null);
   const panelRef = useRef(null);
   const open = pinned;
@@ -96,10 +111,16 @@ export function SqlChip({ sql, source, result, rawRows }) {
     };
   }, [pinned]);
 
-  if (!sql) return null;
+  // §9(operia) sql 이 없어도 queryInfo(조건/분류기준/정렬기준/지표)가 있으면 "조회 조건" 칩으로 노출.
+  const hasQueryInfo = queryInfo && typeof queryInfo === "object"
+    && Object.keys(queryInfo).some((k) => !["sql", "source"].includes(k) && queryInfo[k] != null);
+  if (!sql && !hasQueryInfo) return null;
   // mock 계열(고정 템플릿/폴백/정적 목업)은 '실제 쿼리'가 아니라 칩 숨김 — 실 채널(api)·Claude 생성(claude)만 노출
   if (source === "template" || source === "fallback" || source === "mock") return null;
   const meta = SOURCE_META[source] || SOURCE_META.api;
+  // sql 없으면 "조회 조건" 칩(🔎), 있으면 출처별 SOURCE_META 라벨/아이콘 유지.
+  const btnLabel = sql ? meta.label : "조회 조건";
+  const btnIcon = sql ? meta.icon : "🔎";
   // source=api 는 실 서버 채널(backend/operia 공통) → 활성 채널명으로 헤더 구분
   const headerText = source === "api"
     ? (activeChannelName() === "backend" ? "출처: 임시 백엔드 서버" : "출처: 오페리아 서버")
@@ -119,7 +140,7 @@ export function SqlChip({ sql, source, result, rawRows }) {
         aria-label="생성된 SQL 보기"
         className={"inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 " +
           (open ? btnOpen : btnClosed)}>
-        <span className="font-mono">{meta.icon}</span> {meta.label}
+        <span className="font-mono">{btnIcon}</span> {btnLabel}
       </button>
       {open && (
         <div ref={panelRef} className="mt-1.5 w-[300px] max-w-full rounded-xl shadow-xl border border-black/10 overflow-hidden"
@@ -131,7 +152,7 @@ export function SqlChip({ sql, source, result, rawRows }) {
           </div>
           {hasResult && (
             <div className="flex items-center gap-1 px-2 py-1 border-b border-white/10 bg-black/20">
-              {tabBtn("sql", "SQL")}
+              {sql ? tabBtn("sql", "SQL") : tabBtn("info", "조회 조건")}
               {tabBtn("result", "결과")}
             </div>
           )}
@@ -145,8 +166,10 @@ export function SqlChip({ sql, source, result, rawRows }) {
                 </details>
               )}
             </div>
-          ) : (
+          ) : sql ? (
             <pre className="px-3 py-2.5 text-[11px] leading-relaxed text-violet-50 font-mono whitespace-pre-wrap break-words max-h-64 overflow-auto edupay-noscroll">{sql}</pre>
+          ) : (
+            <QueryInfoView queryInfo={queryInfo} />
           )}
         </div>
       )}
@@ -210,6 +233,40 @@ function ReportToggleCard({ initialShaped, initialRows, sql, source, onCardQuery
   );
 }
 
+// operia summaryStats.groups[0].rows({label,value,pct}) → 그룹형 카드 표준 입력. 대상: barlist(merchantBreakdown)·donut(catSpend)만.
+//   schoolCompare(barlist)는 rank/me/avgRow 가 필요해 제외(그룹행만으론 부족). 그 외/미존재 → null(기존 shapeForIntent 폴백).
+const GROUP_PRIORITY = new Set(["merchantBreakdown", "catSpend"]);
+function shapeFromGroups(intent, cfg, summaryStats) {
+  if (!GROUP_PRIORITY.has(intent)) return null;
+  const g = summaryStats && Array.isArray(summaryStats.groups) && summaryStats.groups[0];
+  if (!g || !Array.isArray(g.rows) || !g.rows.length) return null;
+  // ★회귀 가드: 클라 계산 computeSummaryStats 도 groups 를 만든다(mock/backend 경로). operia 실 payload 전용
+  //   마커(groupByLabel/valueLabel)가 있어야만 진입 → mock/backend 는 shapeForIntent 폴백 유지(회귀 0).
+  if (!g.groupByLabel && !g.valueLabel) return null;
+  const rows = g.rows.map((r) => ({ label: r.label, value: r.value, pct: r.pct }));
+  if (cfg.template === "donut") {
+    const total = rows.reduce((s, r) => s + (r.value || 0), 0);
+    return { total, slices: rows };
+  }
+  // barlist (merchantBreakdown)
+  return { items: rows };
+}
+
+// reportPlan 한글 제목: heading.content 우선 → chart.config.title. 없으면 null.
+function planTitle(reportPlan) {
+  const secs = reportPlan && Array.isArray(reportPlan.sections) ? reportPlan.sections : [];
+  const heading = secs.find((s) => s && s.type === "heading" && s.content);
+  if (heading) return heading.content;
+  const chart = secs.find((s) => s && s.type === "chart" && s.config && s.config.title);
+  return chart ? chart.config.title : null;
+}
+// 그룹형 카드만 payload 제목 우선(그 외는 커스텀 유지). 없으면 cfg.title 폴백.
+function mergeTitleFromPlan(intent, cfg, reportPlan) {
+  if (!GROUP_PRIORITY.has(intent)) return cfg;
+  const t = planTitle(reportPlan);
+  return t ? { ...cfg, title: t } : cfg;
+}
+
 // 렌더 모델(§0.2): 프론트가 질문으로 카드를 정하고(intent) tableData 를 shapeForIntent 로 카드 입력 변환 → 전용 템플릿.
 //   shape 실패(역할 부족/미지원 intent) → reportPlan 폴백 → table. 10개 카드 시각은 전용 템플릿 그대로(입력만 tableData).
 export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, onCardQuery, onActiveSql }) {
@@ -228,10 +285,13 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   else {
     const cfg = INTENT_CONFIG[intent];
     if (cfg) {
-      const shaped = shapeForIntent(intent, tableData, columnMetadata);
+      const grouped = shapeFromGroups(intent, cfg, summaryStats);          // 그룹 payload 우선(비율 그대로)
+      const shaped = grouped || shapeForIntent(intent, tableData, columnMetadata);
       if (shaped) {
         const Tpl = TEMPLATES[cfg.template] || TEMPLATES.table;
-        return <Tpl data={shaped} config={cfg} intent={intent} />;
+        // payload 한글 제목은 operia 그룹 경로(grouped)일 때만 — mock/backend(shapeForIntent 폴백)는 cfg.title 유지(회귀 0)
+        const mergedCfg = grouped ? mergeTitleFromPlan(intent, cfg, reportPlan) : cfg;
+        return <Tpl data={shaped} config={mergedCfg} intent={intent} />;
       }
     }
   }

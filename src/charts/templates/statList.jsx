@@ -10,6 +10,22 @@ export function StatListTemplate({ data, config }) {
   const styles = opt.itemStyles || [];
   const noteStyle = opt.noteStyle || { background: "#F6F6FB", color: "#6B6E78" };
   const note = cfg.insight ? cfg.insight(data || {}) : "";
+  // ★ 단일 KPI(operia 잔액 총액 등: kpi=true + 항목 1개) → 3항목 리스트 대신 큰 단일 값 강조. 기존 3항목 렌더는 아래 유지.
+  if (data && data.kpi && items.length === 1) {
+    const it = items[0];
+    const st = (opt.itemStyles && opt.itemStyles[0]) || {};
+    return (
+      <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
+        <div className="mt-4 flex flex-col items-center justify-center py-4">
+          <div className="text-[13px] text-gray-500 mb-1">{it.label}</div>
+          <div className="text-[34px] font-extrabold tracking-[-0.03em] tabular-nums" style={{ color: st.ink || "#0F5A57" }}>
+            {num(it.value)}<span className="text-[18px] font-bold ml-0.5">{it.unit}</span>
+          </div>
+        </div>
+        {note && (<div className="mt-2 rounded-xl px-3.5 py-3 text-[12.5px] leading-relaxed" style={noteStyle}>💡 {note}</div>)}
+      </ChartShell>
+    );
+  }
   return (
     <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
       <div className="mt-3 flex flex-col gap-2.5">

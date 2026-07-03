@@ -26,6 +26,26 @@ export function canonChannel(c) {
   return CHANNEL_CANON[k] || CHANNEL_CANON[k.toUpperCase()] || c;
 }
 
+// 영문 원컬럼명 → 사용자 노출용 한글 라벨(단일 출처). operia columnMetadata.label 이 원컬럼명(영문)이라 필요.
+//   mock/backend 표준 컬럼명(month/amount/merchant 등)은 이 맵에 없어 metaLabel 폴백 → 회귀 0.
+export const COLUMN_LABELS = {
+  ACCOUNT_BALANCE_AMT: "사용 가능 금액",
+  DLNG_YM: "월", DLNG_AMT: "금액",
+  MERCHANT_NM: "가맹점", CATEGORY_NM: "카테고리",
+  ADDR: "주소", LATITUDE: "위도", LONGITUDE: "경도",
+};
+
+/**
+ * 컬럼명 → 한글 라벨. 컬럼명 매핑 우선, 없으면 metaLabel(columnMetadata.label) 폴백, 그것도 없으면 컬럼명 그대로.
+ * @param {*} column 원컬럼명
+ * @param {*} [metaLabel] columnMetadata.label
+ */
+export function labelForColumn(column, metaLabel) {
+  if (column != null && COLUMN_LABELS[column] != null) return COLUMN_LABELS[column];
+  if (metaLabel != null && String(metaLabel).trim() !== "") return String(metaLabel);
+  return column == null ? "" : String(column);
+}
+
 const hasKorean = (s) => typeof s === "string" && /[가-힣]/.test(s);
 
 /**

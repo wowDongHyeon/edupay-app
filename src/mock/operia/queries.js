@@ -1,7 +1,7 @@
 // 알려진 10개 intent — 고정 SQL 템플릿 + shaper (MOCK_API_설계.md §8.4 / TEMPLATE_설계.md §4)
 // ★ 실 오페리아 계약 = 한 요청 = SQL 1문장 = 결과셋 1개(rows). intent당 sql은 '정확히 1문장'(UNION ALL 허용).
 //   shape(rows)는 그 단일 rows를 '템플릿 표준 데이터'(§2)로 정규화한다(표현/필드는 charts/intentConfig·templates 담당).
-import { labelOfCode, canonChannel } from "../../charts/codeLabels";
+import { labelOfCode, canonChannel, labelForColumn } from "../../charts/codeLabels";
 
 const UID = "stu_demo";
 const VOUCHER_LIMIT = 100000;
@@ -171,6 +171,20 @@ export const QUERIES = {
         { re: /edu.*point|^point|포인트|에듀포인트/i, meta: META.point },
       ];
       const keys = Object.keys(rows[0]);
+
+      // ★ 단일행 + 숫자컬럼 1개(operia 잔액 총액 ACCOUNT_BALANCE_AMT 등) → 단일 KPI 로 렌더.
+      //   기존 A/B/C KIND 매칭이 안 잡히던 케이스(라벨=값 깨짐)의 근본 방지. KIND 에 명확히 매칭되면(하위호환)
+      //   여기서 처리하지 않고 아래 기존 경로(B: 단일행 피벗)로 넘긴다.
+      if (rows.length === 1) {
+        const numCols = keys.filter((c) => typeof rows[0][c] === "number");
+        if (numCols.length === 1) {
+          const col = numCols[0];
+          const matchesKind = KIND.some((k) => k.re.test(col));
+          if (!matchesKind) {
+            return { kpi: true, items: [{ label: labelForColumn(col), sub: "", value: pos(rows[0][col] || 0), unit: /P$|POINT|포인트/i.test(String(col)) ? "P" : "원" }] };
+          }
+        }
+      }
 
       // A) 계산형 {k,v} — used/recv/points 원시값으로 잔액 계산(mock)
       if (keys.includes("k") && keys.includes("v") && rows.some((r) => /used|recv|points/i.test(String(r.k)))) {

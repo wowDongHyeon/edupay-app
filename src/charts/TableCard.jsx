@@ -1,5 +1,6 @@
 import React from "react";
 import { ChartShell, num } from "./util";
+import { labelForColumn } from "./codeLabels";
 /* TableCard : ChartRenderer의 기본(default) 렌더 — 매핑된 차트 유형이 없을 때 result를 범용 표로 표시.
    - result가 객체 배열: 키를 열로 하는 표
    - result가 객체: 키/값 2열 표 (중첩 배열·객체는 요약)
@@ -38,7 +39,8 @@ export function tableColumns(rows, columnMetadata) {
     cols = dataKeys;
   }
   const labelByCol = new Map(meta.map((m) => [m.column, (m.label != null && String(m.label).trim() !== "") ? String(m.label) : null]));
-  const headers = cols.map((c) => ({ key: c, label: labelByCol.get(c) || c }));
+  // COLUMN_LABELS(영문 원컬럼→한글) 우선, 없으면 metaLabel 폴백, 그것도 없으면 컬럼명. mock/backend 표준컬럼은 맵에 없어 metaLabel 폴백(회귀 0).
+  const headers = cols.map((c) => ({ key: c, label: labelForColumn(c, labelByCol.get(c)) }));
   return { cols, headers };
 }
 
