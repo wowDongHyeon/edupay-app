@@ -41,11 +41,11 @@ export function BarTemplate({ data, config, tab, onTab, loading, error, onRetry 
       <>
       <div style={{ width: "100%", height: 150 }} className="mt-2">
         <ResponsiveContainer>
-          <BarChart data={chart} margin={{ top: 16, right: 4, left: 4, bottom: 0 }} barCategoryGap={36}>
+          <BarChart data={chart} margin={{ top: 16, right: 4, left: 4, bottom: 0 }} barCategoryGap="38%">
             <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#9CA3AF" }} interval={0} />
             <Tooltip cursor={{ fill: "rgba(59,130,246,0.06)" }} formatter={(v) => [won(v), "사용"]}
               contentStyle={{ borderRadius: 12, border: "1px solid #E0E2FA", fontSize: 12 }} />
-            <Bar dataKey="amount" radius={[8, 8, 0, 0]} maxBarSize={44} isAnimationActive={false}>
+            <Bar dataKey="amount" radius={[8, 8, 0, 0]} maxBarSize={28} isAnimationActive={false}>
               <LabelList dataKey="amount" position="top"
                 formatter={(v) => (v ? (v >= 10000 ? (Number.isInteger(v / 10000) ? v / 10000 : (v / 10000).toFixed(1)) + "만" : num(v)) : "")}
                 style={{ fontSize: 10, fontWeight: 700, fill: "#6B7280" }} />

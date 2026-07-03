@@ -59,7 +59,8 @@ export const QUERIES = {
       const hasMeans = rows.some((r) => r.means != null);
       return {
         // key(YYYY-MM) = 진행중 당월 판정용(insight). label/value 는 기존과 동일(bar 템플릿은 label/value 만 사용).
-        series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).map((x) => ({ label: mLabel(x.month), value: x.amount, key: monthKey(x.month) })),
+        // 최근 6개월만(막대): 오름차순 정렬 후 뒤에서 6개(최신). 6개 이하면 그대로 — 배지/인사이트가 이 series 기준으로 자동 연동.
+        series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).slice(-6).map((x) => ({ label: mLabel(x.month), value: x.amount, key: monthKey(x.month) })),
         currentMonthKey: monthKey(TODAY), // 오늘(DATA.TODAY) 기준 현재월 — 마지막 막대가 진행중 당월인지 판정(insight)
         breakdown: hasMeans
           ? withPct(sumBy(rows, "means").sort((a, b) => b.amount - a.amount))
@@ -173,6 +174,21 @@ export const QUERIES = {
         { re: /edu.*point|^point|포인트|에듀포인트/i, meta: META.point },
       ];
       const keys = Object.keys(rows[0]);
+
+      // ★ operia 3열 잔액(한 행: ACCOUNT_BALANCE_AMT / CARD_BALANCE_AMT / CURRENT_POINT) → 고정 3항목(총합 없음).
+      //   컬럼명 대소문자 무시, 값이 라벨로 새는 것 방지(라벨은 META 고정). itemStyles[0..2] 아이콘 🎫/💸/⭐ 순서와 정렬.
+      if (rows.length === 1) {
+        const row = rows[0];
+        const findCol = (name) => keys.find((c) => String(c).toUpperCase() === name);
+        const cVoucher = findCol("ACCOUNT_BALANCE_AMT"), cCharge = findCol("CARD_BALANCE_AMT"), cPoint = findCol("CURRENT_POINT");
+        if (cVoucher && cCharge && cPoint) {
+          return { items: [
+            { ...META.voucher, value: pos(row[cVoucher] || 0) },
+            { ...META.charge, value: pos(row[cCharge] || 0) },
+            { ...META.point, value: pos(row[cPoint] || 0) },
+          ] };
+        }
+      }
 
       // ★ 단일행 + 숫자컬럼 1개(operia 잔액 총액 ACCOUNT_BALANCE_AMT 등) → 단일 KPI 로 렌더.
       //   기존 A/B/C KIND 매칭이 안 잡히던 케이스(라벨=값 깨짐)의 근본 방지. KIND 에 명확히 매칭되면(하위호환)
