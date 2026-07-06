@@ -1,11 +1,11 @@
 import React from "react";
 import { ChartShell, CAT_EMOJI } from "./util";
 /* map : 근처 사용 가능 가맹점 (오페리아 result {center:{lat,lng}, merchants:[{name,category,addr,lat,lng}]})
-   카카오 지도(JS SDK) 실지도 + 가맹점 마커/라벨. 기본 위치 = 청주 흥덕 중심(거리 현실화).
+   카카오 지도(JS SDK) 실지도 + 가맹점 마커/라벨. 기본 위치 = 대전 유성구 신성동 중심(거리 현실화).
    VITE_KAKAO_MAP_KEY 없거나 SDK 로드 실패 → 기존 '오프라인 약식 지도'(격자+상대좌표) 폴백. */
 
 const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
-const CHEONGJU = { lat: 36.6372, lng: 127.486 }; // 청주 흥덕 중심(서울 기본값 → 111km 문제 제거)
+const DAEJEON_SINSEONG = { lat: 36.3615, lng: 127.3545 }; // 대전 유성구 신성동 중심(실 가맹점 데이터 지역 · 원거리 GPS 폴백)
 
 // 하버사인 거리(m)
 const distM = (a, b) => {
@@ -42,11 +42,11 @@ export function MapChartCard({ result, title, subtitle, badge }) {
   const [visibleCount, setVisibleCount] = React.useState(5); // 하단 리스트만 점진 노출(지도 마커는 전부)
 
   const merchantsRaw = (result && Array.isArray(result.items || result.merchants) ? (result.items || result.merchants) : []).filter((m) => m.lat != null && m.lng != null);
-  // 지도 중심: result.center → 가맹점 평균 → 청주 기본
+  // 지도 중심: result.center → 가맹점 평균 → 대전 신성동 기본
   const avg = merchantsRaw.length
     ? { lat: merchantsRaw.reduce((s, m) => s + m.lat, 0) / merchantsRaw.length, lng: merchantsRaw.reduce((s, m) => s + m.lng, 0) / merchantsRaw.length }
     : null;
-  const center = (result && result.center) || avg || CHEONGJU;
+  const center = (result && result.center) || avg || DAEJEON_SINSEONG;
 
   // 약식 폴백용 상대좌표(x/y%)
   const merchants = (result && Array.isArray(result.items || result.merchants) ? (result.items || result.merchants) : []).map((m) => ({
@@ -56,11 +56,11 @@ export function MapChartCard({ result, title, subtitle, badge }) {
     y: Math.min(88, Math.max(12, 50 - (m.lat - center.lat) * 4000)),
   }));
 
-  // 내 위치 정책(데모): GPS가 가맹점 무리에서 멀면(>30km, 예: 서울 접속) 청주 흥덕 중심으로 대체.
-  //   가까우면 실 GPS 사용 → 어디서 접속해도 청주 기준·거리 수백 m, 지도도 동네 단위로 확대.
+  // 내 위치 정책(데모): GPS가 가맹점 무리에서 멀면(>30km, 예: 서울 접속) 대전 신성동 중심으로 대체.
+  //   가까우면 실 GPS 사용 → 어디서 접속해도 대전 신성동 기준·거리 수백 m, 지도도 동네 단위로 확대.
   const gps = geo.status === "ok" ? { lat: geo.lat, lng: geo.lng } : null;
   const realLoc = !!(gps && distM(gps, center) <= 30000); // 30km 이내면 실 위치로 인정
-  const myPos = realLoc ? gps : CHEONGJU;
+  const myPos = realLoc ? gps : DAEJEON_SINSEONG;
   const list = merchants
     .map((m) => ({ ...m, realDist: m.lat != null ? distM(myPos, { lat: m.lat, lng: m.lng }) : null }))
     .sort((a, b) => (a.realDist ?? 9e9) - (b.realDist ?? 9e9));
@@ -109,7 +109,7 @@ export function MapChartCard({ result, title, subtitle, badge }) {
           content: `<div style="padding:1px 6px;background:#fff;border:1px solid #E0D9F7;border-radius:8px;font-size:10.5px;font-weight:700;color:#5B4DD6;white-space:nowrap;box-shadow:0 1px 3px rgba(80,60,160,.18)">${m.name}</div>`,
         });
       });
-      // 가맹점(+가까운 내 위치) 기준으로 맞춤. 원거리 GPS는 위에서 청주로 대체돼 줌아웃되지 않음.
+      // 가맹점(+가까운 내 위치) 기준으로 맞춤. 원거리 GPS는 위에서 대전 신성동으로 대체돼 줌아웃되지 않음.
       // 레벨 클램프: 너무 넓으면(>6) 동네 단위로, 한 점에 몰리면(<4) 과확대 방지.
       const applyBounds = () => {
         if (!near.length) return;
@@ -128,12 +128,12 @@ export function MapChartCard({ result, title, subtitle, badge }) {
     return () => { cancelled = true; };
   }, [geo.status, geo.lat, geo.lng]);
 
-  // 배지: 실 위치(가까운 GPS)면 "현재 위치 기준 · 실제 거리", 그 외(원거리 GPS·미허용·실패)는 "청주 기준 · 예시 거리"
+  // 배지: 실 위치(가까운 GPS)면 "현재 위치 기준 · 실제 거리", 그 외(원거리 GPS·미허용·실패)는 "대전 신성동 기준 · 예시 거리"
   const statusBar = geo.status === "locating"
     ? { txt: "내 위치 찾는 중…", cls: "bg-gray-100 text-gray-500" }
     : realLoc
     ? { txt: "📍 현재 위치 기준 · 실제 거리", cls: "bg-emerald-50 text-emerald-700" }
-    : { txt: "청주 기준 · 예시 거리", cls: "bg-amber-50 text-amber-700" };
+    : { txt: "대전 신성동 기준 · 예시 거리", cls: "bg-amber-50 text-amber-700" };
 
   const retry = () => {
     setGeo({ status: "locating" });
