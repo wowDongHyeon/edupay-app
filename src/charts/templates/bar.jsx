@@ -37,6 +37,10 @@ export function BarTemplate({ data, config, tab, onTab, loading, error, onRetry 
           <div>{(cfg.options && cfg.options.errorText) || "일별 내역을 불러오지 못했어요."}</div>
           <button onClick={onRetry} className="px-3.5 py-1.5 rounded-full bg-violet-100 text-violet-700 font-bold text-[12px] active:scale-95 transition">{(cfg.options && cfg.options.retryText) || "다시 시도"}</button>
         </div>
+      ) : series.length === 0 ? (
+        <div className="mt-3 rounded-2xl bg-gray-50 px-4 py-7 text-center text-[13.5px] text-gray-500">
+          {(cfg.options && cfg.options.emptyText) || "이 기간엔 사용 내역이 없어요 👍"}
+        </div>
       ) : (
       <>
       <div style={{ width: "100%", height: 150 }} className="mt-2">
