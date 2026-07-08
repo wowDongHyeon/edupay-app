@@ -275,11 +275,58 @@ function mergeTitleFromPlan(intent, cfg, reportPlan) {
 
 // 렌더 모델(§0.2): 프론트가 질문으로 카드를 정하고(intent) tableData 를 shapeForIntent 로 카드 입력 변환 → 전용 템플릿.
 //   shape 실패(역할 부족/미지원 intent) → reportPlan 폴백 → table. 10개 카드 시각은 전용 템플릿 그대로(입력만 tableData).
-export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, onCardQuery, onActiveSql }) {
+// ── dayTxns 헬퍼: operia 건별 행 → 리스트 shape. 컬럼은 '이름'으로 유연 매핑(대소문자 무관), 필수(가맹점·금액) 없으면 null → 폴백. ──
+function _pickCol(keys, re, exclude) {
+  return keys.find((k) => re.test(k) && !(exclude && exclude.test(k)));
+}
+function _fmtTime(v) {
+  const s = String(v == null ? "" : v);
+  if (/^\d{1,2}:\d{2}/.test(s)) return s.slice(0, 5);   // "12:00[:00]" → "12:00"
+  const d = s.replace(/\D/g, "");
+  if (d.length >= 4) return d.slice(0, 2) + ":" + d.slice(2, 4); // "1200"/"120000" → "12:00"
+  return "";
+}
+function dayBadge(scope) {
+  const d = scope && scope.date;
+  if (!d) return "사용";
+  const p = String(d).split("-");
+  return p[1] && p[2] ? `${+p[1]}월 ${+p[2]}일` : "사용";
+}
+function shapeDayTxns(tableData) {
+  const rows = Array.isArray(tableData) ? tableData : [];
+  if (!rows.length) return null;
+  const keys = Object.keys(rows[0] || {});
+  const cMerchant = _pickCol(keys, /merchant_nm|merchant|가맹|store|shop/i, /_no$|_id$/i) || _pickCol(keys, /_nm$|name/i, /_no$|_id$/i);
+  const cAmount = _pickCol(keys, /dlng_amt|amt|amount|금액|price|pay/i);
+  if (!cMerchant || !cAmount) return null; // 형태 안 맞음 → 폴백(reportPlan/table)
+  const cItem = _pickCol(keys, /gds_nm|goods|item|상품|product|prod/i, /_no$|_id$/i);
+  const cTime = _pickCol(keys, /dlng_tm|_tm$|time|시각|시간/i);
+  const cDate = _pickCol(keys, /dlng_dt|_dt$|date|일자/i);
+  const items = rows.map((r) => ({
+    merchant: r[cMerchant],
+    item: cItem ? r[cItem] : "",
+    amount: Number(r[cAmount]) || 0,
+    time: cTime ? _fmtTime(r[cTime]) : "",
+    _t: cTime ? String(r[cTime]).replace(/\D/g, "") : (cDate ? String(r[cDate]) : ""),
+  }));
+  items.sort((a, b) => (a._t < b._t ? -1 : a._t > b._t ? 1 : 0)); // 시간순(오름차순)
+  return { rows: items, total: items.reduce((s, x) => s + x.amount, 0), count: items.length };
+}
+
+export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, onCardQuery, onActiveSql }) {
   // 전용 1) report 월/일 토글 — shapeForIntent("report") {series,breakdown}, 일별은 lazy
   if (intent === "report") {
     const shaped = shapeForIntent("report", tableData, columnMetadata);
     if (shaped) return <ReportToggleCard initialShaped={shaped} initialRows={tableData} sql={sql} source={source} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
+  }
+  // 전용 1.5) dayTxns 하루 건별 거래 리스트 — operia 행(merchant/gds/amount/time)을 인라인 shape. 형태 안 맞으면 아래 폴백.
+  else if (intent === "dayTxns") {
+    const shaped = shapeDayTxns(tableData);
+    if (shaped) {
+      const label = (scope && scope.label) || "";
+      const badge = label && label !== "선택 날짜" ? label : dayBadge(scope);
+      return <TEMPLATES.txnList data={shaped} config={{ title: `${badge} 사용 내역`, subtitle: "FOX PAY 결제 · 건별 내역", badge, options: { limit: 6 } }} />;
+    }
   }
   // 전용 2) merchantMap 지도 — shapeForIntent("merchantMap") {center,items}. 좌표 없으면(shape 실패) 아래 공통 폴백으로
   //   흘려보낸다(reportPlan 한글 우선 → table). "가맹점 몇개"처럼 merchantMap 오판 시 원시 뷰 대신 리포트/한글 테이블.

@@ -6,6 +6,7 @@ import { StatListTemplate } from "./statList.jsx";
 import { CompareTemplate } from "./compare.jsx";
 import { TrendTemplate } from "./trend.jsx";
 import { TxListTemplate } from "./txList.jsx";
+import { TxnListTemplate } from "./txnList.jsx";
 import { MapTemplate } from "./map.jsx";
 import { ListTemplate } from "./list.jsx";
 import { TableTemplate } from "./table.jsx";
@@ -22,6 +23,7 @@ export const TEMPLATES = {
   compare: CompareTemplate,
   trend: TrendTemplate,
   txList: TxListTemplate,
+  txnList: TxnListTemplate,
   map: MapTemplate,
   list: ListTemplate,
   table: TableTemplate,

@@ -90,7 +90,11 @@ function Section({ section, ctx }) {
   // reportPlan 폴백에선 서술(report)·인사이트(insight) 텍스트 블록 숨김 — heading/kpi/chart/table/kpi_grid 만 표시.
   //   (핵심질의 커스텀 카드 InsightBox 는 intentConfig 경로라 영향 없음.)
   if (t === "insight" || t === "report") return null;
-  if (t === "table") return <TableCard result={rows} columnMetadata={cm} />;
+  if (t === "table") {
+    // 단일 값(≤1행)인데 kpi_cards가 이미 그 값을 보여주면 중복 표 숨김. 다행(목록/랭킹)이거나 kpi_cards 없으면 표 유지.
+    if (rows.length <= 1 && ctx.hasKpiCards) return null;
+    return <TableCard result={rows} columnMetadata={cm} />;
+  }
   if (t === "chart") return <ChartSection section={section} rows={rows} cm={cm} />;
   if (t === "kpi_grid") return <KpiGrid section={section} rows={rows} cm={cm} />;
   if (t === "kpi_cards") return <KpiCards section={section} rows={rows} cm={cm} />;
@@ -99,7 +103,8 @@ function Section({ section, ctx }) {
 
 export function ReportPlanRenderer({ reportPlan, tableData, columnMetadata, summaryStats }) {
   const sections = reportPlan && Array.isArray(reportPlan.sections) ? reportPlan.sections : [];
-  const ctx = { tableData: tableData || [], columnMetadata: columnMetadata || [], summaryStats };
+  const hasKpiCards = sections.some((s) => s && s.type === "kpi_cards");
+  const ctx = { tableData: tableData || [], columnMetadata: columnMetadata || [], summaryStats, hasKpiCards };
   if (!sections.length) return <TableCard result={tableData || []} columnMetadata={columnMetadata} />;
   return (
     <div className="flex flex-col gap-2.5">

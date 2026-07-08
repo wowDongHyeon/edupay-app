@@ -30,6 +30,7 @@ export function canonChannel(c) {
 //   mock/backend 표준 컬럼명(month/amount/merchant 등)은 이 맵에 없어 metaLabel 폴백 → 회귀 0.
 export const COLUMN_LABELS = {
   ACCOUNT_BALANCE_AMT: "사용 가능 금액",
+  CARD_BALANCE_AMT: "용돈 충전금", CURRENT_POINT: "에듀포인트",
   DLNG_YM: "월", DLNG_AMT: "금액",
   MERCHANT_NM: "가맹점", CATEGORY_NM: "카테고리",
   ADDR: "주소", LATITUDE: "위도", LONGITUDE: "경도",

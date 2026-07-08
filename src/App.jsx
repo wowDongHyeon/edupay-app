@@ -615,6 +615,41 @@ function UserBubble({ text, onRegisterFaq }) {
 const NET_ERROR_MSG = "앗, 지금 잠깐 연결이 안 돼 😅 조금 있다 다시 해볼래?";
 // 데이터 구조 자체가 없는 텍스트 응답(OTHER/비관련 거절)용 친근 회피 문구. 오페리아의 사무적 answer 는 노출하지 않는다.
 const OFFTOPIC_MSG = "앗, 그건 내가 도와주기 어려워 😅 결제·용돈·가맹점 관련해서 물어봐줄래?";
+// 조회는 유효하나 데이터가 없는 경우(구조는 있음: 컬럼/plan). 헤더만 있는 빈 표·0 KPI 대신 친근 안내.
+const EMPTY_MSG = "이 조건엔 사용 내역이 없어요 😊 다른 걸 물어봐줄래?";
+// 빈결과 안내 문구를 질의 종류에 맞춰 분기(문구만; 판정 isEmptyResult·operia 게이팅은 불변).
+//   날짜 표현(오늘/어제/이번 달 등)이 있으면 앞말로 반영. 금액/총액/얼마류→"0원" 톤, 내역/목록류·그 외→"없어요" 톤.
+function _dayPrefix(q) {
+  const t = String(q || "");
+  if (/오늘/.test(t)) return "오늘은";
+  if (/(어제|어저께)/.test(t)) return "어제는";
+  if (/(그저께|그제)/.test(t)) return "그저께는";
+  if (/(그끄제|그끄저께)/.test(t)) return "그끄제는";
+  if (/(이번\s*달|이달|당월|금월)/.test(t)) return "이번 달엔";
+  if (/(지난\s*달|저번\s*달|전월)/.test(t)) return "지난 달엔";
+  if (/(이번\s*주|금주)/.test(t)) return "이번 주엔";
+  if (/(지난\s*주|저번\s*주|전주)/.test(t)) return "지난 주엔";
+  return "";
+}
+function emptyMsgFor(q) {
+  const t = String(q || "");
+  const pre = _dayPrefix(t);
+  if (/(금액|총액|합계|얼마|총\s*금액|얼마나\s*썼)/.test(t)) {
+    return pre ? `${pre} 쓴 금액이 없어! 0원이야 👍` : "쓴 금액이 없어! 0원이야 👍";
+  }
+  return pre ? `${pre} 사용 내역이 없어요 😊 다른 걸 물어봐줄래?` : EMPTY_MSG;
+}
+// 빈 결과 판정: totalCount 0 / tableData 없음·빈 배열 / 모든 행의 모든 값이 null·''(집계 null-1행 포함).
+//   ※ OTHER(구조 자체 없음)는 호출부에서 먼저 OFFTOPIC 으로 처리하므로, 여기 도달하는 건 '구조는 있는데 값이 빈' 경우.
+function isEmptyResult(resp) {
+  if (!resp) return false;
+  if (resp.totalCount === 0) return true;
+  const rows = Array.isArray(resp.tableData) ? resp.tableData : [];
+  if (!rows.length) return true;
+  return rows.every((r) => (r && typeof r === "object")
+    ? Object.values(r).every((v) => v == null || v === "")
+    : (r == null || r === ""));
+}
 // 판정: 비었거나 한글이 하나도 없으면(Failed to fetch, NetworkError, datasource error, timeout 등 영문/기술 문자열)
 //   → 친근 문구로 치환. 백엔드가 준 '한글 사용자 안내'는 기술 메시지가 아니므로 그대로 노출(현행 유지).
 function isTechErrorMessage(em) {
@@ -652,7 +687,7 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
             <span className="text-[13px]">↻</span>다시 시도
           </button>
           }
-          {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} onCardQuery={onCardQuery} onActiveSql={setChip} />}
+          {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} scope={msg.scope} onCardQuery={onCardQuery} onActiveSql={setChip} />}
           {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} onSend={onSend} onOpenContent={onOpenContent} />}
         </div>
       </div>
@@ -1267,6 +1302,12 @@ function App() {
     const spend = /(얼마|소비|지출|사용|썼|쓴|샀|구매|구입|결제|쓴돈)/.test(t);
     const ps = periodScope(t);
 
+    // 하루 스코프(오늘/어제/특정일) + 사용/내역 → 건별 거래 리스트(dayTxns). operia 만(mock/backend 는 아래 기존 report 경로 유지 → 회귀 0).
+    //   질의는 operia 로 그대로 전달(userInput). 월별/달별·기간 추이는 위(1263~64)에서 이미 분기되어 여기 안 옴.
+    if (ps && ps.single && (wantsList || spend) && activeChannelName() === "operia") {
+      return { kind: "dayTxns", scope: { type: "day", date: ps.start, label: ps.label } };
+    }
+
     // 0) '카테고리별/분류별/항목별' → 카테고리 비중 분석 카드 (기간 없으면 이번 달)
     if (/(카테고리별|분류별|항목별|뭐에)/.test(t)) {
       const rp = ps || { ...DATA.monthRangeOf(DATA.TODAY), label: "이번 달", single: false };
@@ -1352,6 +1393,42 @@ function App() {
     return await queryDataSource(text, intent, ci ? ci.scope : null); // { result, sql, source, rawRows }
   }
 
+  // operia 미분류(cardIntent===null) 응답 렌더 — 핵심 카드 경로(§ci useOperia)와 동일 규칙:
+  //   unsupported→안내, success=false→친근/원문, 폴백 토스트, 데이터 '구조' 없음(행0+컬럼없음+plan없음)→OTHER 친근 회피,
+  //   있으면 chartType(미분류→table 폴백)/reportPlan/table 카드로 렌더. ci 경로는 이 함수를 쓰지 않는다(불변).
+  function renderChannelResp(resp, kind, scope, q, forceTable) {
+    setTyping(false);
+    if (resp && resp.unsupported) {
+      setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.message) }]);
+      return;
+    }
+    if (resp && resp.success === false) {
+      showApiToast("채널 오류(success=false)", "error");
+      if (isTechErrorMessage(resp.errorMessage)) {
+        setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: NET_ERROR_MSG, retry: q }]);
+      } else {
+        setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.errorMessage }]);
+      }
+      return;
+    }
+    if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${kind || "(미분류)"}`, "error");
+    const _rows = Array.isArray(resp && resp.tableData) ? resp.tableData : [];
+    const _hasCols = Array.isArray(resp && resp.columnMetadata) && resp.columnMetadata.length > 0;
+    const _hasPlan = !!(resp && resp.reportPlan && Array.isArray(resp.reportPlan.sections) && resp.reportPlan.sections.length > 0);
+    if (!_rows.length && !_hasCols && !_hasPlan) {
+      setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: OFFTOPIC_MSG }]);
+      return;
+    }
+    // 구조는 있으나 데이터 없음(0행/전부 null 집계) → 빈 표·0 KPI 대신 친근 안내(이 경로는 operia 전용).
+    if (isEmptyResult(resp)) {
+      setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: emptyMsgFor(q) }]);
+      return;
+    }
+    // 렌더 지시(forceTable) + 표 데이터 有 → 카드/plan 스킵하고 범용 표. 미분류(kind=null)는 원래 table 폴백이라 reportPlan 억제만 유효.
+    const _tf = forceTable && (_hasCols || _rows.length > 0);
+    setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : chartTypeForIntent(kind), intent: _tf ? null : kind, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
+  }
+
   async function send(text) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
@@ -1363,6 +1440,9 @@ function App() {
 
     // 소비 조회/분석 질의 → 시각화 카드로 바로 응답
     const ci = cardIntent(q);
+    // 렌더 지시("표/리스트/목록으로 보여줘") → 카드 템플릿·reportPlan 건너뛰고 범용 표로 강제(표현 계층만; 질의는 그대로 operia로 감).
+    //   채널 무관(operia/mock/backend 동일). 표 데이터가 있을 때만 적용 → plan-only 응답은 기존 렌더 유지.
+    const tableForce = /(표|리스트|목록)\s*(으?로)\s*(보여|볼래|알려|출력|나열|정리|봐|줘|주)/.test(q);
     setTypingIntent(ci ? ci.kind : null); // 로딩 말풍선 문구 풀 선택(미매칭/잡담 → 기타)
     if (ci) {
       // ── 데이터 질문 → 오페리아 API 호출 → ChartRenderer 렌더 ──
@@ -1406,8 +1486,15 @@ function App() {
             setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: OFFTOPIC_MSG }]);
             return;
           }
+          // 구조는 있으나 데이터 없음(0행/전부 null 집계) → 빈 표·0 KPI 대신 친근 안내(operia 만; mock/backend 는 기존 렌더 유지 → 회귀 0).
+          if (activeChannelName() === "operia" && isEmptyResult(resp)) {
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: emptyMsgFor(q) }]);
+            return;
+          }
           // answer 말풍선(§6/§9): 있으면 카드 위 텍스트, 없으면 생략(10개 intent 는 빈 answer → 기존과 동일, 시각 보존).
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
+          // 렌더 지시(tableForce) + 표 데이터 有 → 카드/plan 스킵하고 범용 표(intent:null·reportPlan:null → ChartRenderer TEMPLATES.table, 한글 헤더). 지시 없으면 기존 카드 그대로.
+          const _tf = tableForce && (_hasCols || _rows.length > 0);
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : chartTypeForIntent(ci.kind), intent: _tf ? null : ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
         } catch (e) {
           console.error("[데이터] 호출 오류:", e);
           showApiToast("데이터 오류", "error");
@@ -1431,12 +1518,34 @@ function App() {
       return;
     }
 
-    // 그 외 → 실제 AI 답변
+    // 그 외(cardIntent 미분류) — operia 모드: 순수 인사/잡담만 로컬 한 줄, 나머지 null 질의는 operia로 전달(세션 맥락 누적+재조회, 오페리아팀 요청).
+    //   mock/backend 모드: 기존 로컬/AI 토글 유지(operiaMode=false → 아래 신규 분기 건너뜀).
+    const operiaMode = activeChannelName() === "operia";
+    // 순수 인사/자기소개 화이트리스트 → 로컬(데이터 없음, 기존 인사 유지). 그 외 미분류는 operia로.
+    const GREETING_RE = /^(안녕|하이|헬로|반가|고마|감사|잘가|잘 가|누구야|넌\s*누구|누구니|이름이)/;
+    if (operiaMode && !GREETING_RE.test(q)) {
+      showApiToast(`${activeChannelName()} · (미분류)`, "api");
+      try {
+        const resp = await queryDataSource(q, null, null); // 미분류 → operia 전달(kind/scope 없음). shape→reportPlan→table 폴백, 무관이면 OTHER→회피.
+        renderChannelResp(resp, null, null, q, tableForce);
+      } catch (e) {
+        console.error("[데이터] 호출 오류:", e);
+        showApiToast("데이터 오류", "error");
+        setTyping(false);
+        const em = e && e.message;
+        if (isTechErrorMessage(em)) {
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: NET_ERROR_MSG, retry: q }]);
+        } else {
+          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: em }]);
+        }
+      }
+      return;
+    }
+
+    // 인사/잡담(operia) 또는 mock/backend → 실제 AI 답변 or 로컬 fallback
     let res;
     try {
-      // ★ operia 모드에선 Claude(askAI/window.claude) 호출 완전 차단 — 잡담/인사/무관 질문은 로컬 응답(fallback→DATA.classify/answer)으로.
-      //   (mock/backend 모드는 기존 AI 토글 동작 유지 — operiaMode 만 강제 false.)
-      const operiaMode = activeChannelName() === "operia";
+      // ★ operia 모드에선 Claude(askAI/window.claude) 호출 완전 차단 — 인사/잡담은 로컬 fallback. mock/backend는 기존 AI 토글 유지.
       const hasAI = !operiaMode && aiEnabled && (typeof window !== "undefined" && window.FINFRIEND_AI_ENDPOINT || window.claude && window.claude.complete);
       if (hasAI) {
         showApiToast("🤖 Claude API 호출", "api");
