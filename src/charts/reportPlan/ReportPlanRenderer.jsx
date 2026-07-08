@@ -87,7 +87,9 @@ function Section({ section, ctx }) {
   const rows = ctx.tableData || [];
   const cm = ctx.columnMetadata;
   if (t === "heading") return <div className="text-[16px] font-extrabold text-gray-900 px-1 pt-1">{section.content || ""}</div>;
-  if (t === "insight" || t === "report") return <InsightBox text={section.narrative || ""} />;
+  // reportPlan 폴백에선 서술(report)·인사이트(insight) 텍스트 블록 숨김 — heading/kpi/chart/table/kpi_grid 만 표시.
+  //   (핵심질의 커스텀 카드 InsightBox 는 intentConfig 경로라 영향 없음.)
+  if (t === "insight" || t === "report") return null;
   if (t === "table") return <TableCard result={rows} columnMetadata={cm} />;
   if (t === "chart") return <ChartSection section={section} rows={rows} cm={cm} />;
   if (t === "kpi_grid") return <KpiGrid section={section} rows={rows} cm={cm} />;

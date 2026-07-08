@@ -94,7 +94,7 @@ export function TableCard({ result, intent, columnMetadata }) {
     body = <pre className="mt-3 text-[12px] text-gray-600 whitespace-pre-wrap break-all">{JSON.stringify(result, null, 2)}</pre>;
   }
   return (
-    <ChartShell badge="데이터" title="조회 결과" sub={intent ? `intent: ${intent}` : "표 형식"}>
+    <ChartShell badge="데이터" title="조회 결과" sub="표 형식">
       {body}
     </ChartShell>
   );

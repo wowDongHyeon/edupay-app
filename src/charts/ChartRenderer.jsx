@@ -281,11 +281,11 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
     const shaped = shapeForIntent("report", tableData, columnMetadata);
     if (shaped) return <ReportToggleCard initialShaped={shaped} initialRows={tableData} sql={sql} source={source} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
   }
-  // 전용 2) merchantMap 지도 — shapeForIntent("merchantMap") {center,items}. 좌표 없으면 table 폴백(§6-1)
+  // 전용 2) merchantMap 지도 — shapeForIntent("merchantMap") {center,items}. 좌표 없으면(shape 실패) 아래 공통 폴백으로
+  //   흘려보낸다(reportPlan 한글 우선 → table). "가맹점 몇개"처럼 merchantMap 오판 시 원시 뷰 대신 리포트/한글 테이블.
   else if (intent === "merchantMap") {
     const shaped = shapeForIntent("merchantMap", tableData, columnMetadata);
     if (shaped) return <TEMPLATES.map data={shaped} config={INTENT_CONFIG.merchantMap || {}} />;
-    return <TEMPLATES.table data={tableData} intent={intent} columnMetadata={columnMetadata} />;
   }
   // 그 외 전용 카드 — INTENT_CONFIG[intent] + shapeForIntent 성공 시 전용 렌더(bar/donut/compare/trend/statList/txList/barlist/list)
   else {

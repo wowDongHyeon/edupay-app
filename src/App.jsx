@@ -70,7 +70,10 @@ function queryDataSource(userInput, intent, scope) {
             if (settled) return;
             settled = true;
             // 데이터 확정 → 클라가 summaryStats 계산(§4.4). ★bridge 제거(§0.2): 표준 계약(tableData+reportPlan)만 소비.
-            const columnMetadata = state.columnMetadata || (e && e.columnMetadata) || [];
+            // result 이벤트 columnMetadata(한글 라벨·displayOrder 포함)를 우선 — data 청크 라벨은 원컬럼(예: merchant_count)일 수 있어
+            //   사용자 노출 라벨(예: 가맹점수)이 정확. type/column 은 동일해 shapeForIntent 무영향. mock/backend 는 두 이벤트가 동일(회귀 0).
+            const resultCM = e && Array.isArray(e.columnMetadata) && e.columnMetadata.length ? e.columnMetadata : null;
+            const columnMetadata = resultCM || state.columnMetadata || [];
             // summaryStats: operia payload(e.summaryStats) 우선, 없으면 클라 계산(§4.4). mock/backend 는 미전송 → 항상 클라 계산(회귀 0).
             const payloadStats = e && e.summaryStats;
             const hasPayloadStats = payloadStats && typeof payloadStats === "object"
@@ -124,7 +127,6 @@ const GRADES = ["초등", "중학", "고등"];
 const GRADE_LABELS = { "초등": "초등학생", "중학": "중학생", "고등": "고등학생" };
 
 const SUGGESTIONS = [
-{ icon: "📝", label: "용돈기입장 작성", text: "용돈기입장에 기록하고 싶어" },
 { icon: "📊", label: "소비패턴 분석", text: "내 소비 패턴 분석해줘" },
 { icon: "🧩", label: "금융퀴즈 풀기", text: "금융 퀴즈 풀고 싶어" },
 { icon: "🎓", label: "추천금융쇼츠", text: "나한테 맞는 금융 공부 추천해줘" }];
@@ -431,7 +433,6 @@ const MenuIcons = {
 /* ── 금융친구 메뉴 홈 ──────────────────────────────────── */
 function MenuScreen({ onPick }) {
   const MENU = [
-  { key: "ledger", label: "용돈기입장\n작성", text: "용돈기입장에 기록하고 싶어" },
   { key: "analysis", label: "소비패턴\n분석", text: "내 소비 패턴 분석해줘" },
   { key: "quiz", label: "금융퀴즈\n풀기", text: "금융 퀴즈 풀고 싶어" },
   { key: "shorts", label: "추천 금융\n쇼츠", text: "나한테 맞는 금융 공부 추천해줘" },
@@ -612,6 +613,8 @@ function UserBubble({ text, onRegisterFaq }) {
 // [연결 실패 안내] 기술/네트워크 에러는 사용자에게 그대로 노출하지 않고 친근 문구로 치환한다.
 //   친근 문구(금융친구 반말 톤, 빨강/경고 아님 — 일반 AI 말풍선 톤 유지).
 const NET_ERROR_MSG = "앗, 지금 잠깐 연결이 안 돼 😅 조금 있다 다시 해볼래?";
+// 데이터 구조 자체가 없는 텍스트 응답(OTHER/비관련 거절)용 친근 회피 문구. 오페리아의 사무적 answer 는 노출하지 않는다.
+const OFFTOPIC_MSG = "앗, 그건 내가 도와주기 어려워 😅 결제·용돈·가맹점 관련해서 물어봐줄래?";
 // 판정: 비었거나 한글이 하나도 없으면(Failed to fetch, NetworkError, datasource error, timeout 등 영문/기술 문자열)
 //   → 친근 문구로 치환. 백엔드가 준 '한글 사용자 안내'는 기술 메시지가 아니므로 그대로 노출(현행 유지).
 function isTechErrorMessage(em) {
@@ -621,7 +624,7 @@ function isTechErrorMessage(em) {
   return false;                   // 한글 포함 → 백엔드 사용자 안내(보존)
 }
 
-function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenContent, onCardQuery, onRegisterFaq }) {
+function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
   const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
   // 사용자 말풍선은 좌측 스와이프 → '등록' 버튼(UserBubble). long-press 등록/복사는 모두 제거됨.
@@ -630,7 +633,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
     return <UserBubble text={msg.text} onRegisterFaq={onRegisterFaq} />;
   }
   const isChart = !!msg.chartType; // 오페리아 데이터 메시지(ChartRenderer 렌더)
-  const bigCard = isChart || ["spending", "report", "recorded", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
+  const bigCard = isChart || ["spending", "report", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex gap-2 items-start">
@@ -650,7 +653,7 @@ function Bubble({ msg, grade, ledger, onAdd, onUpdate, onDelete, onSend, onOpenC
           </button>
           }
           {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} onCardQuery={onCardQuery} onActiveSql={setChip} />}
-          {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} ledger={ledger} onAdd={onAdd} onUpdate={onUpdate} onDelete={onDelete} onSend={onSend} onOpenContent={onOpenContent} />}
+          {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} onSend={onSend} onOpenContent={onOpenContent} />}
         </div>
       </div>
       {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
@@ -848,7 +851,6 @@ function App() {
   }, []);
   const [typing, setTyping] = useState(false);
   const [typingIntent, setTypingIntent] = useState(null); // 로딩 말풍선 문구 풀 선택용(send 에서 cardIntent 결과 저장)
-  const [ledger, setLedger] = useState(() => DATA.ledgerSeed.map((x) => ({ ...x })));
   const [modal, setModal] = useState(null);
   const [tab, setTab] = useState("금융친구");
   const [convos, setConvos] = useState(() => {
@@ -945,10 +947,6 @@ function App() {
 
   const scrollRef = useRef(null);
   const started = messages.length > 0;
-
-  const addEntry = (e) => setLedger((l) => [e, ...l]);
-  const updateEntry = (e) => setLedger((l) => l.map((x) => x.id === e.id ? e : x));
-  const deleteEntry = (id) => setLedger((l) => l.filter((x) => x.id !== id));
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -1138,7 +1136,7 @@ function App() {
   // 접힌 탭 탭 → 전체 핀 복원(저장된 가장자리·높이). 복원 후 다시 드래그/탭(팝오버) 정상. 접힌 상태에선 팝오버 안 열림.
   const restorePin = () => { setPinMinimized(false); setHistPop(false); };
 
-  const CARD_KINDS = ["spending", "report", "ledger", "recommend", "quiz"];
+  const CARD_KINDS = ["spending", "report", "recommend", "quiz"];
 
   // 질의 → 날짜 추출 (오늘/어제/그저께/N일/M월 N일)
   function parseDay(t) {
@@ -1216,15 +1214,6 @@ function App() {
 
   function cardIntent(q) {
     const t = (q || "").replace(/\s/g, "");
-    // 기록(쓰기) 의도 판별:
-    //  - 명시적 명령("기록해/적어줘/입력/추가/등록") 이거나
-    //  - 금액(숫자+원)과 거래 동사가 함께 있을 때 ("오늘 4000원 사용했어")
-    // ※ "지난주 뭐 샀어?"처럼 금액 없는 과거형은 '질문'이므로 기록으로 보지 않는다.
-    const hasAmount = /\d[\d,]*\s*원/.test(q) || /(만원|천원)/.test(q);
-    const recordCmd = /(기록(해|할|하고|해줘|하자|좀|부탁)|적어(줘|놔)?|입력(해|할|좀)?|추가(해|좀)?|등록(해|좀)?)/.test(t);
-    const txnVerb = /(썼|샀|사용|냈|받았|결제|지출|구매|구입)/.test(t);
-    if (recordCmd || hasAmount && txnVerb) return null;
-
     // ── 특수 인텐트 (비교·지원금·가맹점·채널·결제자) — 우선 매칭 ──
     const psX = periodScope(t);
     const rangeOf = () => psX ? { type: "range", ...psX } : null;
@@ -1284,8 +1273,8 @@ function App() {
       return { kind: "report", scope: { type: "range", ...rp } };
     }
 
-    // 1) '내역/리스트/기입장' 요청 → 기간별 기입장 리스트 카드
-    if (wantsList) return { kind: "ledger", scope: ps ? { type: "range", ...ps } : null };
+    // 1) '내역/리스트/기입장/가계부' 요청 → 오페리아 결제 데이터 조회(report). 기간 없으면 이번 달 범위.
+    if (wantsList) return { kind: "report", scope: ps ? { type: "range", ...ps } : (DATA.monthRangeOf ? { type: "range", ...DATA.monthRangeOf(DATA.TODAY), label: "이번 달" } : null) };
 
     // 2) 기간 + 소비 질의 → 금액 요약(리스트 X). 리스트는 '내역/리스트' 요청 때만
     if (ps && spend) {
@@ -1325,7 +1314,7 @@ function App() {
 
   async function askAI(q, history) {
     const msgs = [
-    { role: "user", content: DATA.buildSystemPrompt(grade, ledger) },
+    { role: "user", content: DATA.buildSystemPrompt(grade) },
     { role: "assistant", content: "응, 준비됐어! 소비랑 용돈에 대해 무엇이든 물어봐 😊" },
     ...history.filter((m) => m.text).map((m) => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
     { role: "user", content: q }];
@@ -1350,66 +1339,9 @@ function App() {
     throw new Error("AI 연결 없음");
   }
 
-  // 오프라인(실시간 AI 없음)에서도 간단한 기록 문장을 직접 파싱해 기록
-  function parseRecord(q) {
-    const t = (q || "").replace(/\s/g, "");
-    let amount = 0;
-    let m = t.match(/([\d,]+)\s*원/) || t.match(/([\d,]+)/);
-    if (m) amount = parseInt(m[1].replace(/,/g, ""), 10) || 0;
-    if (/만원/.test(t) && amount < 1000) amount = (amount || 1) * 10000;else
-    if (/천원/.test(t) && amount < 1000) amount = (amount || 1) * 1000;
-    if (!amount) return null;
-    const isIncome = /(받았|받음|용돈|충전|입금|선물|세뱃|벌었|생겼)/.test(t);
-    const date = parseDay(t) || DATA.TODAY;
-    let cat, title;
-    if (isIncome) {
-      cat = /선물|세뱃/.test(t) ? "선물" : /용돈/.test(t) ? "용돈" : "기타수입";
-      title = cat;
-    } else {
-      const map = [
-      [/편의점|gs25|cu|매점|간식|과자|음료|김밥|떡볶이|분식|햄버거|밥|급식|간식|아이스크림|젤리/, "식비"],
-      [/버스|지하철|택시|교통/, "교통"],
-      [/문구|문제집|참고서|볼펜|노트|책|학용품/, "학용품"],
-      [/영화|웹툰|게임|만화|문화|코인/, "문화"]];
-
-      const hit = map.find(([re]) => re.test(t));
-      cat = hit ? hit[1] : "기타";
-      title = (q.match(/[가-힣A-Za-z0-9]+(?=에서|에|을|를|샀|먹|사용|썼|구매)/) || [])[0] || cat;
-    }
-    return { op: "addLedger", type: isIncome ? "income" : "expense", date, cat, title, amount, memo: "" };
-  }
-
   function fallback(q) {
-    const t = (q || "").replace(/\s/g, "");
-    // 금액이 있는 기록 문장 → 직접 파싱해 기록 (오프라인 대비)
-    const rec = parseRecord(q);
-    if (rec) {
-      const dStr = (() => {const [, mo, d] = rec.date.split("-").map(Number);const rel = rec.date === DATA.TODAY ? "오늘" : rec.date === DATA.dMinus(DATA.TODAY, 1) ? "어제" : `${mo}월 ${d}일`;return rel;})();
-      return { text: `${dStr} ${rec.title} ${rec.type === "income" ? "수입" : "지출"} ${DATA.num(rec.amount)}원 기록했어!`, action: rec, card: null };
-    }
-    // 상세 없는 기록 요청("기록하고 싶어/기록해줘") → 전체 기입장 대신 되묻기(텍스트만)
-    if (/(기록|적|입력|추가|써).{0,3}(하고싶|할래|하고파|해줘|해|싶어|할게|좀)/.test(t) && !/\d/.test(t)) {
-      return { text: "좋아! 뭘 기록하고 싶은데? 날짜, 금액, 뭘 샀는지(식비/교통 같은 종류) 알려줘.", card: null };
-    }
     const intent = DATA.classify(q);
     return { text: DATA.answer(intent, grade), card: intent === "offtopic" ? null : intent };
-  }
-
-  const EMOJI_BY_CAT = { 식비: "🍱", 교통: "🚌", 학용품: "📚", 문화: "🎮", 기타: "💡", 용돈: "💸", 선물: "🎁", 기타수입: "💰" };
-  function runAction(a) {
-    if (!a || a.op !== "addLedger") return null;
-    const amount = Math.round(Number(String(a.amount).replace(/[^0-9.]/g, "")) || 0);
-    if (!amount) return null;
-    const type = a.type === "income" ? "income" : "expense";
-    const cat = a.cat || (type === "income" ? "기타수입" : "기타");
-    const entry = {
-      id: "ai" + Date.now(),
-      type, date: a.date || DATA.TODAY, cat,
-      emoji: EMOJI_BY_CAT[cat] || (type === "income" ? "💰" : "💡"),
-      title: a.title || cat, amount, source: "ai", memo: a.memo || ""
-    };
-    addEntry(entry);
-    return entry;
   }
 
   // 카드 내부 lazy 질의(예: 리포트 카드 '일별' 탭) — 새 말풍선/대화턴을 만들지 않고 데이터만 가져온다.
@@ -1436,8 +1368,8 @@ function App() {
       // ── 데이터 질문 → 오페리아 API 호출 → ChartRenderer 렌더 ──
       // 차트 유형은 응답이 아니라 프론트가 결정(chartTypeForIntent). 응답은 {question,sql,result}.
       // 정적/실서버 모드: 알려진 10개 intent만. AI 시뮬 모드(§8): 미지정 데이터질문도 보내 table로 렌더
-      //   (recommend/quiz/ledger 같은 UI/비데이터 카드는 항상 로컬 보존).
-      const NON_OPERIA = ["recommend", "quiz", "ledger", "recorded"];
+      //   (recommend/quiz 같은 UI/비데이터 카드는 항상 로컬 보존).
+      const NON_OPERIA = ["recommend", "quiz"];
       const useOperia = OPERIA_KINDS.includes(ci.kind) || (isOperiaAiMode() && !NON_OPERIA.includes(ci.kind));
       if (useOperia) {
         showApiToast(`${activeChannelName()} · ${ci.kind}`, "api");
@@ -1464,6 +1396,16 @@ function App() {
           }
           // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
           if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
+          // OTHER/비관련 거절: 데이터 '구조' 자체가 없는 텍스트 응답(행 0 + columnMetadata 없음 + reportPlan 없음)
+          //   → 빈 "조회 결과가 없어요" 카드 대신 친근 회피 말풍선(chartType 미설정 = isChart false). 오페리아 사무적 answer 는 숨김.
+          //   ※ 진짜 0행 데이터 조회는 columnMetadata(또는 reportPlan)가 있어 아래 카드 경로 유지("조회 결과가 없어요").
+          const _rows = Array.isArray(resp && resp.tableData) ? resp.tableData : [];
+          const _hasCols = Array.isArray(resp && resp.columnMetadata) && resp.columnMetadata.length > 0;
+          const _hasPlan = !!(resp && resp.reportPlan && Array.isArray(resp.reportPlan.sections) && resp.reportPlan.sections.length > 0);
+          if (!_rows.length && !_hasCols && !_hasPlan) {
+            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: OFFTOPIC_MSG }]);
+            return;
+          }
           // answer 말풍선(§6/§9): 있으면 카드 위 텍스트, 없으면 생략(10개 intent 는 빈 answer → 기존과 동일, 시각 보존).
           setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: chartTypeForIntent(ci.kind), intent: ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
         } catch (e) {
@@ -1492,14 +1434,17 @@ function App() {
     // 그 외 → 실제 AI 답변
     let res;
     try {
-      const hasAI = aiEnabled && (typeof window !== "undefined" && window.FINFRIEND_AI_ENDPOINT || window.claude && window.claude.complete);
+      // ★ operia 모드에선 Claude(askAI/window.claude) 호출 완전 차단 — 잡담/인사/무관 질문은 로컬 응답(fallback→DATA.classify/answer)으로.
+      //   (mock/backend 모드는 기존 AI 토글 동작 유지 — operiaMode 만 강제 false.)
+      const operiaMode = activeChannelName() === "operia";
+      const hasAI = !operiaMode && aiEnabled && (typeof window !== "undefined" && window.FINFRIEND_AI_ENDPOINT || window.claude && window.claude.complete);
       if (hasAI) {
         showApiToast("🤖 Claude API 호출", "api");
         res = await askAI(q, history);
         if (!res.text) { res = fallback(q); showApiToast("로컬 fallback · 빈 응답", "local"); }
       } else {
         res = fallback(q);
-        showApiToast(aiEnabled ? "로컬 응답 · AI 미설정(키없음)" : "로컬 응답 · AI OFF", "local");
+        showApiToast(operiaMode ? "로컬 응답 · operia(Claude 차단)" : aiEnabled ? "로컬 응답 · AI 미설정(키없음)" : "로컬 응답 · AI OFF", "local");
       }
     } catch (e) {
       res = fallback(q);
@@ -1507,12 +1452,6 @@ function App() {
       console.error("[AI] 호출 오류:", e);
     }
     setTyping(false);
-    const recorded = res.action ? runAction(res.action) : null;
-    // 기록이 됐으면 → 전체 기입장 대신 '방금 기록한 한 건'만 간단히 확인
-    if (recorded) {
-      setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: res.text, card: "recorded", entry: recorded }]);
-      return;
-    }
     // 데이터 intent 카드는 InlineCard로 렌더하지 않는다(ChartRenderer 단일 경로). AI가 골라도 무시 → 텍스트로 답.
     const DATA_INTENTS = ["spending", "report", "catSpend", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "timePattern"];
     if (DATA_INTENTS.includes(res.card)) res.card = null;
@@ -1549,7 +1488,7 @@ function App() {
           className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
-          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} ledger={ledger} onAdd={addEntry} onUpdate={updateEntry} onDelete={deleteEntry} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
+          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
           {typing && <Typing intent={typingIntent} />}
           <div className="h-1"></div>
         </div>
