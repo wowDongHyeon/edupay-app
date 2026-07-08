@@ -1260,7 +1260,7 @@ function App() {
       return { kind: "report", scope: null };
     }
     // "월별/달별" 또는 "N개월" → 달별 추이 요약(막대), "일별/날짜별" → 일별 추이
-    if (/(월별|달별)/.test(t) || moCount) return { kind: "report", scope: { type: "trend", view: "month", months: moCount ? +moCount[1] : 3 } };
+    if (/(월별|달별|매달|매월|달마다|월마다)/.test(t) || moCount) return { kind: "report", scope: { type: "trend", view: "month", months: moCount ? +moCount[1] : 3 } };
     if (/(일별|날짜별)/.test(t)) return { kind: "report", scope: { type: "trend", view: "week" } };
 
     const wantsList = /(내역|리스트|목록|기입장|가계부)/.test(t);
