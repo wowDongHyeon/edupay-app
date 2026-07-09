@@ -43,6 +43,51 @@ function extractOperiaSql(summary) {
   return sql || null;
 }
 
+// 한글 포함 여부(라벨 우선순위 판정용). codeLabels.hasKorean 과 동일 규칙(미export → 로컬 정의).
+const _hasKorean = (s) => typeof s === "string" && /[가-힣]/.test(s);
+
+// reportPlan.sections 에서 {대문자 컬럼 → 한글 라벨} 맵 구성.
+//   대상 라벨 소스(모두 한글일 때만 채움, 영문/집계형은 무시 → 하드코딩·raw 가 처리):
+//     · kpi_cards 의 section.metrics[].{column,label}
+//     · section.kpiGrid.metrics[].{column,label}      (있는 구현 대비 방어)
+//     · section.kpiGrid.{valueColumn→valueLabel, groupBy→groupLabel}  (operia 실제 kpi_grid 구조)
+//   먼저 등장한 라벨을 유지(중복 컬럼 안정성). label 이 없거나 영문이면 담지 않는다.
+function reportPlanLabelMap(reportPlan) {
+  const map = {};
+  const put = (col, label) => {
+    if (col == null || !_hasKorean(label)) return;
+    const key = String(col).trim().toUpperCase();
+    if (map[key] == null) map[key] = String(label);
+  };
+  const secs = reportPlan && Array.isArray(reportPlan.sections) ? reportPlan.sections : [];
+  for (const s of secs) {
+    const metrics = []
+      .concat(s && Array.isArray(s.metrics) ? s.metrics : [])
+      .concat(s && s.kpiGrid && Array.isArray(s.kpiGrid.metrics) ? s.kpiGrid.metrics : []);
+    for (const m of metrics) if (m) put(m.column, m.label);
+    const kg = s && s.kpiGrid;
+    if (kg) {
+      put(kg.valueColumn, kg.valueLabel);
+      put(kg.groupBy, kg.groupLabel);
+    }
+  }
+  return map;
+}
+
+// columnMetadata 의 영문 라벨을 reportPlan 한글로 보강(라벨 우선순위 ② 채움).
+//   하드코딩 우선(①)은 labelForColumn 이 렌더 시점에 보장하므로, 여기선 raw영문 라벨 → reportPlan한글만 채운다.
+//   이미 한글인 label 은 유지. column/type/displayOrder 는 불변(shapeForIntent·summaryStats 무영향).
+function enrichColumnMetadata(columnMetadata, reportPlan) {
+  if (!Array.isArray(columnMetadata) || !columnMetadata.length) return columnMetadata;
+  const map = reportPlanLabelMap(reportPlan);
+  if (!Object.keys(map).length) return columnMetadata;
+  return columnMetadata.map((m) => {
+    if (!m || m.column == null || _hasKorean(m.label)) return m;
+    const ko = map[String(m.column).trim().toUpperCase()];
+    return ko != null ? { ...m, label: ko } : m;
+  });
+}
+
 // 데이터 질문 1건 → 데이터창구 어댑터의 SSE 이벤트(data 청크 → result) 소비.
 // StreamState: data 의 tableData 를 rows 에 누적, isLast 로 종료. 데이터 확정 시 computeSummaryStats 계산(§4.4, §8).
 // ★Phase A 브리지: result 이벤트를 "기존 렌더가 기대하는 입력"{ result, rawRows, sql, source } 로 변환해 resolve.
@@ -73,7 +118,8 @@ function queryDataSource(userInput, intent, scope) {
             // result 이벤트 columnMetadata(한글 라벨·displayOrder 포함)를 우선 — data 청크 라벨은 원컬럼(예: merchant_count)일 수 있어
             //   사용자 노출 라벨(예: 가맹점수)이 정확. type/column 은 동일해 shapeForIntent 무영향. mock/backend 는 두 이벤트가 동일(회귀 0).
             const resultCM = e && Array.isArray(e.columnMetadata) && e.columnMetadata.length ? e.columnMetadata : null;
-            const columnMetadata = resultCM || state.columnMetadata || [];
+            // 라벨 우선순위 ②: operia columnMetadata 의 영문 라벨을 reportPlan 한글 라벨로 보강(하드코딩 ①은 labelForColumn 이 보장).
+            const columnMetadata = enrichColumnMetadata(resultCM || state.columnMetadata || [], e && e.reportPlan);
             // summaryStats: operia payload(e.summaryStats) 우선, 없으면 클라 계산(§4.4). mock/backend 는 미전송 → 항상 클라 계산(회귀 0).
             const payloadStats = e && e.summaryStats;
             const hasPayloadStats = payloadStats && typeof payloadStats === "object"

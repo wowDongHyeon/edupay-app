@@ -27,21 +27,27 @@ const SLOTS = {
 // 측정값 슬롯 선호: 같은 value 역할 후보가 여럿일 때 슬롯 의미에 맞는 컬럼을 고른다
 // (예: 온오프 결과 {cnt_pay, sum_pay_dlng_amt} → amount 는 sum, cnt 는 count 를 선택).
 const VALUE_PREF = {
-  amount: /amt|amount|sum|tot|total|dlng|spend/i,
-  tot: /amt|amount|sum|tot|total|dlng|spend/i,
-  v: /amt|amount|sum|tot|total|dlng|spend/i,
-  cnt: /cnt|count|num|회/i,
+  amount: /amt|amount|sum|tot|total|dlng|spend|금액|결제금액|합계/i,
+  tot: /amt|amount|sum|tot|total|dlng|spend|금액|결제금액|합계/i,
+  v: /amt|amount|sum|tot|total|dlng|spend|금액|결제금액|합계/i,
+  cnt: /cnt|count|num|회|건수/i,
   students: /stu|student|count|cnt|num|인원/i,
+};
+
+// 좌표(coord) 슬롯 이름 선호: lat/lng 를 이름으로 구분(영문/한글) → byRole.coord 순서 의존 제거.
+const COORD_PREF = {
+  lat: /lat|latitude|위도/i,
+  lng: /lon|lng|longitude|경도/i,
 };
 
 // 범주(category) 슬롯 이름 선호: 여러 varchar 후보 중 슬롯 의미에 맞는 컬럼 선택(VALUE_PREF의 category판).
 //   prefer = 우선 매칭, exclude = 후보에서 제외(이름/범주 슬롯에서 MERCHANT_NO 등 식별자 _no/_id 배제).
 //   예) merchantMap 이 MERCHANT_NO/MERCHANT_NM/ADDR/CATEGORY_NM 를 모두 varchar 로 줄 때 name←MERCHANT_NM(NO 아님).
 const LABEL_PREF = {
-  name:     { prefer: /merchant_nm|_nm$|name/i, exclude: /_no$|_id$/i },
-  merchant: { prefer: /merchant_nm|_nm$|name/i, exclude: /_no$|_id$/i },
-  addr:     { prefer: /addr|address|주소/i, exclude: /_no$|_id$/i },
-  category: { prefer: /categor|biz|item|업종|종목/i, exclude: /_no$|_id$/i },
+  name:     { prefer: /merchant_nm|_nm$|name|가맹점명|가맹점|상호/i, exclude: /_no$|_id$|번호|코드/i },
+  merchant: { prefer: /merchant_nm|_nm$|name|가맹점명|가맹점|상호/i, exclude: /_no$|_id$|번호|코드/i },
+  addr:     { prefer: /addr|address|주소/i, exclude: /_no$|_id$|번호|코드/i },
+  category: { prefer: /categor|biz|item|업종|종목|분류|카테고리/i, exclude: /_no$|_id$|번호|코드/i },
 };
 
 // 날짜 패턴(시간축 판정): YYYY-MM / YYYY-MM-DD / YYYYMM / YYYYMMDD
@@ -57,9 +63,9 @@ function inferType(rows, col) {
 // 컬럼 → 역할. 수치(decimal/integer)는 항상 측정값(6/8자리 금액을 시간축으로 오인하지 않게 패턴 검사 전에 처리).
 // 시간축은 type=date 뿐 아니라 '값 패턴'(YYYY-MM[-DD]/YYYYMM[DD])으로도 인식(backend 월/일축이 varchar 로 와도 처리, §6-1·작업A).
 function roleOf(column, type, rows) {
-  const name = String(column || "").toLowerCase();
-  // ★ 좌표는 숫자형(value) 판정보다 먼저(컬럼명 기준). operia LATITUDE/LONGITUDE(decimal)도 여기서 coord 로 확정.
-  if (name === "lat" || name === "lng" || name === "lon" || name === "longitude" || name === "latitude") return "coord";
+  const name = String(column || "").toLowerCase().replace(/\s+/g, "");
+  // ★ 좌표는 숫자형(value) 판정보다 먼저(컬럼명 기준). operia LATITUDE/LONGITUDE(decimal)·한글(위도/경도) 모두 coord 로 확정.
+  if (/^(lat|latitude|위도)$/.test(name) || /^(lon|lng|longitude|경도)$/.test(name)) return "coord";
   const t = String(type || "").toLowerCase();
   if (t === "date" || t === "datetime" || t === "timestamp") return "temporal";
   // ★ 숫자형 전부 value: operia bigint 잔액 + int/number/numeric/double/float/real 및 정수/실수 변형. 소문자화 후 매칭.
@@ -75,6 +81,9 @@ function roleOf(column, type, rows) {
 function pickCandidate(slot, byRole, used) {
   const avail = (byRole[slot.role] || []).filter((c) => !used.has(c));
   if (!avail.length) return null;
+  // coord 슬롯: lat/lng 를 이름으로 구분(영문/한글) → 순서 의존 없이 정확 매핑
+  const cpref = COORD_PREF[slot.n];
+  if (cpref) { const hit = avail.find((c) => cpref.test(c)); if (hit) return hit; }
   // value 슬롯: 측정값 선호(기존 동작 불변)
   const pref = VALUE_PREF[slot.n];
   if (pref) { const hit = avail.find((c) => pref.test(c)); if (hit) return hit; }

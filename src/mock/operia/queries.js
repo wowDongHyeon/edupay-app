@@ -167,20 +167,29 @@ export const QUERIES = {
         charge: { label: "용돈 충전금", sub: "보호자가 충전한 용돈", unit: "원" },
         point: { label: "에듀포인트", sub: "질문·퀴즈로 모은 포인트", unit: "P" },
       };
-      // 항목 식별 규칙(영문 코드/한글 라벨 공통)
+      // 항목 식별 규칙(영문 코드/한글 라벨 공통). voucher←계좌, charge←카드 한글 별칭 포함(3열 분기 미충족 시 폴백 안전).
       const KIND = [
-        { re: /voucher.*bal|바우처|지원금/i, meta: META.voucher },
-        { re: /charge.*bal|충전|용돈/i, meta: META.charge },
+        { re: /voucher.*bal|바우처|지원금|계좌/i, meta: META.voucher },
+        { re: /charge.*bal|충전|용돈|카드/i, meta: META.charge },
         { re: /edu.*point|^point|포인트|에듀포인트/i, meta: META.point },
       ];
       const keys = Object.keys(rows[0]);
 
-      // ★ operia 3열 잔액(한 행: ACCOUNT_BALANCE_AMT / CARD_BALANCE_AMT / CURRENT_POINT) → 고정 3항목(총합 없음).
-      //   컬럼명 대소문자 무시, 값이 라벨로 새는 것 방지(라벨은 META 고정). itemStyles[0..2] 아이콘 🎫/💸/⭐ 순서와 정렬.
+      // ★ operia 3열 잔액(한 행) → 고정 3항목(총합 없음). operia 가 실행/설정에 따라 컬럼 키를
+      //   영문(ACCOUNT_BALANCE_AMT…)·한글("계좌 잔액"…) 아무거나 줘도 감지(bilingual).
+      //   키/별칭을 정규화(trim + 내부공백 제거 + 대문자; 한글은 공백만 제거) 후 별칭 집합과 비교.
+      //   값이 라벨로 새는 것 방지(라벨은 META 고정). itemStyles[0..2] 아이콘 🎫/💸/⭐ 순서와 정렬.
       if (rows.length === 1) {
         const row = rows[0];
-        const findCol = (name) => keys.find((c) => String(c).toUpperCase() === name);
-        const cVoucher = findCol("ACCOUNT_BALANCE_AMT"), cCharge = findCol("CARD_BALANCE_AMT"), cPoint = findCol("CURRENT_POINT");
+        const normKey = (s) => String(s == null ? "" : s).trim().replace(/\s+/g, "").toUpperCase();
+        // 슬롯별 별칭: 바우처←계좌 잔액, 용돈←카드 잔액, 에듀포인트←포인트/에듀포인트.
+        const SLOT_ALIASES = {
+          voucher: ["ACCOUNT_BALANCE_AMT", "계좌잔액", "계좌 잔액"],
+          charge: ["CARD_BALANCE_AMT", "카드잔액", "카드 잔액"],
+          point: ["CURRENT_POINT", "포인트", "포인트잔액", "포인트 잔액", "에듀포인트"],
+        };
+        const findSlotCol = (aliases) => { const set = new Set(aliases.map(normKey)); return keys.find((c) => set.has(normKey(c))); };
+        const cVoucher = findSlotCol(SLOT_ALIASES.voucher), cCharge = findSlotCol(SLOT_ALIASES.charge), cPoint = findSlotCol(SLOT_ALIASES.point);
         if (cVoucher && cCharge && cPoint) {
           return { items: [
             { ...META.voucher, value: pos(row[cVoucher] || 0) },

@@ -28,26 +28,44 @@ export function canonChannel(c) {
 
 // 영문 원컬럼명 → 사용자 노출용 한글 라벨(단일 출처). operia columnMetadata.label 이 원컬럼명(영문)이라 필요.
 //   mock/backend 표준 컬럼명(month/amount/merchant 등)은 이 맵에 없어 metaLabel 폴백 → 회귀 0.
+//   키는 모두 대문자(labelForColumn 이 column 을 대문자로 정규화해 대소문자 무시로 조회). 식별자(MERCHANT_NO 등)는 넣지 않는다.
 export const COLUMN_LABELS = {
+  // 잔액/자산(balance 3항목 하드코딩 유지)
   ACCOUNT_BALANCE_AMT: "사용 가능 금액",
-  CARD_BALANCE_AMT: "용돈 충전금", CURRENT_POINT: "에듀포인트",
-  DLNG_YM: "월", DLNG_AMT: "금액",
-  MERCHANT_NM: "가맹점", CATEGORY_NM: "카테고리",
+  CARD_BALANCE_AMT: "용돈 충전금",
+  CURRENT_POINT: "에듀포인트",
+  CARD_VOUCHER_BLNC: "바우처 지원금", // V_USER_ASSET 자산 잔액(바우처) — operia 가 label 미제공 → raw 노출 방지
+  // 날짜/시간
+  DLNG_YM: "월", DLNG_DT: "일자", DLNG_DTM: "거래일시", DLNG_TM: "시간",
+  // 금액/집계
+  DLNG_AMT: "금액", TOTAL_AMOUNT: "금액", SUM_PAY_DLNG_AMT: "금액",
+  CNT_PAY: "건수", RATIO_PCT: "비율",
+  // 가맹점/상품/분류
+  MERCHANT_NM: "가맹점", GDS_NM: "상품명",
+  CATEGORY_NM: "카테고리", CATEGORY_CD: "카테고리",
+  BIZ_TYPE_NM: "업종", BIZ_ITEM_NM: "업종",
+  // 위치(근처 가맹점 — reportPlan 집계 라벨 "주소 종류" 를 하드코딩이 덮어 방어)
   ADDR: "주소", LATITUDE: "위도", LONGITUDE: "경도",
 };
 
+const hasKorean = (s) => typeof s === "string" && /[가-힣]/.test(s);
+
 /**
- * 컬럼명 → 한글 라벨. 컬럼명 매핑 우선, 없으면 metaLabel(columnMetadata.label) 폴백, 그것도 없으면 컬럼명 그대로.
+ * 컬럼명 → 한글 라벨. 우선순위: ① COLUMN_LABELS 하드코딩(대소문자 무시) → ② metaLabel 이 한글일 때만 → ③ raw 컬럼명.
+ *   ①이 최우선이라 reportPlan 의 집계형 오라벨("주소 종류" 등)을 하드코딩이 덮어 방어한다.
+ *   ②는 한글일 때만 → operia 의 영문 라벨(MERCHANT_NM 등)이 새어나오지 않고, App 이 reportPlan 한글로 채운 값만 통과.
+ *   mock/backend 표준컬럼은 metaLabel===column(영문/표준)이라 ②를 건너뛰고 ③에서 동일 문자열 반환 → 회귀 0.
  * @param {*} column 원컬럼명
  * @param {*} [metaLabel] columnMetadata.label
  */
 export function labelForColumn(column, metaLabel) {
-  if (column != null && COLUMN_LABELS[column] != null) return COLUMN_LABELS[column];
-  if (metaLabel != null && String(metaLabel).trim() !== "") return String(metaLabel);
+  if (column != null) {
+    const key = String(column).trim().toUpperCase();
+    if (COLUMN_LABELS[key] != null) return COLUMN_LABELS[key];
+  }
+  if (hasKorean(metaLabel)) return String(metaLabel);
   return column == null ? "" : String(column);
 }
-
-const hasKorean = (s) => typeof s === "string" && /[가-힣]/.test(s);
 
 /**
  * 코드 → 한글 라벨. domain 지정 시 그 사전 우선, 미지정이면 전 사전 탐색. 모르는 값/한글은 원문.
