@@ -51,7 +51,7 @@ export function BarListTemplate({ data, config }) {
               </div>
               <Bar frac={(m.value || 0) / maxV} color={barColor} />
               {opt.showPct && <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.pct != null ? m.pct + "%" : Math.round((m.value || 0) / maxV * 100) + "%"}</span>}
-              <span className={"font-bold text-gray-800 tabular-nums text-right shrink-0 " + (ranked ? "text-[12px] w-[58px]" : "text-[12.5px] w-[52px]")}>{num(m.value)}{opt.unit || ""}</span>
+              <span className={"font-bold text-gray-800 tabular-nums text-right shrink-0 whitespace-nowrap " + (ranked ? "text-[12px] w-[68px]" : "text-[12.5px] w-[62px]")}>{num(m.value)}{opt.unit || ""}</span>
             </div>
           );
         })}
