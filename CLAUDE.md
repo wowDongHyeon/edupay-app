@@ -69,3 +69,18 @@
   ```
   → 반환 JSON의 `line`을 그대로 사용: `🔒 락 로그: claim 1 / 대기 1회(총 3s) / 재개 1 / release 1 / 타임아웃 0`
   (락을 전혀 안 쓴 단독 작업이면 이 줄은 생략한다.)
+
+## operia 연동 — 프론트 렌더/라벨 규칙 (지속)
+
+- **라벨 우선순위**(`src/charts/codeLabels.js` `labelForColumn`): ① `COLUMN_LABELS`(대소문자 무시, 키는 영문 대문자) → ② `metaLabel`이 **한글일 때만**(`/[가-힣]/`) → ③ raw 컬럼명. 영문 metaLabel은 화면에 내보내지 않는다.
+- **reportPlan 라벨을 컬럼 라벨 소스로 쓰지 말 것.** operia reportPlan은 LLM 생성이라 비결정적(같은 질의도 실행마다 한글↔영문, title 변동)이고, kpi_grid/kpi_cards 라벨이 집계형("주소 종류", "가맹점 수")이라 컬럼 헤더로 부적합. 라벨은 프론트 `COLUMN_LABELS`가 단일 소유. 새 컬럼이 영문으로 새면 이 맵에 한 줄 추가.
+- **balance 3항목·좌표는 bilingual**(영문+한글 키 둘 다 인식). operia가 `columnMetadata.column`·`tableData` 키를 영문(`ACCOUNT_BALANCE_AMT`)↔한글(`계좌 잔액`)로 오락가락 보내므로, 컬럼명 매칭은 항상 영문/한글 별칭을 함께 둔다. (balance shape `src/mock/operia/queries.js`, 좌표 `src/charts/shapeForIntent.js` roleOf/COORD_PREF)
+- **operia 서버 특성**: 실서버 flakiness ~50%(간헐 "연결 안 돼" → 재시도 시 정상). 라이브 검증은 재시도 전제로 진행.
+- **else/미분류 질의**는 `ReportPlanRenderer` 폴백으로 렌더(전용 카드 없음).
+- 사용처별/catSpend 카드의 기간 배지는 제거함(operia 쿼리에 기간 필터 없음=전체 기간). 월별 배지는 실제 월수로 동적 계산(정확)이라 유지.
+
+### 진행 중 (2026-07-09, 완료되면 이 블록 삭제)
+
+- **대기 CLI ①** reportPlan 폴백 "KPI+표만"(chart·kpi_grid 섹션 숨김, else 질의 중복 제거) — 미착수.
+- **대기 CLI ②** Q6 잔액 새 반환 컬럼 선반영: `CARD_VOUCHER_BLNC`(남은 지원금)/`CARD_ADD_CHARG_BLNC`(충전 잔액)/`CURRENT_POINT`(포인트). operia semantic layer **미적용 상태**(적용 전엔 옛 `account/card` 컬럼이 옴) → 프론트 별칭만 선추가(하위호환).
+- **방금 완료**: 배지 '최근 3개월' 제거 + 긴 가맹점명 …클립(라이브 확인) / 긴 이름 **탭하면 펼치기**(`barlist.jsx`, CLI 완료보고 — 탭 펼침 라이브 재검증은 미완, 배지 제거는 확인됨).

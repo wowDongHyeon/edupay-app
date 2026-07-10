@@ -21,6 +21,9 @@ export function BarListTemplate({ data, config }) {
   const limit = opt.limit || 5;
   const [visibleCount, setVisibleCount] = React.useState(limit);
   const shownItems = items.slice(0, visibleCount);
+  // 모바일: hover 툴팁·long-press 불가 → 라벨 탭으로 그 행만 truncate 해제(전체 이름). 재탭 접힘. index 기준.
+  const [expanded, setExpanded] = React.useState(() => new Set());
+  const toggle = (i) => setExpanded((prev) => { const n = new Set(prev); n.has(i) ? n.delete(i) : n.add(i); return n; });
 
   const Bar = ({ frac, color }) => (
     <div className={"flex-1 rounded-full bg-gray-100 overflow-hidden " + (ranked ? "h-3" : "h-2.5")}>
@@ -39,9 +42,12 @@ export function BarListTemplate({ data, config }) {
           return (
             <div key={i} className={ranked ? ("flex items-center gap-2 rounded-xl px-2 py-1.5 " + (me ? "bg-violet-50" : "")) : "flex items-center gap-2.5"}>
               {opt.rank && <span className={"w-5 shrink-0 text-center font-extrabold " + (ranked ? "text-[13px] " : "text-[12px] ") + rankColor}>{rk}</span>}
-              <div className={(ranked ? "w-[92px] flex items-center gap-1 min-w-0" : "w-[96px] shrink-0 min-w-0 overflow-hidden")}>
+              <div role="button" title={m.label} onClick={() => toggle(i)}
+                className={"cursor-pointer " + (expanded.has(i)
+                  ? (ranked ? "flex-1 flex items-center gap-1 min-w-0" : "flex-1 min-w-0")
+                  : (ranked ? "w-[92px] flex items-center gap-1 min-w-0" : "w-[96px] shrink-0 min-w-0 overflow-hidden"))}>
                 {me && <span className="shrink-0">🦊</span>}
-                <span className={"truncate text-[12.5px] " + (ranked ? "flex-1 min-w-0 " : "block w-full ") + (me ? "font-extrabold text-violet-700" : "text-gray-700")}>{m.label}</span>
+                <span className={"text-[12.5px] " + (expanded.has(i) ? "block break-words " : "truncate " + (ranked ? "flex-1 min-w-0 " : "block w-full ")) + (me ? "font-extrabold text-violet-700" : "text-gray-700")}>{m.label}</span>
               </div>
               <Bar frac={(m.value || 0) / maxV} color={barColor} />
               {opt.showPct && <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.pct != null ? m.pct + "%" : Math.round((m.value || 0) / maxV * 100) + "%"}</span>}
