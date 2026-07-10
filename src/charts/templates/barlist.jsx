@@ -39,9 +39,9 @@ export function BarListTemplate({ data, config }) {
           return (
             <div key={i} className={ranked ? ("flex items-center gap-2 rounded-xl px-2 py-1.5 " + (me ? "bg-violet-50" : "")) : "flex items-center gap-2.5"}>
               {opt.rank && <span className={"w-5 shrink-0 text-center font-extrabold " + (ranked ? "text-[13px] " : "text-[12px] ") + rankColor}>{rk}</span>}
-              <div className={(ranked ? "w-[92px] flex items-center gap-1 min-w-0" : "w-[96px] shrink-0")}>
+              <div className={(ranked ? "w-[92px] flex items-center gap-1 min-w-0" : "w-[96px] shrink-0 min-w-0 overflow-hidden")}>
                 {me && <span className="shrink-0">🦊</span>}
-                <span className={"truncate text-[12.5px] " + (me ? "font-extrabold text-violet-700" : ranked ? "text-gray-700" : "text-gray-700")}>{m.label}</span>
+                <span className={"truncate text-[12.5px] " + (ranked ? "flex-1 min-w-0 " : "block w-full ") + (me ? "font-extrabold text-violet-700" : "text-gray-700")}>{m.label}</span>
               </div>
               <Bar frac={(m.value || 0) / maxV} color={barColor} />
               {opt.showPct && <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.pct != null ? m.pct + "%" : Math.round((m.value || 0) / maxV * 100) + "%"}</span>}

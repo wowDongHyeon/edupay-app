@@ -182,10 +182,11 @@ export const QUERIES = {
       if (rows.length === 1) {
         const row = rows[0];
         const normKey = (s) => String(s == null ? "" : s).trim().replace(/\s+/g, "").toUpperCase();
-        // 슬롯별 별칭: 바우처←계좌 잔액, 용돈←카드 잔액, 에듀포인트←포인트/에듀포인트.
+        // 슬롯별 별칭: 바우처←(옛)계좌 잔액/(새)남은 지원금, 용돈←(옛)카드 잔액/(새)충전 잔액, 에듀포인트←포인트.
+        //   옛/새 컬럼세트 어느 쪽이 와도 3슬롯 감지(하위호환). 0709 컬럼교체: CARD_VOUCHER_BLNC/CARD_ADD_CHARG_BLNC/CURRENT_POINT.
         const SLOT_ALIASES = {
-          voucher: ["ACCOUNT_BALANCE_AMT", "계좌잔액", "계좌 잔액"],
-          charge: ["CARD_BALANCE_AMT", "카드잔액", "카드 잔액"],
+          voucher: ["ACCOUNT_BALANCE_AMT", "계좌잔액", "계좌 잔액", "CARD_VOUCHER_BLNC", "남은지원금", "남은 지원금", "지원금"],
+          charge: ["CARD_BALANCE_AMT", "카드잔액", "카드 잔액", "CARD_ADD_CHARG_BLNC", "충전잔액", "충전 잔액"],
           point: ["CURRENT_POINT", "포인트", "포인트잔액", "포인트 잔액", "에듀포인트"],
         };
         const findSlotCol = (aliases) => { const set = new Set(aliases.map(normKey)); return keys.find((c) => set.has(normKey(c))); };

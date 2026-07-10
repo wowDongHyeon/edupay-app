@@ -87,9 +87,9 @@ function Section({ section, ctx }) {
   const rows = ctx.tableData || [];
   const cm = ctx.columnMetadata;
   if (t === "heading") return <div className="text-[16px] font-extrabold text-gray-900 px-1 pt-1">{section.content || ""}</div>;
-  // reportPlan 폴백에선 서술(report)·인사이트(insight) 텍스트 블록 숨김 — heading/kpi/chart/table/kpi_grid 만 표시.
-  //   (핵심질의 커스텀 카드 InsightBox 는 intentConfig 경로라 영향 없음.)
-  if (t === "insight" || t === "report") return null;
+  // reportPlan 폴백 = KPI + 표만. chart·kpi_grid(순위그리드)·insight·report 는 숨김(같은 데이터 3중 중복 방지).
+  //   (핵심질의 커스텀 카드 InsightBox 는 intentConfig 경로라 영향 없음. detail 유실은 ReportPlanRenderer 안전망이 보장.)
+  if (t === "insight" || t === "report" || t === "chart" || t === "kpi_grid") return null;
   if (t === "table") {
     // 단일 값(≤1행)인데 kpi_cards가 이미 그 값을 보여주면 중복 표 숨김. 다행(목록/랭킹)이거나 kpi_cards 없으면 표 유지.
     if (rows.length <= 1 && ctx.hasKpiCards) return null;
@@ -104,11 +104,15 @@ function Section({ section, ctx }) {
 export function ReportPlanRenderer({ reportPlan, tableData, columnMetadata, summaryStats }) {
   const sections = reportPlan && Array.isArray(reportPlan.sections) ? reportPlan.sections : [];
   const hasKpiCards = sections.some((s) => s && s.type === "kpi_cards");
-  const ctx = { tableData: tableData || [], columnMetadata: columnMetadata || [], summaryStats, hasKpiCards };
-  if (!sections.length) return <TableCard result={tableData || []} columnMetadata={columnMetadata} />;
+  const hasTable = sections.some((s) => s && s.type === "table");
+  const rows = tableData || [];
+  const ctx = { tableData: rows, columnMetadata: columnMetadata || [], summaryStats, hasKpiCards };
+  if (!sections.length) return <TableCard result={rows} columnMetadata={columnMetadata} />;
   return (
     <div className="flex flex-col gap-2.5">
       {sections.map((s, i) => <Section key={i} section={s} ctx={ctx} />)}
+      {/* 안전망: table 섹션 없이 chart/kpi_grid 로만 detail 을 준 grouped 응답이면 표를 1개 보장(detail 유실 방지). */}
+      {!hasTable && rows.length > 1 && <TableCard result={rows} columnMetadata={columnMetadata} />}
     </div>
   );
 }

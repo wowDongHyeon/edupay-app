@@ -49,7 +49,7 @@ export const INTENT_CONFIG = {
   // ② catSpend (donut)
   catSpend: {
     template: "donut",
-    title: "사용처별 사용 내역", subtitle: "업종별 사용 금액 · 가맹점 기준", badge: "최근 3개월",
+    title: "사용처별 사용 내역", subtitle: "업종별 사용 금액 · 가맹점 기준", // badge 제거: operia 쿼리에 기간 필터 없음(전체 기간)
     insight: (d) => {
       const t = (d.slices || [])[0];
       return t ? `${t.label}이(가) 가장 커 (${num(t.value)}원, 전체의 ${t.pct}%).` : "";
@@ -119,7 +119,7 @@ export const INTENT_CONFIG = {
   // ⑧ merchantBreakdown (barlist) — 가맹점별 비율 순위(N:1: schoolCompare와 같은 barlist 템플릿)
   merchantBreakdown: {
     template: "barlist",
-    title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", badge: "최근 3개월",
+    title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", // badge 제거: operia 쿼리에 기간 필터 없음(전체 기간)
     options: { rank: true, showPct: true, unit: "" },
     insight: (d) => {
       const t = (d.items || [])[0];
