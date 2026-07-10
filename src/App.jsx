@@ -185,7 +185,12 @@ const QUICK_QUERIES = [
 { icon: "💰", text: "현재 사용할 수 있는 금액 알려줘" },
 { icon: "📅", text: "월별 사용 내역 알려줘" },
 { icon: "📍", text: "근처 사용 가능 가맹점 알려줘" },
-{ icon: "🧾", text: "사용처별 내역 알려줘" }];
+{ icon: "🧾", text: "사용처별 내역 알려줘" },
+/* TEMP(테스트용): 가능질의 8종 전부 노출. 테스트 완료 후 아래 4줄 삭제하고 위 4개로 원복 */
+{ icon: "👫", text: "친구랑 사용내역 비교 해줘" },
+{ icon: "🛒", text: "온라인/오프라인 결제내역 확인해줘" },
+{ icon: "📊", text: "어디에 주로 쓰고 있는지 알려줘" },
+{ icon: "🏫", text: "학교별 사용 내역 비교해줘" }];
 
 
 
@@ -1614,8 +1619,8 @@ function App() {
   }
 
   return (
-    <div className="relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame"
-    style={{ maxWidth: 390 }}>
+    <div className={"relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
+    style={{ maxWidth: WEBVIEW ? undefined : 390 }}>
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
       canBack={tab === "금융친구" && entered} onBack={() => { if (started) { resetOperiaSession(); setMessages([]); setActiveId(null); } else { setEntered(false); } }}
@@ -1640,7 +1645,7 @@ function App() {
 
         <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)}
           onScroll={(e) => { if (WEBVIEW) setPinMini(e.currentTarget.scrollTop > 24); }}
-          className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
+          className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}

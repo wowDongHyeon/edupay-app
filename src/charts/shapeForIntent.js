@@ -47,7 +47,9 @@ const LABEL_PREF = {
   name:     { prefer: /merchant_nm|_nm$|name|가맹점명|가맹점|상호/i, exclude: /_no$|_id$|번호|코드/i },
   merchant: { prefer: /merchant_nm|_nm$|name|가맹점명|가맹점|상호/i, exclude: /_no$|_id$|번호|코드/i },
   addr:     { prefer: /addr|address|주소/i, exclude: /_no$|_id$|번호|코드/i },
-  category: { prefer: /categor|biz|item|업종|종목|분류|카테고리/i, exclude: /_no$|_id$|번호|코드/i },
+  // Q5 운영DB: category_cd(코드)+category_nm(업종명) 동시 반환 → 코드 컬럼 제외해 업종명이 잡히게.
+  //   strict: prefer(업종명류)에 안 맞으면 무관 컬럼(ADDR 등)으로 폴백하지 말 것 → opt 슬롯이라 비워짐(코드/주소 오탐·누출 방지).
+  category: { prefer: /categor|biz|item|업종|종목|분류|카테고리/i, exclude: /_no$|_id$|_cd$|_code$|번호|코드/i, strict: true },
 };
 
 // 날짜 패턴(시간축 판정): YYYY-MM / YYYY-MM-DD / YYYYMM / YYYYMMDD
@@ -93,7 +95,8 @@ function pickCandidate(slot, byRole, used) {
     const filtered = lpref.exclude ? avail.filter((c) => !lpref.exclude.test(c)) : avail;
     const hit = filtered.find((c) => lpref.prefer.test(c));
     if (hit) return hit;                       // 식별자(_no/_id) 제외 후 prefer 우선(예: category←CATEGORY_NM)
-    if (filtered.length) return filtered[0];   // prefer 없으면 비식별자 첫 후보(예: category←ADDR)
+    if (lpref.strict) return slot.opt ? null : (filtered[0] || avail[0]); // strict(category): prefer 미매칭 시 무관 컬럼 폴백 금지(opt→비움)
+    if (filtered.length) return filtered[0];   // prefer 없으면 비식별자 첫 후보(예: addr←첫 varchar)
     // 남은 후보가 전부 식별자: 선택 슬롯(category/addr)은 비워 MERCHANT_NO 누출 방지, 필수 슬롯(name)만 원복
     return slot.opt ? null : avail[0];
   }

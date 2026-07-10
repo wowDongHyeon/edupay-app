@@ -10,6 +10,7 @@ html,
 body {
   margin: 0;
   height: 100%;
+  overscroll-behavior: none; /* 웹뷰 최상위 오버스크롤(고무줄/당겨서새로고침)이 네이티브로 전파되지 않게 */
 }
 body {
   font-family: "Pretendard", -apple-system, sans-serif;
@@ -41,6 +42,14 @@ body {
     box-shadow: 0 30px 80px -20px rgba(91, 77, 214, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
     overflow: hidden;
   }
+}
+/* 웹뷰(?view=webview)는 폭과 무관하게 edge-to-edge — 데스크톱 phone-mock 프레임 무효화.
+   특이성 0,2,0 이라 위 @media 의 .phone-frame(0,1,0) 을 모든 폭에서 덮는다. */
+.phone-frame.webview-full {
+  height: 100dvh;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: none;
 }
 
 .edupay-noscroll::-webkit-scrollbar {
