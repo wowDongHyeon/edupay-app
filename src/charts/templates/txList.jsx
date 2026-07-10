@@ -1,5 +1,6 @@
 import React from "react";
 import { num, ChartShell } from "../util";
+import { ExpandableText } from "../ExpandableText";
 /* 제네릭 txList 템플릿 — data {groups:[{key,label,amount,count,pct}], rows:[{group,item,amount,date}]} + config.
    상단 스택바 + 그룹 요약박스 + 거래 리스트(최근순, options.limit건). 그룹 색/이모지는 config.options.groupStyles[key]. */
 
@@ -35,7 +36,6 @@ export function TxListTemplate({ data, config }) {
           return (
             <div key={i} className="flex-1 rounded-2xl px-3.5 py-3" style={{ background: c.soft }}>
               <div className="flex items-center gap-1.5">
-                <span className="text-[14px]">{c.emoji}</span>
                 <span className="text-[12.5px] font-bold" style={{ color: c.color }}>{g.label}</span>
                 <span className="ml-auto text-[11px] font-bold" style={{ color: c.color }}>{g.pct}%</span>
               </div>
@@ -52,7 +52,7 @@ export function TxListTemplate({ data, config }) {
           return (
             <div key={i} className="flex items-center gap-2.5 py-1 border-b border-gray-50 last:border-0">
               <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold" style={{ background: c.soft, color: c.color }}>{labelOf[r.group]}</span>
-              <span className="flex-1 min-w-0 text-[13px] text-gray-800 truncate">{r.item}</span>
+              <ExpandableText text={r.item} className="flex-1 min-w-0 text-[13px] text-gray-800" />
               <span className="text-[11px] text-gray-400 tabular-nums shrink-0">{dayMD(r.date)}</span>
               <span className="text-[13px] font-bold text-gray-900 tabular-nums shrink-0 w-[74px] text-right whitespace-nowrap">−{num(r.amount)}원</span>
             </div>

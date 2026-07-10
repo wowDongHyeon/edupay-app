@@ -1,5 +1,6 @@
 import React from "react";
 import { ChartShell, CAT_EMOJI } from "./util";
+import { ExpandableText } from "./ExpandableText";
 /* map : 근처 사용 가능 가맹점 (오페리아 result {center:{lat,lng}, merchants:[{name,category,addr,lat,lng}]})
    카카오 지도(JS SDK) 실지도 + 가맹점 마커/라벨. 기본 위치 = 대전 유성구 신성동 중심(거리 현실화).
    VITE_KAKAO_MAP_KEY 없거나 SDK 로드 실패 → 기존 '오프라인 약식 지도'(격자+상대좌표) 폴백. */
@@ -180,8 +181,8 @@ export function MapChartCard({ result, title, subtitle, badge }) {
           <div key={i} className="flex items-center gap-3">
             <span className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-[15px] shrink-0">{m.emoji}</span>
             <div className="flex-1 min-w-0">
-              <div className="text-[13.5px] font-semibold text-gray-800 truncate">{m.name}</div>
-              <div className="text-[11px] text-gray-400 truncate">{m.cat}{m.addr ? " · " + m.addr : ""}</div>
+              <ExpandableText as="div" text={m.name} className="text-[13.5px] font-semibold text-gray-800" />
+              <ExpandableText as="div" text={`${m.cat}${m.addr ? " · " + m.addr : ""}`} className="text-[11px] text-gray-400" />
             </div>
             {m.realDist != null && (
               <span className="text-[12px] font-bold text-violet-600 shrink-0">{m.realDist >= 1000 ? (m.realDist / 1000).toFixed(1) + "km" : m.realDist + "m"}</span>

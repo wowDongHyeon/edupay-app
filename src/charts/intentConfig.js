@@ -12,17 +12,22 @@ export const INTENT_CONFIG = {
     tabs: {
       month: {
         title: "월별 사용 내역", subtitle: "FOX PAY 결제 · 월별 추이", badge: "최근 3개월",
-        // 진행 중 당월(마지막 막대 key === 오늘 YYYYMM)은 완결월과 단순 비교하지 않는다.
-        //   → 비교는 완결월끼리(당월 제외, 예 6월 vs 5월) + "당월 집계 중" 안내. 완결월 1개뿐이면 비교 생략.
-        //   → 과거만 조회(마지막이 현재월 아님)면 기존대로 마지막 vs 직전 비교. 금액/증감 계산 로직은 유지.
+        // 당월(막대 key === 오늘 YYYYMM) 처리: 비교는 완결월끼리(당월 제외), 당월은 별도 안내.
+        //   · 당월에 사용액 있으면 "지금까지 N원 썼어요"(집계중 문구 금지 — 데이터 있는데 오해 소지).
+        //   · 당월 데이터 없으면(series에 당월 막대 없음) "아직 사용 내역이 없어요".
+        //   · 과거만 조회(당월 막대 없음)면 마지막 vs 직전 비교(기존).
         insight: (d) => {
           const s = d.series || [];
           if (!s.length) return "";
-          const last = s[s.length - 1];
-          const inProgress = !!(d.currentMonthKey && last.key === d.currentMonthKey);
-          const pool = inProgress ? s.slice(0, -1) : s; // 비교 대상 = 완결월(진행중이면 당월 제외)
+          const curKey = d.currentMonthKey;
+          const curBar = curKey ? s.find((x) => x.key === curKey) : null; // 당월 막대(있으면)
+          const curLabel = curKey ? ((+String(curKey).slice(5, 7) || "") + "월") : "";
+          const pool = curBar ? s.filter((x) => x.key !== curKey) : s; // 비교 대상 = 완결월(당월 제외)
           const cur = pool[pool.length - 1], prev = pool[pool.length - 2];
-          const note = inProgress ? ` ${last.label}은 아직 집계 중이에요.` : "";
+          // 당월 안내: 데이터 있으면 실제 사용액, 없으면 '아직 사용 내역 없음'(집계중 문구 폐기)
+          const note = curBar
+            ? ` ${curLabel}은 지금까지 ${won(curBar.value)} 썼어요.`
+            : (curLabel ? ` ${curLabel}은 아직 사용 내역이 없어요.` : "");
           if (cur && prev && prev.value) {
             const diff = cur.value - prev.value, pct = Math.round(Math.abs(diff) / prev.value * 100);
             const msg = diff >= 0
@@ -31,7 +36,8 @@ export const INTENT_CONFIG = {
             return msg + note;
           }
           if (cur) return `${cur.label}에 ${won(cur.value)} 썼어.${note || " 계획해서 써보자 📊"}`;
-          return `${last.label}에 지금까지 ${won(last.value)} 썼어. 아직 집계 중이야 📊`;
+          // 완결월 없음(당월 데이터뿐) → 당월 사용액만 안내(집계중 문구 없이)
+          return curBar ? `${curLabel}에 지금까지 ${won(curBar.value)} 썼어 📊` : "";
         },
       },
       day: {
@@ -106,7 +112,7 @@ export const INTENT_CONFIG = {
   // ⑦ channel (txList) — 스택바 + 그룹 요약박스 + 거래 리스트. 그룹 스타일은 options.groupStyles.
   channel: {
     template: "txList",
-    title: "온·오프라인 결제 내역", subtitle: "결제 채널별 · 최근 거래", badge: "최근 내역",
+    title: "온·오프라인 결제 내역", subtitle: "결제 채널별 · 전체 거래", badge: "전체 내역", // operia 쿼리에 기간 필터 없음 = 전체 기간
     options: {
       limit: 5, // 거래 리스트 초기 노출 5건 → '더보기' +5 (txList 점진 노출)
       groupStyles: {

@@ -1,5 +1,6 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { ExpandableText } from "../ExpandableText";
 import { num, ChartShell, DONUT_COLORS, InsightBox } from "../util";
 /* 제네릭 donut 템플릿 — data {slices:[{label,value,pct,cnt?}], total} + config. */
 
@@ -28,7 +29,7 @@ export function DonutTemplate({ data, config }) {
           {view.map((e, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: e.color }}></span>
-              <span className="text-[12px] text-gray-600 flex-1 truncate">{e.name}</span>
+              <ExpandableText text={e.name} className="text-[12px] text-gray-600 flex-1" />
               {e.cnt != null && <span className="text-[11px] text-gray-400 tabular-nums">{e.cnt}건</span>}
               <span className="text-[12px] font-semibold text-gray-900 tabular-nums w-[52px] text-right">{num(e.value)}원</span>
             </div>

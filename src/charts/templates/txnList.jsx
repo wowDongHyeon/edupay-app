@@ -1,5 +1,6 @@
 import React from "react";
 import { num, ChartShell } from "../util";
+import { ExpandableText } from "../ExpandableText";
 /* 제네릭 txnList 템플릿 — 건별 거래 리스트. data {rows:[{merchant,item,amount,time}], total, count} + config.
    가맹점 · 상품 · 금액 · 시간(HH:MM), 시간순. 하단 푸터(총 N건 · 합계). options.limit 로 '더보기' 점진 노출.
    사용처(merchantBreakdown) 카드 톤(깔끔 리스트, %랭킹바 없음). */
@@ -22,8 +23,8 @@ export function TxnListTemplate({ data, config }) {
               <div key={i} className="flex items-center gap-2.5">
                 <span className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-[15px] shrink-0">🧾</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[13.5px] font-medium text-gray-800 truncate">{e.merchant}</div>
-                  {e.item ? <div className="text-[11px] text-gray-400 truncate">{e.item}</div> : null}
+                  <ExpandableText as="div" text={e.merchant} className="text-[13.5px] font-medium text-gray-800" />
+                  {e.item ? <ExpandableText as="div" text={e.item} className="text-[11px] text-gray-400" /> : null}
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[13.5px] font-bold text-gray-900 tabular-nums whitespace-nowrap">{num(e.amount)}원</div>

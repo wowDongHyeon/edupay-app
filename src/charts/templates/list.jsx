@@ -1,5 +1,6 @@
 import React from "react";
 import { num, ChartShell } from "../util";
+import { ExpandableText } from "../ExpandableText";
 /* 제네릭 list 템플릿 — data {rows:[{date,merchant,amount}], total, count} + config.
    합계+건수 헤더 + 거래 리스트. 아이콘/접미/빈문구/건수접미는 config.options. */
 export function ListTemplate({ data, config }) {
@@ -26,7 +27,7 @@ export function ListTemplate({ data, config }) {
             <div key={i} className="flex items-center gap-2.5">
               <span className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-[15px] shrink-0">{icon}</span>
               <div className="flex-1 min-w-0">
-                <div className="text-[13.5px] font-medium text-gray-800 truncate">{e.merchant}</div>
+                <ExpandableText as="div" text={e.merchant} className="text-[13.5px] font-medium text-gray-800" />
                 <div className="text-[11px] text-gray-400">{fmt(e.date)}{suffix ? " · " + suffix : ""}</div>
               </div>
               <span className="text-[13.5px] font-bold text-gray-900 tabular-nums shrink-0">-{num(e.amount)}원</span>
