@@ -365,7 +365,7 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
         // 단위: POINT/포인트→P, 금액/잔액류→원, 그 외(건수·비율 등 애매)→무단위(과추론 금지).
         // 금액 토큰에 PAY 미포함(CNT_PAY=건수 오판 방지). 실 금액 컬럼은 AMT/AMOUNT/금액 등으로 매칭됨.
         const _unit = /P$|POINT|포인트/i.test(_s) ? "P"
-          : (/AMT|AMOUNT|BLNC|BALANCE|COST|PRICE|금액|잔액|충전금|지원금|결제|비용|가격|원/i.test(_s) ? "원" : "");
+          : (/AMT|AMOUNT|BLNC|BALANCE|COST|PRICE|금액|잔액|충전금|지원금|비용|가격|원/i.test(_s) ? "원" : "");
         const _st = (INTENT_CONFIG.balance && INTENT_CONFIG.balance.options && INTENT_CONFIG.balance.options.itemStyles) || [];
         const _cfg = { badge: (INTENT_CONFIG.balance && INTENT_CONFIG.balance.badge) || "실시간", title: _label, subtitle: "지금 사용할 수 있어요", options: { itemStyles: [_st[0] || {}] } };
         return <TEMPLATES.statList data={{ kpi: true, items: [{ label: _label, sub: "", value: Math.abs(Number(_rows[0][_col]) || 0), unit: _unit }] }} config={_cfg} intent={intent} />;
