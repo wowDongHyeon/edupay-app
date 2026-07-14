@@ -181,16 +181,22 @@ const SUGGESTIONS = [
 const FAVORITES = SUGGESTIONS;
 
 /* 입력창 위 고정 빠른 질문 (사용자 지정) */
-const QUICK_QUERIES = [
+// 진입 랜딩·즐겨찾기 공용 질의. 플래그 하나로 4개(핵심)↔8개(전체) 토글.
+//   SHOW_ALL_QUICK_QUERIES = false → 핵심 4개(기본/운영), true → 전체 8개(테스트).
+//   메인 칩(IntroLanding)·즐겨찾기 시드 모두 QUICK_QUERIES 참조 → 이 값 하나로 둘 다 바뀜.
+const SHOW_ALL_QUICK_QUERIES = import.meta.env.VITE_SHOW_ALL_QUICK_QUERIES === 'true'; // .env.local 로 4↔8 전환(미설정=4개). QUICK_QUERIES·FAV_KEY 자동 연동.
+const QUICK_QUERIES_ALL = [
 { icon: "💰", text: "현재 사용할 수 있는 금액 알려줘" },
 { icon: "📅", text: "월별 사용 내역 알려줘" },
 { icon: "📍", text: "근처 사용 가능 가맹점 알려줘" },
 { icon: "🧾", text: "사용처별 내역 알려줘" },
-/* TEMP(테스트용): 가능질의 8종 전부 노출. 테스트 완료 후 아래 4줄 삭제하고 위 4개로 원복 */
 { icon: "👫", text: "친구랑 사용내역 비교 해줘" },
 { icon: "🛒", text: "온라인/오프라인 결제내역 확인해줘" },
 { icon: "📊", text: "어디에 주로 쓰고 있는지 알려줘" },
 { icon: "🏫", text: "학교별 사용 내역 비교해줘" }];
+const QUICK_QUERIES = SHOW_ALL_QUICK_QUERIES ? QUICK_QUERIES_ALL : QUICK_QUERIES_ALL.slice(0, 4);
+// 즐겨찾기 시드 키를 질의 개수에 묶음 → 플래그로 4↔8 바뀌면 즐겨찾기도 그 세트로 재시드(같은 모드 내 편집은 유지).
+const FAV_KEY = "edupay_favorites_v1_" + QUICK_QUERIES.length;
 
 
 
@@ -769,26 +775,84 @@ function poolKeyForIntent(intent) {
   }
 }
 
+// 로딩 여우 러너 단계·문구 config(★편집 지점★). tiredAt 전=run, 이후=tired, cheerAt 이후=cheer(=tired 모션+응원 문구).
+const FOX_LOADER_CONFIG = { tiredAt: 5000, cheerAt: 10000, cheerMessages: ["조금만 더!", "거의 다 왔어요!"] };
+
+// 세미-업라이트로 달리는 여우(인라인 SVG). 앞발 펌핑·뒷다리 러닝·꼬리 스윙·발밑 먼지. 모션은 index.css(.fox--run/.fox--tired).
+//   제자리 유지(이동 X), 이모지·쓰러짐 없음. cheer 는 tired 모션 재사용.
+function FoxRunner({ stage }) {
+  const cls = "fox " + (stage === "run" ? "fox--run" : "fox--tired"); // cheer→tired 모션
+  return (
+    <svg className={cls} width="50" height="46" viewBox="0 0 60 56" fill="none" aria-hidden="true">
+      {/* 먼지: 시작 버스트(1회, .fox-burst) + run 반복(.fox-dust). 발밑(y≈50)에 싱크. */}
+      <g className="fox-dust-layer">
+        <circle className="fox-burst" cx="26" cy="50" r="4.5" fill="#D9C9B0" />
+        <circle className="fox-burst fox-burst-b" cx="20" cy="51" r="3.5" fill="#E7DAC4" />
+        <circle className="fox-dust fox-dust-1" cx="24" cy="50" r="2.6" fill="#DCCCB2" />
+        <circle className="fox-dust fox-dust-2" cx="18" cy="51" r="2.1" fill="#CDB795" />
+        <circle className="fox-dust fox-dust-3" cx="30" cy="51" r="2.3" fill="#E7DAC4" />
+        <circle className="fox-dust fox-dust-4" cx="27" cy="51.5" r="2.7" fill="#DCCCB2" />
+        <circle className="fox-dust fox-dust-5" cx="21" cy="50" r="3" fill="#E7DAC4" />
+      </g>
+      {/* 몸통 그룹: 러닝 bob + 미세 translateX(±2~3px) */}
+      <g className="fox-body">
+        {/* 꼬리(뒤) */}
+        <g className="fox-tail">
+          <path d="M25 30 C10 29 5 46 15 49 C13 40 20 36 27 38 Z" fill="#E8622E" />
+          <path d="M14 47 C10 46 9 50 13 51 C12 48 13 47 16 48 Z" fill="#FBEEE3" />
+        </g>
+        {/* 뒷다리 2(러닝, 교대) */}
+        <rect className="fox-leg fox-leg-l" x="23" y="35" width="5.4" height="16" rx="2.7" fill="#C6501F" />
+        <rect className="fox-leg fox-leg-r" x="31" y="35" width="5.4" height="16" rx="2.7" fill="#EE6C3A" />
+        {/* 몸통(세미-업라이트, 앞으로 살짝 기움) */}
+        <path d="M24 16 C24 11 40 11 39.5 17 L37.5 35 C37.5 40 25 40 25 35 Z" fill="#F47A45" />
+        {/* 배(흰색) */}
+        <path d="M29 18 C29 15.5 36 16 35.5 19 L34.5 34 C34.5 37 30 37 29.5 34 Z" fill="#FCEFE4" />
+        {/* 앞발 2(위로 들어 앞뒤 펌핑, 교대) */}
+        <rect className="fox-arm fox-arm-l" x="27" y="17" width="4.6" height="13" rx="2.3" fill="#C6501F" />
+        <rect className="fox-arm fox-arm-r" x="32" y="17" width="4.6" height="13" rx="2.3" fill="#EE6C3A" />
+        {/* 머리(오른쪽 향함) */}
+        <g className="fox-head">
+          <path d="M26 3 L31 11 L22 10 Z" fill="#E8622E" />
+          <path d="M41 3 L39 11 L34 8 Z" fill="#E8622E" />
+          <circle cx="33" cy="10" r="9" fill="#F47A45" />
+          <path d="M34 9 L46 11 L34 14 Z" fill="#FCEFE4" />
+          <circle cx="45" cy="11" r="1.7" fill="#2B2B2B" />
+          <circle cx="36" cy="9" r="1.5" fill="#2B2B2B" />
+        </g>
+      </g>
+      {/* 출발 먼지구름(1회): fox-body '뒤 순서=위'에 그려 다리를 순간 가림 → 걷히며 러닝 드러남(만화식 대시). */}
+      <g className="fox-launch">
+        <circle cx="27" cy="47" r="12" fill="#E7DAC4" />
+        <circle cx="19" cy="49" r="8.5" fill="#DCCCB2" />
+        <circle cx="34" cy="49" r="8" fill="#D9C9B0" />
+      </g>
+    </svg>
+  );
+}
+
 function Typing({ intent }) {
-  const pool = LOADING_POOLS[poolKeyForIntent(intent)] || LOADING_POOLS["기타"];
+  const runPool = LOADING_POOLS[poolKeyForIntent(intent)] || LOADING_POOLS["기타"];
   const [idx, setIdx] = useState(0);
-  // 마운트/intent 변경 시 첫 문구부터, 1.8s 마다 모듈로 순환. 언마운트 시 clearInterval.
+  const [elapsed, setElapsed] = useState(0);
+  // 마운트/intent 변경 시 리셋 후, 경과시간(단계 판정)·문구순환 두 타이머. 언마운트 시 clear. (달리기 리듬은 CSS)
   useEffect(() => {
-    setIdx(0);
-    const id = setInterval(() => setIdx((i) => (i + 1) % pool.length), 1800);
-    return () => clearInterval(id);
+    setIdx(0); setElapsed(0);
+    const start = Date.now();
+    const tick = setInterval(() => setElapsed(Date.now() - start), 250);
+    const msg = setInterval(() => setIdx((i) => i + 1), 1800);
+    return () => { clearInterval(tick); clearInterval(msg); };
   }, [intent]);
+  const stage = elapsed >= FOX_LOADER_CONFIG.cheerAt ? "cheer"
+    : elapsed >= FOX_LOADER_CONFIG.tiredAt ? "tired" : "run";
+  const pool = stage === "cheer" ? FOX_LOADER_CONFIG.cheerMessages : runPool;
   const msg = pool[idx % pool.length];
   return (
     <div className="flex gap-2 items-start edupay-fade">
       <AiAvatar />
-      <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2 items-center">
+      <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2.5 items-center">
+        <FoxRunner stage={stage} />
         <span className="text-[13px] text-gray-500 leading-snug">{msg}</span>
-        <span className="flex gap-1 items-center shrink-0">
-          {[0, 1, 2].map((i) =>
-          <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-300 edupay-dot" style={{ animationDelay: i * 0.16 + "s" }}></span>
-          )}
-        </span>
       </div>
     </div>);
 
@@ -983,7 +1047,7 @@ function App() {
   //   정렬: 최신 등록이 배열 앞(prepend). 구 키(edupay_faq_v1: 핵심질의 시드본)는 더는 사용하지 않음.
   const [favItems, setFavItems] = useState(() => {
     let raw = null;
-    try { raw = localStorage.getItem("edupay_favorites_v1"); } catch (e) {}
+    try { raw = localStorage.getItem(FAV_KEY); } catch (e) {}
     if (raw != null) {
       // 키 존재 → 저장값 사용(재시드 금지). 손상/비배열이면 빈 배열.
       try {
@@ -1001,7 +1065,7 @@ function App() {
   });
   // favItems 변경 시마다 저장(프라이빗 모드/차단 대비 try/catch).
   useEffect(() => {
-    try { localStorage.setItem("edupay_favorites_v1", JSON.stringify(favItems)); } catch (e) {}
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(favItems)); } catch (e) {}
   }, [favItems]);
   // [즐겨찾기] 스와이프로 '열린'(삭제 버튼 노출) 행 단일 소스. 행 key=item.text. null=모두 닫힘.
   const [openFaqKey, setOpenFaqKey] = useState(null);
@@ -1094,7 +1158,8 @@ function App() {
   //   startedRef 로 최신 대화 상태를 읽어(리스너 1회 등록) stale closure 회피. WEBVIEW에서만 동작.
   const startedRef = useRef(started);
   startedRef.current = started;
-  const wasHiddenRef = useRef(false);
+  const hiddenAtRef = useRef(0); // 숨겨진 시각(ms). 임계값 이상 숨겨졌다 돌아올 때만 재진입 리셋.
+  const REENTRY_RESET_MS = Number(import.meta.env.VITE_REENTRY_RESET_MS) || 10000; // 이 시간(ms) 이상 숨겨졌다 돌아오면 재진입=리셋. 미설정 시 10초. 짧은 화면 꺼짐은 유지
   useEffect(() => {
     if (!WEBVIEW) return;
     const resetToLanding = () => {
@@ -1106,10 +1171,11 @@ function App() {
       newChat();                                        // 대화중이면 랜딩 리셋(직전 대화는 자동저장됨)
     };
     const onVisibility = () => {
-      if (document.visibilityState === "hidden") { wasHiddenRef.current = true; return; }
-      if (document.visibilityState === "visible" && wasHiddenRef.current) {
-        wasHiddenRef.current = false;
-        resetToLanding();
+      if (document.visibilityState === "hidden") { hiddenAtRef.current = Date.now(); return; }
+      if (document.visibilityState === "visible") {
+        const t = hiddenAtRef.current;
+        hiddenAtRef.current = 0;
+        if (t && Date.now() - t >= REENTRY_RESET_MS) resetToLanding(); // 짧은 화면 꺼짐(<임계값)은 대화 유지
       }
     };
     const onPageShow = (e) => { if (e && e.persisted) resetToLanding(); }; // bfcache 복귀 대비

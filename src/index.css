@@ -106,6 +106,70 @@ body {
   0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
   30% { opacity: 1; transform: translateY(-3px); }
 }
+
+/* ── 로딩 여우(세미-업라이트): 앞발 공중 펌핑 + 뒷다리 러닝 스텝 + 발밑 먼지(강화). 제자리 유지, cheer=tired ── */
+.fox { overflow: visible; }
+.fox .fox-arm { transform-box: fill-box; transform-origin: 50% 12%; }
+.fox .fox-leg { transform-box: fill-box; transform-origin: 50% 8%; }
+.fox .fox-body { transform-box: fill-box; transform-origin: 50% 100%; }
+.fox .fox-tail { transform-box: fill-box; transform-origin: 92% 12%; }
+.fox .fox-dust, .fox .fox-burst { transform-box: fill-box; transform-origin: center; opacity: 0; }
+
+@keyframes foxArmPump { 0% { transform: rotate(-66deg); } 50% { transform: rotate(60deg); } 100% { transform: rotate(-66deg); } }
+@keyframes foxArmTired { 0% { transform: rotate(-32deg); } 50% { transform: rotate(28deg); } 100% { transform: rotate(-32deg); } }
+@keyframes foxLegRun { 0% { transform: rotate(44deg); } 50% { transform: rotate(-44deg); } 100% { transform: rotate(44deg); } }
+@keyframes foxLegTired { 0% { transform: rotate(20deg); } 50% { transform: rotate(-21deg); } 100% { transform: rotate(20deg); } }
+@keyframes foxLunge { 0% { transform: translate(-1.5px,0); } 50% { transform: translate(2px,-2px); } 100% { transform: translate(-1.5px,0); } }
+@keyframes foxTailSway { 0% { transform: rotate(-7deg); } 50% { transform: rotate(9deg); } 100% { transform: rotate(-7deg); } }
+/* 먼지: 뒷발 뒤로 크고 길게 팍 튀며 페이드(강화) */
+@keyframes foxDust { 0% { opacity: .95; transform: translate(4px,0) scale(.45); } 45% { opacity: .7; } 100% { opacity: 0; transform: translate(-20px,-6px) scale(2.4); } }
+@keyframes foxBurst { 0% { opacity: 1; transform: scale(.3); } 100% { opacity: 0; transform: translate(-5px,-9px) scale(3.4); } }
+
+/* 시작 먼지 버스트 1회 */
+.fox .fox-burst { animation: foxBurst 0.55s ease-out 1 both; }
+.fox .fox-burst-b { animation-delay: .08s; }
+
+/* 출발 먼지구름(1회): 순간 확 덮었다가(다리 가림) 뒤/위로 걷힘. 다리 노출(foxLegReveal)과 타이밍 맞춤. */
+@keyframes foxLaunch {
+  0%   { opacity: 0;    transform: translate(6px,2px) scale(0.7); }
+  12%  { opacity: 0.97; transform: translate(2px,0) scale(1.15); }
+  55%  { opacity: 0.9;  transform: translate(-2px,-2px) scale(1.5); }
+  100% { opacity: 0;    transform: translate(-10px,-6px) scale(2.4); }
+}
+/* 다리: 첫 ~0.44s 숨겼다가 ~0.8s 페이드인(구름 걷힘과 동기). opacity 전담 — 무한 펌핑(transform)과 병행. */
+@keyframes foxLegReveal { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
+.fox .fox-launch { transform-box: fill-box; transform-origin: center; opacity: 0; animation: foxLaunch 0.7s ease-out 1 both; }
+
+/* run: 큰 진폭·빠른 템포 + 먼지 잦게 */
+.fox--run .fox-arm-l { animation: foxArmPump 0.24s ease-in-out infinite; }
+.fox--run .fox-arm-r { animation: foxArmPump 0.24s ease-in-out infinite; animation-delay: -0.12s; }
+.fox--run .fox-leg-l { animation: foxLegRun 0.24s ease-in-out infinite, foxLegReveal 0.8s ease-out both; }
+.fox--run .fox-leg-r { animation: foxLegRun 0.24s ease-in-out -0.12s infinite, foxLegReveal 0.8s ease-out both; }
+.fox--run .fox-body { animation: foxLunge 0.24s ease-in-out infinite; }
+.fox--run .fox-tail { animation: foxTailSway 0.24s ease-in-out infinite; }
+.fox--run .fox-dust { animation: foxDust 0.2s ease-out infinite; }
+.fox--run .fox-dust-2 { animation-delay: -0.05s; }
+.fox--run .fox-dust-3 { animation-delay: -0.1s; }
+.fox--run .fox-dust-4 { animation-delay: -0.14s; }
+.fox--run .fox-dust-5 { animation-delay: -0.17s; }
+
+/* tired: 작은 진폭·느린 템포 */
+.fox--tired .fox-arm-l { animation: foxArmTired 0.66s ease-in-out infinite; }
+.fox--tired .fox-arm-r { animation: foxArmTired 0.66s ease-in-out infinite; animation-delay: -0.33s; }
+.fox--tired .fox-leg-l { animation: foxLegTired 0.66s ease-in-out infinite; }
+.fox--tired .fox-leg-r { animation: foxLegTired 0.66s ease-in-out infinite; animation-delay: -0.33s; }
+.fox--tired .fox-body { animation: foxLunge 0.66s ease-in-out infinite; }
+.fox--tired .fox-tail { animation: foxTailSway 0.66s ease-in-out infinite; }
+.fox--tired .fox-dust { animation: foxDust 0.6s ease-out infinite; }
+.fox--tired .fox-dust-2 { animation-delay: -0.15s; }
+.fox--tired .fox-dust-3 { animation-delay: -0.3s; }
+.fox--tired .fox-dust-4 { animation-delay: -0.4s; }
+.fox--tired .fox-dust-5 { animation-delay: -0.5s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fox .fox-arm, .fox .fox-leg, .fox .fox-body, .fox .fox-tail, .fox .fox-dust, .fox .fox-burst, .fox .fox-launch { animation: none !important; }
+  .fox .fox-dust, .fox .fox-burst, .fox .fox-launch { opacity: 0; } /* 먼지·출발구름 숨김, 다리는 가림 없이 즉시 노출(base opacity 1) */
+}
 .edupay-dot { animation: edupayDot 1s ease-in-out infinite; }
 
 @keyframes edupaySheet {
@@ -263,4 +327,56 @@ body {
   pointer-events: none;
   background: radial-gradient(circle, rgba(150, 110, 255, 0.35) 0%, rgba(150, 110, 255, 0) 62%);
   filter: blur(8px);
+}
+
+/* ── 로딩 여우 러너(FoxRunner) — 세미-업라이트 대시. 제자리, CSS만. ────────────
+   앞발 펌핑·뒷다리 러닝(큰 진폭)·몸통 bob+미세 translateX·발밑 먼지(시작 버스트+run 반복).
+   .fox--run = 빠름·큰 진폭 / .fox--tired = 느림·작은 진폭(cheer 도 tired 모션 재사용). */
+.fox { display: block; overflow: visible; }
+.fox .fox-arm, .fox .fox-leg, .fox .fox-tail, .fox .fox-body, .fox .fox-dust, .fox .fox-burst { transform-box: fill-box; }
+.fox .fox-arm, .fox .fox-leg { transform-origin: 50% 6%; }   /* 어깨/엉덩이(윗끝) 기준 회전 */
+.fox .fox-tail { transform-origin: 92% 12%; }                 /* 꼬리 밑동 기준 스윙 */
+
+@keyframes foxArmRun  { 0%,100% { transform: rotate(-60deg); } 50% { transform: rotate(46deg); } }
+@keyframes foxLegRun  { 0%,100% { transform: rotate(-38deg); } 50% { transform: rotate(34deg); } }
+@keyframes foxArmTired{ 0%,100% { transform: rotate(-30deg); } 50% { transform: rotate(20deg); } }
+@keyframes foxLegTired{ 0%,100% { transform: rotate(-18deg); } 50% { transform: rotate(15deg); } }
+@keyframes foxBobRun  { 0%,100% { transform: translate(0,0); } 25% { transform: translate(2.5px,-2.5px); } 50% { transform: translate(0,-1px); } 75% { transform: translate(-2.5px,-2px); } }
+@keyframes foxBobTired{ 0%,100% { transform: translate(0,0); } 50% { transform: translate(0,-1.2px); } }
+@keyframes foxTail    { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(15deg); } }
+@keyframes foxDustRun { 0% { opacity: .85; transform: translate(0,0) scale(.4); } 100% { opacity: 0; transform: translate(-11px,-4px) scale(1.7); } }
+@keyframes foxDustTired { 0% { opacity: .4; transform: translate(0,0) scale(.35); } 100% { opacity: 0; transform: translate(-6px,-2px) scale(1.1); } }
+@keyframes foxBurst   { 0% { opacity: .9; transform: translate(0,0) scale(.3); } 100% { opacity: 0; transform: translate(-6px,-9px) scale(2.6); } }
+
+/* run: 빠른 스냅(~0.24s) + 큰 진폭 + 왕성한 먼지 */
+.fox--run .fox-arm-l { animation: foxArmRun .24s ease-in-out infinite; }
+.fox--run .fox-arm-r { animation: foxArmRun .24s ease-in-out infinite; animation-delay: -.12s; }
+.fox--run .fox-leg-l { animation: foxLegRun .24s ease-in-out infinite; animation-delay: -.12s; }
+.fox--run .fox-leg-r { animation: foxLegRun .24s ease-in-out infinite; }
+.fox--run .fox-body  { animation: foxBobRun .24s ease-in-out infinite; }
+.fox--run .fox-tail  { animation: foxTail .24s ease-in-out infinite; }
+.fox--run .fox-dust  { animation: foxDustRun .34s ease-out infinite; }
+.fox--run .fox-dust-2 { animation-delay: .12s; }
+.fox--run .fox-dust-3 { animation-delay: .22s; }
+
+/* tired/cheer: 느리게(~0.5s) + 작은 진폭 + 약한 먼지 */
+.fox--tired .fox-arm-l { animation: foxArmTired .5s ease-in-out infinite; }
+.fox--tired .fox-arm-r { animation: foxArmTired .5s ease-in-out infinite; animation-delay: -.25s; }
+.fox--tired .fox-leg-l { animation: foxLegTired .5s ease-in-out infinite; animation-delay: -.25s; }
+.fox--tired .fox-leg-r { animation: foxLegTired .5s ease-in-out infinite; }
+.fox--tired .fox-body  { animation: foxBobTired .5s ease-in-out infinite; }
+.fox--tired .fox-tail  { animation: foxTail .6s ease-in-out infinite; }
+.fox--tired .fox-dust  { animation: foxDustTired .8s ease-out infinite; }
+.fox--tired .fox-dust-2 { animation-delay: .28s; }
+.fox--tired .fox-dust-3 { animation-delay: .5s; }
+
+/* 시작 먼지 버스트: 1회(both 로 끝 상태 유지=사라짐). run/tired 공통. */
+.fox .fox-burst { animation: foxBurst .55s ease-out .02s 1 both; }
+.fox .fox-burst-b { animation-delay: .1s; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* 모션 정지(선 포즈 유지) + 먼지 숨김 + 문구는 그대로 */
+  .fox .fox-arm, .fox .fox-leg, .fox .fox-tail, .fox .fox-body { animation: none !important; }
+  .fox .fox-dust, .fox .fox-burst { display: none; }
+  .edupay-dot { animation: none; }
 }
