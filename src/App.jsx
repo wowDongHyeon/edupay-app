@@ -1733,6 +1733,16 @@ function App() {
               <path d="M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.72.99-5.8-4.21-4.1 5.82-.85z" strokeLinejoin="round" />
             </svg>
           </button>
+          {/* 새 대화 버튼(＋) — 대화중에만. 확인창 없이 즉시 newChat(이전 대화는 '지난 대화'에 자동저장됨). */}
+          {started && (
+            <button onClick={() => { newChat(); showFaqToast("새 대화 시작 — 이전 대화는 지난 대화에 저장됨"); }} aria-label="새 대화"
+              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-[#F3F4F6] transition active:scale-90"
+              style={{ color: "#8B8FA3" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+          )}
           <div className="flex-1 min-w-0 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">
             <input
                 value={input}
