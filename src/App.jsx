@@ -531,11 +531,11 @@ function IntroLanding({ userName, onPick }) {
       <h2 className="mt-6 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
         {userName ? <>{userName}님<br />반가워요</> : "반가워요"}
       </h2>
-      {/* 핵심질의 4개 칩 — 세로 스택, 가로 중앙정렬, 넉넉한 간격. 인사말과의 간격 확대(iPhone에서 붙어보임 방지). 탭 → 전송 */}
-      <div className="mt-14 w-full flex flex-col items-center gap-3">
+      {/* 핵심질의 4개 칩 — 세로 스택, full-width 왼쪽정렬(items-stretch), 넉넉한 간격. 인사말과의 간격 확대(iPhone에서 붙어보임 방지). 탭 → 전송 */}
+      <div className="mt-14 w-full flex flex-col items-stretch gap-3">
         {QUICK_QUERIES.map((q, i) =>
         <button key={i} onClick={() => onPick(q.text)}
-        className="flex items-center gap-2 px-5 py-3 rounded-full text-[14px] font-semibold whitespace-nowrap bg-[#F3F4F6] text-gray-700 active:bg-violet-50 active:text-violet-600 active:scale-95 transition">
+        className="flex items-center gap-2 px-5 py-3 rounded-full text-[14px] font-semibold whitespace-nowrap text-left bg-[#F3F4F6] text-gray-700 active:bg-violet-50 active:text-violet-600 active:scale-95 transition">
             <span className="text-[16px]">{q.icon}</span>
             {q.text}
           </button>
@@ -783,7 +783,20 @@ const FOX_LOADER_CONFIG = { tiredAt: 5000, cheerAt: 10000, cheerMessages: ["조�
 function FoxRunner({ stage }) {
   const cls = "fox " + (stage === "run" ? "fox--run" : "fox--tired"); // cheer→tired 모션
   return (
-    <svg className={cls} width="50" height="46" viewBox="0 0 60 56" fill="none" aria-hidden="true">
+    <svg
+      className={cls}
+      width="50"
+      height="46"
+      viewBox="0 0 60 56"
+      fill="none"
+      aria-hidden="true"
+      style={{
+        // 여우 로더 속도: .env.local(VITE_FOX_*)로 조정, 없으면 기본(가속). CSS time 형식('0.16s').
+        "--fox-run-dur": import.meta.env.VITE_FOX_RUN_DUR || "0.16s",
+        "--fox-launch-dur": import.meta.env.VITE_FOX_LAUNCH_DUR || "0.55s",
+        "--fox-reveal-dur": import.meta.env.VITE_FOX_REVEAL_DUR || "0.6s",
+      }}
+    >
       {/* 먼지: 시작 버스트(1회, .fox-burst) + run 반복(.fox-dust). 발밑(y≈50)에 싱크. */}
       <g className="fox-dust-layer">
         <circle className="fox-burst" cx="26" cy="50" r="4.5" fill="#D9C9B0" />

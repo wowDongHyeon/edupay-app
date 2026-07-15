@@ -13,33 +13,39 @@
 // ※ 지금은 토큰 도입이 아니다(시연: userId 만). 인증/토큰은 추후 §13 에서.
 // ※ 1회만 조회하고 캐시 — send 마다 네이티브 브릿지를 두드리지 않는다.
 
-let cached; // Promise<string|null> — 최초 1회 resolve 후 재사용
+let bridgeCached; // Promise<object|null> — getEduPayUser 응답 1회 캐시(null=브릿지 없음/실패)
+let userCached;   // Promise<string|null>
 
-async function resolveUserId() {
-  // ① 네이티브 WebView 브릿지 (Flutter inappwebview)
+// 네이티브 브릿지(getEduPayUser)를 1회만 호출해 전체 응답을 캐시. userId·location 둘 다 여기서 읽는다.
+async function callBridge() {
   try {
     const bridge = typeof window !== "undefined" && window.flutter_inappwebview;
     if (bridge && typeof bridge.callHandler === "function") {
-      const res = await bridge.callHandler("getEduPayUser");
-      if (res && res.ok && res.userId) return String(res.userId);
-      if (import.meta.env.DEV) console.warn("[session] getEduPayUser 응답에 userId 없음 — 폴백", res);
+      return (await bridge.callHandler("getEduPayUser")) || null;
     }
   } catch (e) {
     if (import.meta.env.DEV) console.warn("[session] getEduPayUser 브릿지 실패 — 폴백", e);
   }
+  return null; // 브릿지 없음(브라우저 dev)
+}
+function getBridge() {
+  if (!bridgeCached) bridgeCached = callBridge();
+  return bridgeCached;
+}
 
-  // ② URL ?user_id=  (브라우저 dev)
+async function resolveUserId() {
+  const res = await getBridge(); // ① 네이티브 브릿지
+  if (res && res.ok && res.userId) return String(res.userId);
+  if (res && import.meta.env.DEV) console.warn("[session] getEduPayUser 응답에 userId 없음 — 폴백", res);
+  // ② URL ?user_id= (브라우저 dev)
   if (typeof window !== "undefined") {
     const q = new URLSearchParams(window.location.search).get("user_id");
     if (q) return q;
   }
-
   // ③ env 폴백
   const envUser = import.meta.env.VITE_DEV_USER_ID;
   if (envUser) return String(envUser);
-
-  // ④ 없음
-  return null;
+  return null; // ④ 없음
 }
 
 /**
@@ -47,8 +53,34 @@ async function resolveUserId() {
  * @returns {Promise<string|null>}
  */
 export function getUserId() {
-  if (!cached) cached = resolveUserId();
-  return cached;
+  if (!userCached) userCached = resolveUserId();
+  return userCached;
+}
+
+/**
+ * 사용자 실제 위치. 브릿지(getEduPayUser)의 lat/lng 우선(웹뷰 GPS 권한 우회).
+ *  - 유효: { status:"ok", lat, lng }
+ *  - 권한 없음/거부(브릿지 응답은 왔으나 위치 무효): { status:"denied", locStatus }
+ *  - 브릿지 없음(브라우저 dev): URL ?lat&lng 있으면 ok, 없으면 { status:"none" } → 호출부가 브라우저 GPS/대전 폴백
+ * @returns {Promise<{status:"ok"|"denied"|"none", lat?:number, lng?:number, locStatus?:string}>}
+ */
+export async function getUserLocation() {
+  const res = await getBridge();
+  if (res) { // 브릿지 응답 있음(실기기)
+    const { ok, locationOk, locStatus, lat, lng } = res;
+    if (ok === true && locationOk === true && locStatus === "ok" && Number.isFinite(lat) && Number.isFinite(lng)) {
+      return { status: "ok", lat, lng };
+    }
+    return { status: "denied", locStatus }; // 권한 거부/미허용 → 안내 표시 대상
+  }
+  // 브릿지 없음(dev): URL ?lat&lng 로 실위치 주입 지원
+  if (typeof window !== "undefined") {
+    const q = new URLSearchParams(window.location.search);
+    const latS = q.get("lat"), lngS = q.get("lng");
+    const lat = Number(latS), lng = Number(lngS);
+    if (latS && lngS && Number.isFinite(lat) && Number.isFinite(lng)) return { status: "ok", lat, lng };
+  }
+  return { status: "none" };
 }
 
 export default getUserId;

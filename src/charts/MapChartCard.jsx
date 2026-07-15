@@ -1,6 +1,7 @@
 import React from "react";
 import { ChartShell, CAT_EMOJI } from "./util";
 import { ExpandableText } from "./ExpandableText";
+import { getUserLocation } from "../api/session";
 /* map : 근처 사용 가능 가맹점 (오페리아 result {center:{lat,lng}, merchants:[{name,category,addr,lat,lng}]})
    카카오 지도(JS SDK) 실지도 + 가맹점 마커/라벨. 기본 위치 = 대전 유성구 신성동 중심(거리 현실화).
    VITE_KAKAO_MAP_KEY 없거나 SDK 로드 실패 → 기존 '오프라인 약식 지도'(격자+상대좌표) 폴백. */
@@ -66,14 +67,22 @@ export function MapChartCard({ result, title, subtitle, badge }) {
     .map((m) => ({ ...m, realDist: m.lat != null ? distM(myPos, { lat: m.lat, lng: m.lng }) : null }))
     .sort((a, b) => (a.realDist ?? 9e9) - (b.realDist ?? 9e9));
 
-  // GPS
+  // 위치 소스: 브릿지/URL 실위치 우선(getUserLocation) → 없으면(dev) 브라우저 GPS → 대전 폴백.
   React.useEffect(() => {
-    if (!navigator.geolocation) { setGeo({ status: "unsupported" }); return; }
-    navigator.geolocation.getCurrentPosition(
-      (p) => setGeo({ status: "ok", lat: p.coords.latitude, lng: p.coords.longitude }),
-      (e) => setGeo({ status: e.code === 1 ? "denied" : "error" }),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-    );
+    let cancelled = false;
+    getUserLocation().then((loc) => {
+      if (cancelled) return;
+      if (loc.status === "ok") { setGeo({ status: "ok", lat: loc.lat, lng: loc.lng }); return; }
+      if (loc.status === "denied") { setGeo({ status: "no_perm" }); return; } // 네이티브 권한 없음 → 안내 문구(버튼 없음)
+      // none(브릿지 없음, dev) → 기존 브라우저 GPS 시도
+      if (!navigator.geolocation) { setGeo({ status: "unsupported" }); return; }
+      navigator.geolocation.getCurrentPosition(
+        (p) => !cancelled && setGeo({ status: "ok", lat: p.coords.latitude, lng: p.coords.longitude }),
+        (e) => !cancelled && setGeo({ status: e.code === 1 ? "denied" : "error" }),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    });
+    return () => { cancelled = true; };
   }, []);
 
   // 카카오 지도 렌더 (geo 확정 후)
@@ -132,6 +141,8 @@ export function MapChartCard({ result, title, subtitle, badge }) {
   // 배지: 실 위치(가까운 GPS)면 "현재 위치 기준 · 실제 거리", 그 외(원거리 GPS·미허용·실패)는 "대전 신성동 기준 · 예시 거리"
   const statusBar = geo.status === "locating"
     ? { txt: "내 위치 찾는 중…", cls: "bg-gray-100 text-gray-500" }
+    : geo.status === "no_perm"
+    ? { txt: "📍 위치 권한이 없어 예시(대전 신성동) 거리로 보여드려요", cls: "bg-amber-50 text-amber-700" }
     : realLoc
     ? { txt: "📍 현재 위치 기준 · 실제 거리", cls: "bg-emerald-50 text-emerald-700" }
     : { txt: "대전 신성동 기준 · 예시 거리", cls: "bg-amber-50 text-amber-700" };

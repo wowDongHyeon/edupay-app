@@ -138,13 +138,13 @@ body {
 }
 /* 다리: 첫 ~0.44s 숨겼다가 ~0.8s 페이드인(구름 걷힘과 동기). opacity 전담 — 무한 펌핑(transform)과 병행. */
 @keyframes foxLegReveal { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
-.fox .fox-launch { transform-box: fill-box; transform-origin: center; opacity: 0; animation: foxLaunch 0.7s ease-out 1 both; }
+.fox .fox-launch { transform-box: fill-box; transform-origin: center; opacity: 0; animation: foxLaunch var(--fox-launch-dur, 0.55s) ease-out 1 both; }
 
 /* run: 큰 진폭·빠른 템포 + 먼지 잦게 */
 .fox--run .fox-arm-l { animation: foxArmPump 0.24s ease-in-out infinite; }
 .fox--run .fox-arm-r { animation: foxArmPump 0.24s ease-in-out infinite; animation-delay: -0.12s; }
-.fox--run .fox-leg-l { animation: foxLegRun 0.24s ease-in-out infinite, foxLegReveal 0.8s ease-out both; }
-.fox--run .fox-leg-r { animation: foxLegRun 0.24s ease-in-out -0.12s infinite, foxLegReveal 0.8s ease-out both; }
+.fox--run .fox-leg-l { animation: foxLegRun var(--fox-run-dur, 0.16s) ease-in-out infinite, foxLegReveal var(--fox-reveal-dur, 0.6s) ease-out both; }
+.fox--run .fox-leg-r { animation: foxLegRun var(--fox-run-dur, 0.16s) ease-in-out -0.12s infinite, foxLegReveal var(--fox-reveal-dur, 0.6s) ease-out both; }
 .fox--run .fox-body { animation: foxLunge 0.24s ease-in-out infinite; }
 .fox--run .fox-tail { animation: foxTailSway 0.24s ease-in-out infinite; }
 .fox--run .fox-dust { animation: foxDust 0.2s ease-out infinite; }
@@ -348,14 +348,14 @@ body {
 @keyframes foxDustTired { 0% { opacity: .4; transform: translate(0,0) scale(.35); } 100% { opacity: 0; transform: translate(-6px,-2px) scale(1.1); } }
 @keyframes foxBurst   { 0% { opacity: .9; transform: translate(0,0) scale(.3); } 100% { opacity: 0; transform: translate(-6px,-9px) scale(2.6); } }
 
-/* run: 빠른 스냅(~0.24s) + 큰 진폭 + 왕성한 먼지 */
-.fox--run .fox-arm-l { animation: foxArmRun .24s ease-in-out infinite; }
-.fox--run .fox-arm-r { animation: foxArmRun .24s ease-in-out infinite; animation-delay: -.12s; }
-.fox--run .fox-leg-l { animation: foxLegRun .24s ease-in-out infinite; animation-delay: -.12s; }
-.fox--run .fox-leg-r { animation: foxLegRun .24s ease-in-out infinite; }
-.fox--run .fox-body  { animation: foxBobRun .24s ease-in-out infinite; }
-.fox--run .fox-tail  { animation: foxTail .24s ease-in-out infinite; }
-.fox--run .fox-dust  { animation: foxDustRun .34s ease-out infinite; }
+/* run: 빠른 스냅 + 큰 진폭 + 왕성한 먼지. 속도는 --fox-run-dur(env VITE_FOX_RUN_DUR, 기본 0.16s). */
+.fox--run .fox-arm-l { animation: foxArmRun var(--fox-run-dur, 0.16s) ease-in-out infinite; }
+.fox--run .fox-arm-r { animation: foxArmRun var(--fox-run-dur, 0.16s) ease-in-out infinite; animation-delay: -.12s; }
+.fox--run .fox-leg-l { animation: foxLegRun var(--fox-run-dur, 0.16s) ease-in-out infinite; animation-delay: -.12s; }
+.fox--run .fox-leg-r { animation: foxLegRun var(--fox-run-dur, 0.16s) ease-in-out infinite; }
+.fox--run .fox-body  { animation: foxBobRun var(--fox-run-dur, 0.16s) ease-in-out infinite; }
+.fox--run .fox-tail  { animation: foxTail var(--fox-run-dur, 0.16s) ease-in-out infinite; }
+.fox--run .fox-dust  { animation: foxDustRun var(--fox-run-dur, 0.16s) ease-out infinite; }
 .fox--run .fox-dust-2 { animation-delay: .12s; }
 .fox--run .fox-dust-3 { animation-delay: .22s; }
 
