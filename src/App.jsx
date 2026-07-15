@@ -169,6 +169,7 @@ const WEBVIEW =
 // 파싱: 'true' 문자열만 true(미설정/그 외 = false).
 const SHOW_SQL = import.meta.env.VITE_SHOW_SQL === "true";
 const SHOW_SOURCE_BADGE = import.meta.env.VITE_SHOW_SOURCE_BADGE === "true";
+const FOX_LOADER_ENABLED = import.meta.env.VITE_FOX_LOADER_ENABLED === "true"; // 미설정=false(여우 OFF→점3개 폴백). 'true'면 FoxRunner 여우 로더 표시.
 
 const GRADES = ["초등", "중학", "고등"];
 const GRADE_LABELS = { "초등": "초등학생", "중학": "중학생", "고등": "고등학생" };
@@ -866,7 +867,14 @@ function Typing({ intent }) {
     <div className="flex gap-2 items-start edupay-fade">
       <AiAvatar />
       <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2.5 items-center">
-        <FoxRunner stage={stage} />
+        {FOX_LOADER_ENABLED
+          ? <FoxRunner stage={stage} />
+          : /* 기본 폴백: 점 3개(여우 도입 전 마크업). 문구 순환은 아래 공통. */
+            <span className="flex gap-1 items-center" aria-hidden="true">
+              <span className="edupay-dot w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+              <span className="edupay-dot w-1.5 h-1.5 rounded-full bg-gray-400" style={{ animationDelay: "0.15s" }}></span>
+              <span className="edupay-dot w-1.5 h-1.5 rounded-full bg-gray-400" style={{ animationDelay: "0.3s" }}></span>
+            </span>}
         <span className="text-[13px] text-gray-500 leading-snug">{msg}</span>
       </div>
     </div>);
@@ -1151,7 +1159,12 @@ function App() {
     });
   }, [messages]);
 
+  // 대화 세대(epoch): 대화 리셋/전환 시 ++. 진행 중 send()가 이 값을 캡처해, await 후 값이 바뀌었으면
+  //   (=그 사이 새 대화/전환) stale 응답·로딩을 새 대화에 반영하지 않고 무시한다(레이스 가드).
+  const convoEpochRef = useRef(0);
+  function resetConvoEpoch() { convoEpochRef.current++; setTyping(false); setTypingIntent(null); } // 진행 중 요청 무효화 + 로딩 클리어
   function newChat() {
+    resetConvoEpoch();
     resetOperiaSession(); // 새 대화 = 새 세션(다음 질문에서 lazy 생성)
     setMessages([]);
     setActiveId(null);
@@ -1159,6 +1172,7 @@ function App() {
     setEntered(true);
   }
   function selectConvo(c) {
+    resetConvoEpoch();
     resetOperiaSession(); // 다른 대화 로드 → 그 대화용 세션을 새로 lazy 생성
     setMessages(c.messages);
     setActiveId(c.id);
@@ -1167,7 +1181,7 @@ function App() {
   }
   function deleteConvo(id) {
     setConvos((prev) => prev.filter((c) => c.id !== id));
-    if (id === activeId) {resetOperiaSession();setMessages([]);setActiveId(null);}
+    if (id === activeId) {resetConvoEpoch();resetOperiaSession();setMessages([]);setActiveId(null);}
   }
 
   // [웹뷰 재진입 리셋] 네이티브가 웹뷰를 살려둔 채 재사용 → 숨겨졌다 다시 보일 때(뒤로가기 후 메뉴 재진입)
@@ -1567,6 +1581,8 @@ function App() {
   async function send(text) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
+    const myEpoch = convoEpochRef.current;              // 이 요청의 대화 세대. await 후 바뀌면(새 대화/전환) 반영 스킵.
+    const stale = () => convoEpochRef.current !== myEpoch;
     setFavOpen(false); // 전송 시 즐겨찾기 팝업 닫힘
     setInput("");
     const history = messages;
@@ -1592,6 +1608,7 @@ function App() {
           // ↓↓↓ [DEV MOCK] 채널 분기는 getDataSource() 한 곳: VITE_DATA_SOURCE(operia|backend|mock, 미설정→mock) ↓↓↓
           const resp = await queryDataSource(q, ci.kind, ci.scope); // SSE(data→result) 시뮬 소비 → 브리지 resp
           // ↑↑↑ [DEV MOCK] END ↑↑↑
+          if (stale()) return; // 그 사이 새 대화/전환 → stale 응답·로딩 반영 금지
           setTyping(false);
           // §8.5 키 게이팅: 미지원(키 없음) → 차트 대신 친절 텍스트 안내(에러 아님)
           if (resp && resp.unsupported) {
@@ -1638,6 +1655,7 @@ function App() {
           const _tf = tableForce && (_hasCols || _rows.length > 0);
           setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : chartTypeForIntent(ci.kind), intent: _tf ? null : ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
         } catch (e) {
+          if (stale()) return; // 새 대화/전환 후 도착한 오류 → 새 대화에 에러 말풍선 금지
           console.error("[데이터] 호출 오류:", e);
           showApiToast("데이터 오류", "error");
           setTyping(false);
@@ -1655,6 +1673,7 @@ function App() {
       // ── 비데이터 카드(추천/퀴즈/용돈기입장 등) → 기존 로컬 로직 유지 ──
       showApiToast(`로컬 카드 · ${ci.kind}`, "local");
       await new Promise((r) => setTimeout(r, 450));
+      if (stale()) return; // 그 사이 새 대화/전환 → stale 카드 반영 금지
       setTyping(false);
       setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: ci.kind === "recommend" ? DATA.recommendIntro[grade] || "" : "", card: ci.kind, scope: ci.scope || null, only: ci.only || null }]);
       return;
@@ -1669,8 +1688,10 @@ function App() {
       showApiToast(`${activeChannelName()} · (미분류)`, "api");
       try {
         const resp = await queryDataSource(q, null, null); // 미분류 → operia 전달(kind/scope 없음). shape→reportPlan→table 폴백, 무관이면 OTHER→회피.
+        if (stale()) return; // 새 대화/전환 → stale 응답·로딩 반영 금지
         renderChannelResp(resp, null, null, q, tableForce);
       } catch (e) {
+        if (stale()) return; // 새 대화/전환 후 도착한 오류 → 에러 말풍선 금지
         console.error("[데이터] 호출 오류:", e);
         showApiToast("데이터 오류", "error");
         setTyping(false);
@@ -1702,6 +1723,7 @@ function App() {
       showApiToast("로컬 fallback · API 오류", "error");
       console.error("[AI] 호출 오류:", e);
     }
+    if (stale()) return; // 그 사이 새 대화/전환 → stale 응답 반영 금지
     setTyping(false);
     // 데이터 intent 카드는 InlineCard로 렌더하지 않는다(ChartRenderer 단일 경로). AI가 골라도 무시 → 텍스트로 답.
     const DATA_INTENTS = ["spending", "report", "catSpend", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "timePattern"];
@@ -1721,7 +1743,7 @@ function App() {
       }
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
-      canBack={tab === "금융친구" && entered} onBack={() => { if (started) { resetOperiaSession(); setMessages([]); setActiveId(null); } else { setEntered(false); } }}
+      canBack={tab === "금융친구" && entered} onBack={() => { if (started) { resetConvoEpoch(); resetOperiaSession(); setMessages([]); setActiveId(null); } else { setEntered(false); } }}
       onHistory={tab === "금융친구" ? () => setShowHistory(true) : null}
       aiFeature={aiFeature} aiEnabled={aiEnabled} onToggleAi={toggleAi} />
       }
@@ -1765,16 +1787,6 @@ function App() {
               <path d="M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.72.99-5.8-4.21-4.1 5.82-.85z" strokeLinejoin="round" />
             </svg>
           </button>
-          {/* 새 대화 버튼(＋) — 대화중에만. 확인창 없이 즉시 newChat(이전 대화는 '지난 대화'에 자동저장됨). */}
-          {started && (
-            <button onClick={() => { newChat(); showFaqToast("새 대화 시작 — 이전 대화는 지난 대화에 저장됨"); }} aria-label="새 대화"
-              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-[#F3F4F6] transition active:scale-90"
-              style={{ color: "#8B8FA3" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-          )}
           <div className="flex-1 min-w-0 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">
             <input
                 value={input}
