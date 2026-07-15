@@ -15,6 +15,7 @@ import { computeSummaryStats } from "./api/datasource/stats";
 import { OPERIA_KINDS } from "./mock/operia";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
 import { chartTypeForIntent } from "./charts/registry";
+import { balanceIntent } from "./util/balanceIntent";
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
 const DATA = EDUPAY;
@@ -1390,7 +1391,8 @@ function App() {
     if (/학교.*(별|비교|마다)/.test(t) || /(다른|타)학교/.test(t)) return { kind: "schoolCompare" };
     if (/(친구|또래|애들|학우|반친구|다른학생).*(비교|보다|대비|랑|와|과)/.test(t) || /(또래|친구).*비교/.test(t)) return { kind: "friendCompare" };
     if (/(가맹점|쓸수있는곳|사용가능.*곳|근처|주변|어디서쓸|지도)/.test(t)) return { kind: "merchantMap" };
-    if (/((사용가능|쓸수있|사용할수있|남은|남아있).{0,4}(돈|금액|지원금|바우처|포인트))|잔액|지원금.*얼마|얼마.*(남|있|쓸)|쓸돈/.test(t)) return { kind: "balance" };
+    // balance(잔액/포인트) — 자산 토큰 앵커(바레 '얼마'·소비질의 제외). 지목형은 scope.focus 로 단일-KPI 렌더.
+    { const _b = balanceIntent(t); if (_b) return { kind: "balance", scope: _b.focus ? { focus: _b.focus } : null }; }
     if (/(온라인|오프라인|결제채널|어떻게결제)/.test(t)) {
       const hasOn = /온라인/.test(t),hasOff = /오프라인/.test(t);
       const only = hasOn && !hasOff ? "online" : hasOff && !hasOn ? "offline" : null;

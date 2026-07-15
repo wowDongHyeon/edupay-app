@@ -336,6 +336,19 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
     const shaped = shapeForIntent("merchantMap", tableData, columnMetadata);
     if (shaped) return <TEMPLATES.map data={shaped} config={INTENT_CONFIG.merchantMap || {}} />;
   }
+  // 전용 3) balance 지목형(scope.focus) — 3항목 중 지목 자산만 단일-KPI(결정적). 항목 못 찾으면 아래 3항목 폴백.
+  else if (intent === "balance" && scope && scope.focus) {
+    const shaped = shapeForIntent("balance", tableData, columnMetadata);
+    const wantLabel = { voucher: "바우처(지원금)", charge: "용돈 충전금", point: "에듀포인트" }[scope.focus];
+    const it = shaped && Array.isArray(shaped.items) ? shaped.items.find((x) => x.label === wantLabel) : null;
+    if (it) {
+      const bcfg = INTENT_CONFIG.balance || {};
+      const _sts = (bcfg.options && bcfg.options.itemStyles) || [];
+      const _idx = { voucher: 0, charge: 1, point: 2 }[scope.focus];
+      const cfg = { badge: bcfg.badge || "실시간", title: it.label, subtitle: "지금 사용할 수 있어요", options: { itemStyles: [_sts[_idx] || {}] } };
+      return <TEMPLATES.statList data={{ kpi: true, items: [{ label: it.label, sub: "", value: it.value, unit: it.unit }] }} config={cfg} intent="balance" />;
+    }
+  }
   // 그 외 전용 카드 — INTENT_CONFIG[intent] + shapeForIntent 성공 시 전용 렌더(bar/donut/compare/trend/statList/txList/barlist/list)
   else {
     const cfg = INTENT_CONFIG[intent];
