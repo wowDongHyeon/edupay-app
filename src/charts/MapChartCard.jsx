@@ -61,7 +61,7 @@ export function MapChartCard({ result, title, subtitle, badge }) {
   // 내 위치 정책(데모): GPS가 가맹점 무리에서 멀면(>30km, 예: 서울 접속) 대전 신성동 중심으로 대체.
   //   가까우면 실 GPS 사용 → 어디서 접속해도 대전 신성동 기준·거리 수백 m, 지도도 동네 단위로 확대.
   const gps = geo.status === "ok" ? { lat: geo.lat, lng: geo.lng } : null;
-  const realLoc = !!(gps && distM(gps, center) <= 30000); // 30km 이내면 실 위치로 인정
+  const realLoc = !!gps; // 위치 있으면 거리 무관 실위치 기준(30km 가드 제거). 없으면 대전 폴백.
   const myPos = realLoc ? gps : DAEJEON_SINSEONG;
   const list = merchants
     .map((m) => ({ ...m, realDist: m.lat != null ? distM(myPos, { lat: m.lat, lng: m.lng }) : null }))

@@ -793,6 +793,7 @@ function FoxRunner({ stage }) {
       style={{
         // 여우 로더 속도: .env.local(VITE_FOX_*)로 조정, 없으면 기본(가속). CSS time 형식('0.16s').
         "--fox-run-dur": import.meta.env.VITE_FOX_RUN_DUR || "0.16s",
+        "--fox-walk-dur": import.meta.env.VITE_FOX_WALK_DUR || "0.5s",
         "--fox-launch-dur": import.meta.env.VITE_FOX_LAUNCH_DUR || "0.55s",
         "--fox-reveal-dur": import.meta.env.VITE_FOX_REVEAL_DUR || "0.6s",
       }}

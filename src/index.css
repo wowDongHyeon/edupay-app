@@ -359,13 +359,13 @@ body {
 .fox--run .fox-dust-2 { animation-delay: .12s; }
 .fox--run .fox-dust-3 { animation-delay: .22s; }
 
-/* tired/cheer: 느리게(~0.5s) + 작은 진폭 + 약한 먼지 */
-.fox--tired .fox-arm-l { animation: foxArmTired .5s ease-in-out infinite; }
-.fox--tired .fox-arm-r { animation: foxArmTired .5s ease-in-out infinite; animation-delay: -.25s; }
-.fox--tired .fox-leg-l { animation: foxLegTired .5s ease-in-out infinite; animation-delay: -.25s; }
-.fox--tired .fox-leg-r { animation: foxLegTired .5s ease-in-out infinite; }
-.fox--tired .fox-body  { animation: foxBobTired .5s ease-in-out infinite; }
-.fox--tired .fox-tail  { animation: foxTail .6s ease-in-out infinite; }
+/* tired/cheer: 느리게 + 작은 진폭 + 약한 먼지. 속도는 --fox-walk-dur(env VITE_FOX_WALK_DUR, 기본 0.5s). 꼬리는 살짝 느리게 유지(×1.2=0.6s). */
+.fox--tired .fox-arm-l { animation: foxArmTired var(--fox-walk-dur, 0.5s) ease-in-out infinite; }
+.fox--tired .fox-arm-r { animation: foxArmTired var(--fox-walk-dur, 0.5s) ease-in-out infinite; animation-delay: -.25s; }
+.fox--tired .fox-leg-l { animation: foxLegTired var(--fox-walk-dur, 0.5s) ease-in-out infinite; animation-delay: -.25s; }
+.fox--tired .fox-leg-r { animation: foxLegTired var(--fox-walk-dur, 0.5s) ease-in-out infinite; }
+.fox--tired .fox-body  { animation: foxBobTired var(--fox-walk-dur, 0.5s) ease-in-out infinite; }
+.fox--tired .fox-tail  { animation: foxTail calc(var(--fox-walk-dur, 0.5s) * 1.2) ease-in-out infinite; }
 .fox--tired .fox-dust  { animation: foxDustTired .8s ease-out infinite; }
 .fox--tired .fox-dust-2 { animation-delay: .28s; }
 .fox--tired .fox-dust-3 { animation-delay: .5s; }
