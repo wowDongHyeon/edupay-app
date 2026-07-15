@@ -368,9 +368,8 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
         return <TEMPLATES.line data={{ series: pick.series }} config={{ badge: "추이", title: pick.valLabel || "추이", subtitle: "시간별 흐름" }} intent={intent} />;
       }
       if (pick.template === "barlist") {
-        const _t = pick.items.reduce((s, x) => s + (x.value || 0), 0) || 1;
-        const _items = pick.items.map((x) => ({ ...x, pct: Math.round((x.value / _t) * 100) }));
-        return <TEMPLATES.barlist data={{ items: _items }} config={{ badge: "순위", title: "조회 결과", subtitle: "값이 큰 순", options: { unit: pick.unit, showPct: true } }} intent={intent} />;
+        // 가드레일: 폴백은 items 합이 데이터 전체인지 보장 못 함(LIMIT 등 부분집합 가능) → % 숨김(정직).
+        return <TEMPLATES.barlist data={{ items: pick.items }} config={{ badge: "순위", title: "조회 결과", subtitle: "값이 큰 순", options: { unit: pick.unit, showPct: false } }} intent={intent} />;
       }
     }
   }

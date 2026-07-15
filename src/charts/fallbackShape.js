@@ -52,7 +52,15 @@ export function pickFallbackShape(rows, columnMetadata) {
   const tcol = nonNum.find(isTemporal);
   if (tcol) return { template: "line", valLabel: koLabel(vcol), series: R.map((r) => ({ label: fmtCat(r[tcol]), value: Number(r[vcol]) || 0 })) };
   const ccol = catCols.find((c) => !isTemporal(c));
-  if (ccol) return { template: "barlist", unit: unitOf(vcol), items: R.map((r) => ({ label: fmtCat(r[ccol]), value: Number(r[vcol]) || 0 })).sort((a, b) => b.value - a.value) };
+  if (ccol) {
+    let items = R.map((r) => ({ label: fmtCat(r[ccol]), value: Number(r[vcol]) || 0 })).sort((a, b) => b.value - a.value);
+    // 가드레일: 범주 > 8 → 상위 8 + "그 외"(나머지 합계) 1행으로 축약(막대 과밀 방지).
+    if (items.length > 8) {
+      const rest = items.slice(8).reduce((s, x) => s + (x.value || 0), 0);
+      items = items.slice(0, 8).concat([{ label: "그 외", value: rest }]);
+    }
+    return { template: "barlist", unit: unitOf(vcol), items };
+  }
   return null;
 }
 
