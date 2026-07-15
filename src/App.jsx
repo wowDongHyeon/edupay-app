@@ -676,6 +676,28 @@ const NET_ERROR_MSG = "앗, 지금 잠깐 연결이 안 돼 😅 조금 있다 �
 const OFFTOPIC_MSG = "앗, 그건 내가 도와주기 어려워 😅 결제·용돈·가맹점 관련해서 물어봐줄래?";
 // 조회는 유효하나 데이터가 없는 경우(구조는 있음: 컬럼/plan). 헤더만 있는 빈 표·0 KPI 대신 친근 안내.
 const EMPTY_MSG = "이 조건엔 사용 내역이 없어요 😊 다른 걸 물어봐줄래?";
+// 보안/차단 응답(BLOCKED)용 문구. OTHER(무관)와 톤은 같되 별도 상수로 둔다(추후 문구 분화 여지).
+const BLOCKED_MSG = "앗, 그건 도와주기 어려워 😅 결제·용돈·가맹점 관련해서 물어봐줄래?";
+// Phase B 상태 게이트 플래그(기본 OFF=현행 추정 경로). ON이고 응답 봉투에 status/hilRequired 가 있으면 우선 소비.
+const CARD_SIGNATURE_GATE = import.meta.env.VITE_CARD_SIGNATURE === "true";
+// 응답 봉투 상태 → 표시할 말풍선 텍스트(있으면 렌더 대신 이 텍스트). null = 명시 상태 없음 → 기존 추정 경로 유지(패리티).
+//   OTHER→거절, BLOCKED→보안, HIL(hilRequired)→되묻기(hilPrompt), NO_DATA→없음(balance는 "정보 없어요").
+function statusGateMsg(resp, kind, scope, q) {
+  if (!CARD_SIGNATURE_GATE || !resp) return null;
+  if (resp.hilRequired) return sanitizeAnswer(resp.hilPrompt) || "조금만 더 자세히 알려줄래?";
+  const s = resp.status == null ? "" : String(resp.status).toUpperCase();
+  if (!s || s === "SUCCESS") return null;
+  if (s === "OTHER") return OFFTOPIC_MSG;
+  if (s === "BLOCKED") return BLOCKED_MSG;
+  if (s === "NO_DATA") {
+    if (kind === "balance") {
+      const _fl = { voucher: "바우처(지원금)", charge: "용돈 충전금", point: "에듀포인트" }[scope && scope.focus];
+      return _fl ? `아직 ${_fl} 정보가 없어요.` : "아직 정보가 없어요.";
+    }
+    return emptyMsgFor(q);
+  }
+  return null; // 미지의 status → 기존 경로 유지(안전)
+}
 // 빈결과 안내 문구를 질의 종류에 맞춰 분기(문구만; 판정 isEmptyResult·operia 게이팅은 불변).
 //   날짜 표현(오늘/어제/이번 달 등)이 있으면 앞말로 반영. 금액/총액/얼마류→"0원" 톤, 내역/목록류·그 외→"없어요" 톤.
 function _dayPrefix(q) {
@@ -1561,6 +1583,11 @@ function App() {
       return;
     }
     if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${kind || "(미분류)"}`, "error");
+    // Phase B 상태 게이트(플래그 ON+봉투 status/hilRequired 有): 렌더 전 우선 소비. 없으면 기존 추정 경로.
+    {
+      const _gate = statusGateMsg(resp, kind, scope, q);
+      if (_gate) { setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: _gate }]); return; }
+    }
     const _rows = Array.isArray(resp && resp.tableData) ? resp.tableData : [];
     const _hasCols = Array.isArray(resp && resp.columnMetadata) && resp.columnMetadata.length > 0;
     const _hasPlan = !!(resp && resp.reportPlan && Array.isArray(resp.reportPlan.sections) && resp.reportPlan.sections.length > 0);
@@ -1628,6 +1655,11 @@ function App() {
           }
           // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
           if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
+          // Phase B 상태 게이트(플래그 ON+봉투 status/hilRequired 有): 렌더 전 우선 소비. 없으면 null→기존 추정 경로.
+          {
+            const _gate = statusGateMsg(resp, ci.kind, ci.scope, q);
+            if (_gate) { setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: _gate }]); return; }
+          }
           // OTHER/비관련 거절: 데이터 '구조' 자체가 없는 텍스트 응답(행 0 + columnMetadata 없음 + reportPlan 없음)
           //   → 빈 "조회 결과가 없어요" 카드 대신 친근 회피 말풍선(chartType 미설정 = isChart false). 오페리아 사무적 answer 는 숨김.
           //   ※ 진짜 0행 데이터 조회는 columnMetadata(또는 reportPlan)가 있어 아래 카드 경로 유지("조회 결과가 없어요").
