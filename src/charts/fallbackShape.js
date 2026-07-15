@@ -1,5 +1,7 @@
 import { labelForColumn } from "./codeLabels";
 import { monthLabel, dayLabel } from "./util";
+import { classifyCard } from "./cardSignature";
+import shapeForIntent from "./shapeForIntent";
 /* 폴백 shape 결정(순수 함수 — 골든 테스트 대상). cardIntent 가 못 잡은 응답을 데이터 '모양'으로
  * 예쁜 차트에 매핑한다(reportPlan 앞에서 가로챔). 정직하게 안 되는 것만 null → 표.
  *   template: "kpi"(1×1 단일) | "statList"(1행×N숫자 멀티KPI) | "line"(시계열+값) | "barlist"(범주+값). 도넛 제외. */
@@ -62,6 +64,22 @@ export function pickFallbackShape(rows, columnMetadata) {
     return { template: "barlist", unit: unitOf(vcol), items };
   }
   return null;
+}
+
+// 시그니처 축 엔진(Phase A — 아직 미배선). classifyCard(순수 §4 분류) → 카드별 표준 셰이핑 위임.
+//   named 8종은 기존 shapeForIntent 재사용(패리티 안전), kpi/generic 은 기존 pickFallbackShape 로 셰이핑.
+//   셰이핑 실패(역할 부족/무효) 시 generic 폴백 — 현행 폴백 동작과 동일.
+// 반환: { card, shapedData }.  card = 최종 렌더 카드키, shapedData = 그 카드 표준 입력(없으면 null → 표).
+const SIGNATURE_INTENTS = { report: 1, reportDaily: 1, catSpend: 1, merchantBreakdown: 1, channel: 1, schoolCompare: 1, merchantMap: 1, balance: 1 };
+export function pickCardSignature(rows, columnMetadata) {
+  const card = classifyCard(rows, columnMetadata);
+  if (SIGNATURE_INTENTS[card]) {
+    const shapedData = shapeForIntent(card, rows, columnMetadata);
+    if (shapedData) return { card, shapedData };
+  }
+  // kpi/generic 또는 named 셰이핑 실패 → 폴백 셰이퍼(kpi/statList/line/barlist)
+  const shapedData = pickFallbackShape(rows, columnMetadata);
+  return { card: shapedData ? (card === "kpi" ? "kpi" : "generic") : "generic", shapedData };
 }
 
 export default pickFallbackShape;

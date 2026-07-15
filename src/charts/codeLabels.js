@@ -34,7 +34,7 @@ export const COLUMN_LABELS = {
   ACCOUNT_BALANCE_AMT: "사용 가능 금액",
   CARD_BALANCE_AMT: "용돈 충전금",
   CURRENT_POINT: "에듀포인트",
-  CARD_VOUCHER_BLNC: "바우처 지원금", // V_USER_ASSET 자산 잔액(바우처) — operia 가 label 미제공 → raw 노출 방지
+  CARD_VOUCHER_BLNC: "남은 지원금(바우처)", // operia 회신#1 — V_USER_ASSET 자산 잔액(바우처), raw 노출 방지
   CARD_ADD_CHARG_BLNC: "충전 잔액",    // 0709 Q6 컬럼교체: 충전(용돈) 잔액 — raw 노출 방지
   // 날짜/시간
   DLNG_YM: "월", DLNG_DT: "일자", DLNG_DTM: "거래일시", DLNG_TM: "시간",
