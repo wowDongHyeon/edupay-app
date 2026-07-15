@@ -1008,9 +1008,11 @@ function App() {
   // [진입 랜딩] 인사 표시용 이름 — 세션에 name 등 표시이름 필드가 없으므로 getUserId() 결과(userId) 사용.
   //   폴백: name(없음) → userId → null(→ "반가워요"). getUserId 는 캐시 Promise(session.js).
   const [userName, setUserName] = useState(null);
+  // 웹뷰에서 브릿지·URL·env 폴백 다 실패해 ID를 못 받으면 상단 안내 배너 노출용. 해석 후에만 세팅(초기 null 플래시 방지).
+  const [noUserId, setNoUserId] = useState(false);
   useEffect(() => {
     let alive = true;
-    getUserId().then((u) => { if (alive) setUserName(u || null); }).catch(() => {});
+    getUserId().then((u) => { if (alive) { setUserName(u || null); setNoUserId(u == null); } }).catch(() => { if (alive) setNoUserId(true); });
     return () => { alive = false; };
   }, []);
   const [typing, setTyping] = useState(false);
@@ -1701,6 +1703,13 @@ function App() {
   return (
     <div className={"relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
     style={{ maxWidth: WEBVIEW ? undefined : 390 }}>
+      {/* 웹뷰에서 사용자 ID 미해석 시 비차단 안내 배너(계속 사용 가능, 원인만 안내). dev 브라우저(비웹뷰)엔 안 뜸. */}
+      {WEBVIEW && noUserId &&
+      <div className="shrink-0 flex items-center gap-2 px-4 py-2 text-[13px] bg-amber-50 text-amber-800 border-b border-amber-200">
+        <span aria-hidden="true">ℹ️</span>
+        <span>로그인 정보를 불러오지 못했어요. 앱에서 다시 열어주세요.</span>
+      </div>
+      }
       {!WEBVIEW &&
       <Header grade={grade} setGrade={setGrade} tab={tab} setTab={setTab}
       canBack={tab === "금융친구" && entered} onBack={() => { if (started) { resetOperiaSession(); setMessages([]); setActiveId(null); } else { setEntered(false); } }}
