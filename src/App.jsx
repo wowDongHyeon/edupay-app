@@ -1921,7 +1921,7 @@ function App() {
       </div>
       }
 
-      {/* [사용자] 말풍선 long-press → FAQ 등록 피드백 토스트 — prod 포함 노출, 1.6초 */}
+      {/* [사용자] 말풍선 long-press → FAQ 등록 피드백 토스트 — prod 포함 노출, 1.6초s */}
       {faqToast &&
       <div className="absolute left-1/2 -translate-x-1/2 bottom-24 z-50 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12.5px] font-bold text-white shadow-lg edupay-fade pointer-events-none"
       style={{ background: "#2D2870" }}>
