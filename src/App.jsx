@@ -1623,6 +1623,13 @@ function App() {
           }
           // 구조는 있으나 데이터 없음(0행/전부 null 집계) → 빈 표·0 KPI 대신 친근 안내(operia 만; mock/backend 는 기존 렌더 유지 → 회귀 0).
           if (activeChannelName() === "operia" && isEmptyResult(resp)) {
+            // balance: 행 자체가 없음(모름)이면 "0원" 단정 금지 → "아직 정보가 없어요"(지목형이면 그 자산 기준).
+            //   ※ 값 0 행이 실제로 있으면 isEmptyResult=false → 아래 카드 경로로 '0원/0P' 표시(참).
+            if (ci.kind === "balance") {
+              const _fl = { voucher: "바우처(지원금)", charge: "용돈 충전금", point: "에듀포인트" }[ci.scope && ci.scope.focus];
+              setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: _fl ? `아직 ${_fl} 정보가 없어요.` : "아직 정보가 없어요." }]);
+              return;
+            }
             setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: emptyMsgFor(q) }]);
             return;
           }
