@@ -31,6 +31,23 @@ export function BarListTemplate({ data, config }) {
     </div>
   );
 
+  // 정직성 가드레일: 렌더 대상이 1개뿐이면 막대·%·순위 대신 값 하나를 크게(단일-KPI). 100% 착시 방지.
+  //   avgRow(충북 평균 비교) 있는 랭킹 카드는 비교 의미가 있어 제외 → schoolCompare 등 회귀 0.
+  if (items.length === 1 && !avgRow) {
+    const it = items[0];
+    return (
+      <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
+        <div className="mt-4 flex flex-col items-center justify-center py-4">
+          <div className="text-[13px] text-gray-500 mb-1">{it.label}</div>
+          <div className="text-[34px] font-extrabold tracking-[-0.03em] tabular-nums text-violet-700">
+            {num(it.value)}<span className="text-[18px] font-bold ml-0.5">{opt.unit || ""}</span>
+          </div>
+        </div>
+        <InsightBox className="mt-4" text={cfg.insight ? cfg.insight(data || {}) : ""} />
+      </ChartShell>
+    );
+  }
+
   return (
     <ChartShell badge={cfg.badge} title={cfg.title} sub={cfg.subtitle}>
       <div className={"flex flex-col " + (ranked ? "mt-3 gap-1.5" : "mt-4 gap-2.5")}>
