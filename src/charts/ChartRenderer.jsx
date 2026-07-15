@@ -4,6 +4,7 @@ import { INTENT_CONFIG } from "./intentConfig";
 import { ReportPlanRenderer } from "./reportPlan/ReportPlanRenderer";
 import { shapeForIntent } from "./shapeForIntent";
 import { labelForColumn } from "./codeLabels";
+import { pickFallbackShape } from "./fallbackShape";
 import { activeChannelName } from "../api/datasource";
 /* ChartRenderer : 오페리아 데이터 메시지 렌더 진입점 (TEMPLATE_설계.md §1·§5).
    INTENT_CONFIG[intent] 조회 → template 선택 → <Template data={result} config={cfg}/>. 없으면 table.
@@ -314,7 +315,7 @@ function shapeDayTxns(tableData) {
   return { rows: items, total: items.reduce((s, x) => s + x.amount, 0), count: items.length };
 }
 
-export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, onCardQuery, onActiveSql }) {
+export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, forceTable, onCardQuery, onActiveSql }) {
   // 전용 1) report 월/일 토글 — shapeForIntent("report") {series,breakdown}, 일별은 lazy
   if (intent === "report") {
     const shaped = shapeForIntent("report", tableData, columnMetadata);
@@ -349,26 +350,27 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
       }
     }
   }
-  // shape-driven 단일 스칼라 게이트: 1행 + 숫자값 컬럼 정확히 1개 → operia kpi_cards(총/평균·단위없음) 대신
-  //   balance 단일-KPI와 동일한 예쁜 카드로 렌더. 값컬럼 2개↑/다행이면 진입 안 함 → 아래 기존 폴백(회귀 0).
-  //   라벨/단위 규칙은 mock balance shape(queries.js §단일KPI)와 통일. (분류기 cardIntent 는 불변)
-  const _rows = Array.isArray(tableData) ? tableData : [];
-  if (_rows.length === 1) {
-    const _numCols = Object.keys(_rows[0] || {}).filter((c) => typeof _rows[0][c] === "number");
-    if (_numCols.length === 1) {
-      const _col = _numCols[0];
-      const _meta = Array.isArray(columnMetadata) ? columnMetadata.find((m) => m && m.column === _col) : null;
-      const _label = labelForColumn(_col, _meta && _meta.label);
-      // raw 영문 컬럼명 노출 금지(CLAUDE.md): 한글 라벨을 못 얻으면 단일-KPI 포기 → 기존 폴백.
-      if (/[가-힣]/.test(_label)) {
-        const _s = String(_col) + String(_label);
-        // 단위: POINT/포인트→P, 금액/잔액류→원, 그 외(건수·비율 등 애매)→무단위(과추론 금지).
-        // 금액 토큰에 PAY 미포함(CNT_PAY=건수 오판 방지). 실 금액 컬럼은 AMT/AMOUNT/금액 등으로 매칭됨.
-        const _unit = /P$|POINT|포인트/i.test(_s) ? "P"
-          : (/AMT|AMOUNT|BLNC|BALANCE|COST|PRICE|금액|잔액|충전금|지원금|비용|가격|원/i.test(_s) ? "원" : "");
-        const _st = (INTENT_CONFIG.balance && INTENT_CONFIG.balance.options && INTENT_CONFIG.balance.options.itemStyles) || [];
-        const _cfg = { badge: (INTENT_CONFIG.balance && INTENT_CONFIG.balance.badge) || "실시간", title: _label, subtitle: "지금 사용할 수 있어요", options: { itemStyles: [_st[0] || {}] } };
-        return <TEMPLATES.statList data={{ kpi: true, items: [{ label: _label, sub: "", value: Math.abs(Number(_rows[0][_col]) || 0), unit: _unit }] }} config={_cfg} intent={intent} />;
+  // ── shape-driven 폴백(예쁜 차트 우선, 표는 최후안) — reportPlan 앞에서 데이터 모양으로 가로챔.
+  //   tableForce("표로 보여줘")면 스킵 → 아래 표. 라벨/단위 규칙은 balance 단일-KPI와 통일.
+  if (!forceTable) {
+    const pick = pickFallbackShape(tableData, columnMetadata);
+    if (pick) {
+      const _bst = (INTENT_CONFIG.balance && INTENT_CONFIG.balance.options && INTENT_CONFIG.balance.options.itemStyles) || [];
+      if (pick.template === "kpi") {
+        const _cfg = { badge: (INTENT_CONFIG.balance && INTENT_CONFIG.balance.badge) || "실시간", title: pick.label, subtitle: "지금 사용할 수 있어요", options: { itemStyles: [_bst[0] || {}] } };
+        return <TEMPLATES.statList data={{ kpi: true, items: [{ label: pick.label, sub: "", value: pick.value, unit: pick.unit }] }} config={_cfg} intent={intent} />;
+      }
+      if (pick.template === "statList") {
+        const _cfg = { badge: "요약", title: "조회 결과", subtitle: "항목별 값", options: { itemStyles: pick.items.map((_, i) => _bst[i % _bst.length] || {}) } };
+        return <TEMPLATES.statList data={{ items: pick.items }} config={_cfg} intent={intent} />;
+      }
+      if (pick.template === "line") {
+        return <TEMPLATES.line data={{ series: pick.series }} config={{ badge: "추이", title: pick.valLabel || "추이", subtitle: "시간별 흐름" }} intent={intent} />;
+      }
+      if (pick.template === "barlist") {
+        const _t = pick.items.reduce((s, x) => s + (x.value || 0), 0) || 1;
+        const _items = pick.items.map((x) => ({ ...x, pct: Math.round((x.value / _t) * 100) }));
+        return <TEMPLATES.barlist data={{ items: _items }} config={{ badge: "순위", title: "조회 결과", subtitle: "값이 큰 순", options: { unit: pick.unit, showPct: true } }} intent={intent} />;
       }
     }
   }
