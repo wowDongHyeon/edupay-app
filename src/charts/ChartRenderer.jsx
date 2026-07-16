@@ -8,9 +8,9 @@ import { pickFallbackShape } from "./fallbackShape";
 import { classifyCard } from "./cardSignature";
 import { activeChannelName } from "../api/datasource";
 
-// Phase B 피처플래그: ON이면 카드 선택을 질의(intent) 대신 응답 '컬럼 시그니처'로.
-//   기본 OFF = 현행 cardIntent 경로 그대로(무변화·패리티 안전망).
-const CARD_SIGNATURE_ON = import.meta.env.VITE_CARD_SIGNATURE === "true";
+// 피처플래그: ON이면 카드 선택을 질의(intent) 대신 응답 '컬럼 시그니처'로.
+//   Phase C: 기본 ON(env 미설정=ON). 롤백은 VITE_CARD_SIGNATURE=false → 현행 cardIntent 경로 100% 복귀.
+const CARD_SIGNATURE_ON = import.meta.env.VITE_CARD_SIGNATURE !== "false";
 /* ChartRenderer : 오페리아 데이터 메시지 렌더 진입점 (TEMPLATE_설계.md §1·§5).
    INTENT_CONFIG[intent] 조회 → template 선택 → <Template data={result} config={cfg}/>. 없으면 table.
    §9: SqlChip은 카드 밖(App.jsx Bubble의 아바타 아래)에서 렌더. 카드 자체엔 칩 없음.

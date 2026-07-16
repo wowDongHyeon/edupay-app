@@ -174,10 +174,20 @@ const FOX_LOADER_ENABLED = import.meta.env.VITE_FOX_LOADER_ENABLED === "true"; /
 const GRADES = ["초등", "중학", "고등"];
 const GRADE_LABELS = { "초등": "초등학생", "중학": "중학생", "고등": "고등학생" };
 
-const SUGGESTIONS = [
+// 시그니처 축 플래그(모듈 상단 — SUGGESTIONS 등 모듈-레벨 초기화에서 참조하므로 TDZ 회피 위해 먼저 정의).
+//   Phase C: 기본 ON(env 미설정=ON). 롤백은 VITE_CARD_SIGNATURE=false → 현행 cardIntent 경로 100% 복귀.
+//   ON이면 ① 로컬 카드(recommend/quiz/ledger) de-route ② 로컬 카드 칩 제거 ③ 상태 게이트(봉투 status 우선).
+const CARD_SIGNATURE_ON = import.meta.env.VITE_CARD_SIGNATURE !== "false";
+// Phase C: 로컬(비데이터) 카드 종류 — 플래그 ON이면 진입 차단(컴포넌트 파일은 보존, Phase D 삭제 대상).
+const LOCAL_CARD_KINDS = ["recommend", "quiz", "ledger"];
+
+const SUGGESTIONS_ALL = [
 { icon: "📊", label: "소비패턴 분석", text: "내 소비 패턴 분석해줘" },
 { icon: "🧩", label: "금융퀴즈 풀기", text: "금융 퀴즈 풀고 싶어" },
 { icon: "🎓", label: "추천금융쇼츠", text: "나한테 맞는 금융 공부 추천해줘" }];
+// Phase C: 플래그 ON이면 로컬 카드 칩(퀴즈·추천쇼츠) 제거, 데이터 칩(소비패턴 분석)만 노출. OFF면 원본.
+const LOCAL_CHIP_LABELS = ["금융퀴즈 풀기", "추천금융쇼츠"];
+const SUGGESTIONS = CARD_SIGNATURE_ON ? SUGGESTIONS_ALL.filter((s) => !LOCAL_CHIP_LABELS.includes(s.label)) : SUGGESTIONS_ALL;
 
 
 const FAVORITES = SUGGESTIONS;
@@ -491,12 +501,15 @@ const MenuIcons = {
 
 /* ── 금융친구 메뉴 홈 ──────────────────────────────────── */
 function MenuScreen({ onPick }) {
+  // Phase C: 플래그 ON이면 로컬(비데이터) 카드 칩(퀴즈·추천쇼츠·콘텐츠몰) 진입 제거. 데이터 칩(분석·지역상생몰)은 유지.
+  const LOCAL_CHIP_KEYS = ["quiz", "shorts", "content"];
   const MENU = [
   { key: "analysis", label: "소비패턴\n분석", text: "내 소비 패턴 분석해줘" },
   { key: "quiz", label: "금융퀴즈\n풀기", text: "금융 퀴즈 풀고 싶어" },
   { key: "shorts", label: "추천 금융\n쇼츠", text: "나한테 맞는 금융 공부 추천해줘" },
   { key: "content", label: "콘텐츠 몰", text: "추천 콘텐츠 보여줘" },
-  { key: "local", label: "지역상생 몰", text: "근처 사용 가능 가맹점 알려줘" }];
+  { key: "local", label: "지역상생 몰", text: "근처 사용 가능 가맹점 알려줘" }]
+  .filter((m) => !(CARD_SIGNATURE_ON && LOCAL_CHIP_KEYS.includes(m.key)));
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden edupay-fade px-5 pt-8 pb-6 bg-white">
@@ -678,12 +691,10 @@ const OFFTOPIC_MSG = "앗, 그건 내가 도와주기 어려워 😅 결제·용
 const EMPTY_MSG = "이 조건엔 사용 내역이 없어요 😊 다른 걸 물어봐줄래?";
 // 보안/차단 응답(BLOCKED)용 문구. OTHER(무관)와 톤은 같되 별도 상수로 둔다(추후 문구 분화 여지).
 const BLOCKED_MSG = "앗, 그건 도와주기 어려워 😅 결제·용돈·가맹점 관련해서 물어봐줄래?";
-// Phase B 상태 게이트 플래그(기본 OFF=현행 추정 경로). ON이고 응답 봉투에 status/hilRequired 가 있으면 우선 소비.
-const CARD_SIGNATURE_GATE = import.meta.env.VITE_CARD_SIGNATURE === "true";
 // 응답 봉투 상태 → 표시할 말풍선 텍스트(있으면 렌더 대신 이 텍스트). null = 명시 상태 없음 → 기존 추정 경로 유지(패리티).
 //   OTHER→거절, BLOCKED→보안, HIL(hilRequired)→되묻기(hilPrompt), NO_DATA→없음(balance는 "정보 없어요").
 function statusGateMsg(resp, kind, scope, q) {
-  if (!CARD_SIGNATURE_GATE || !resp) return null;
+  if (!CARD_SIGNATURE_ON || !resp) return null;
   if (resp.hilRequired) return sanitizeAnswer(resp.hilPrompt) || "조금만 더 자세히 알려줄래?";
   const s = resp.status == null ? "" : String(resp.status).toUpperCase();
   if (!s || s === "SUCCESS") return null;
@@ -1617,7 +1628,9 @@ function App() {
     setTyping(true);
 
     // 소비 조회/분석 질의 → 시각화 카드로 바로 응답
-    const ci = cardIntent(q);
+    let ci = cardIntent(q);
+    // Phase C: 플래그 ON이면 로컬(비데이터) 카드 진입 차단 → ci 무효화해 operia 경로로 흘림(데이터 카드/거절). OFF면 현행 유지.
+    if (CARD_SIGNATURE_ON && ci && LOCAL_CARD_KINDS.includes(ci.kind)) ci = null;
     // 렌더 지시("표/리스트/목록으로 보여줘") → 카드 템플릿·reportPlan 건너뛰고 범용 표로 강제(표현 계층만; 질의는 그대로 operia로 감).
     //   채널 무관(operia/mock/backend 동일). 표 데이터가 있을 때만 적용 → plan-only 응답은 기존 렌더 유지.
     const tableForce = /(표|리스트|목록)\s*(으?로)\s*(보여|볼래|알려|출력|나열|정리|봐|줘|주)/.test(q);
