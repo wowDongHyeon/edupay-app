@@ -1,8 +1,7 @@
 import React from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, ResponsiveContainer, Tooltip, LabelList } from "recharts";
 import { EDUPAY } from "../data/edupay";
-import { QuizCard } from "./quiz";
-import { RecommendCard } from "./recommend";
+// Phase D: 로컬 카드(quiz/recommend)는 _archive 로 이동·라우팅 제거. InlineCard 는 더 이상 이들을 렌더하지 않음.
 // ※ 데이터 카드(merchantMap/balance/channel/… 10개 + spending/report/catSpend/timePattern)는
 //   새 경로 ChartRenderer→charts/* 로만 렌더한다. 옛 components/extras 데이터 카드는 제거됨.
 /* FOX PAY AI — AI 답변에 인라인으로 붙는 데이터 카드들 (Recharts) */
@@ -189,9 +188,8 @@ function BarCard({ grade, view, months, result }) {
 // 데이터 intent(report/catSpend/merchantMap/balance/channel/merchantBreakdown/parentCard/
 //   friendCompare/nudgeCompare/schoolCompare/spending/timePattern/nudgeList)는 여기서 렌더하지 않고
 //   App.send()가 항상 chartType 메시지로 push → ChartRenderer→charts/* 가 렌더한다(단일 경로).
-function InlineCard({ kind, scope, entry, grade, onSend, onOpenContent, onDismiss, dismissed }) {
-  if (kind === "quiz") return <QuizCard grade={grade} />;
-  if (kind === "recommend") return <RecommendCard grade={grade} onOpenContent={onOpenContent} onDismiss={onDismiss} dismissed={dismissed} />;
+function InlineCard() {
+  // Phase D: 로컬 카드 라우팅 제거 — 렌더 대상 없음(시그니처 단일 경로). 심볼은 App 참조 정리 후 제거 예정.
   return null;
 }
 

@@ -5,6 +5,7 @@
   "type": "module",
   "description": "에듀페이(다채움) AI 금융친구 — 충청북도 교육 지원금 결제 앱",
   "scripts": {
+    "predev": "powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object -Expand OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }\"",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

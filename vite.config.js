@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    strictPort: true, // 5173 점유 시 5174로 밀리지 말고 실패 (predev가 먼저 죽임)
     open: true,
     host: true, // 0.0.0.0 바인딩 — LAN/터널에서 접근 가능
     // ngrok/cloudflare 등 터널 도메인 허용 (Vite의 host 차단 우회)

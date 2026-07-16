@@ -8,9 +8,7 @@ import { pickFallbackShape } from "./fallbackShape";
 import { classifyCard } from "./cardSignature";
 import { activeChannelName } from "../api/datasource";
 
-// 피처플래그: ON이면 카드 선택을 질의(intent) 대신 응답 '컬럼 시그니처'로.
-//   Phase C: 기본 ON(env 미설정=ON). 롤백은 VITE_CARD_SIGNATURE=false → 현행 cardIntent 경로 100% 복귀.
-const CARD_SIGNATURE_ON = import.meta.env.VITE_CARD_SIGNATURE !== "false";
+// Phase D: 카드 선택은 응답 '컬럼 시그니처' 단일 경로로 확정(플래그 제거). forceTable("표로 보여줘")만 예외.
 /* ChartRenderer : 오페리아 데이터 메시지 렌더 진입점 (TEMPLATE_설계.md §1·§5).
    INTENT_CONFIG[intent] 조회 → template 선택 → <Template data={result} config={cfg}/>. 없으면 table.
    §9: SqlChip은 카드 밖(App.jsx Bubble의 아바타 아래)에서 렌더. 카드 자체엔 칩 없음.
@@ -324,7 +322,7 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   // Phase B: 플래그 ON이면 질의 대신 응답 컬럼 시그니처로 카드 결정. intent 만 덮어 아래 기존 큐레이션
   //   경로(report 월/일 토글·balance focus·merchantMap·grouped % payload·폴백)를 그대로 재사용 → 패리티 최상.
   //   generic/kpi 는 전용 브랜치가 없어 자연히 shape 폴백/표로 흐른다. forceTable("표로 보여줘")면 덮지 않음.
-  if (CARD_SIGNATURE_ON && !forceTable) {
+  if (!forceTable) {
     const sig = classifyCard(tableData, columnMetadata);
     if (sig) intent = sig;
   }

@@ -3,19 +3,15 @@ import React from "react";
 import logoFoxpay from "../icons/logo_foxpay.svg";           // 컬러 워드마크(170×62) — 흰 배경 랜딩용
 import aiAvatar from "../icons/ai_avatar.png"; // 원형 AI 아바타(자체 보라 배경+흰 심볼)
 import { EDUPAY, dragScroll } from "./data/edupay";
-import { InlineCard } from "./components/cards";
-import { RecommendModal } from "./components/recommend";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
-import { isOperiaAiMode } from "./api/operia";
 import { getDataSource, activeChannelName } from "./api/datasource";
 import { resetOperiaSession } from "./api/datasource/operia";
 import { getUserId } from "./api/session";
 import { computeSummaryStats } from "./api/datasource/stats";
-import { OPERIA_KINDS } from "./mock/operia";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
-import { chartTypeForIntent } from "./charts/registry";
 import { balanceIntent } from "./util/balanceIntent";
+// Phase D: InlineCard/RecommendModal(로컬 카드)·isOperiaAiMode·OPERIA_KINDS·chartTypeForIntent import 제거(시그니처 단일 경로).
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
 const DATA = EDUPAY;
@@ -174,20 +170,9 @@ const FOX_LOADER_ENABLED = import.meta.env.VITE_FOX_LOADER_ENABLED === "true"; /
 const GRADES = ["초등", "중학", "고등"];
 const GRADE_LABELS = { "초등": "초등학생", "중학": "중학생", "고등": "고등학생" };
 
-// 시그니처 축 플래그(모듈 상단 — SUGGESTIONS 등 모듈-레벨 초기화에서 참조하므로 TDZ 회피 위해 먼저 정의).
-//   Phase C: 기본 ON(env 미설정=ON). 롤백은 VITE_CARD_SIGNATURE=false → 현행 cardIntent 경로 100% 복귀.
-//   ON이면 ① 로컬 카드(recommend/quiz/ledger) de-route ② 로컬 카드 칩 제거 ③ 상태 게이트(봉투 status 우선).
-const CARD_SIGNATURE_ON = import.meta.env.VITE_CARD_SIGNATURE !== "false";
-// Phase C: 로컬(비데이터) 카드 종류 — 플래그 ON이면 진입 차단(컴포넌트 파일은 보존, Phase D 삭제 대상).
-const LOCAL_CARD_KINDS = ["recommend", "quiz", "ledger"];
-
-const SUGGESTIONS_ALL = [
-{ icon: "📊", label: "소비패턴 분석", text: "내 소비 패턴 분석해줘" },
-{ icon: "🧩", label: "금융퀴즈 풀기", text: "금융 퀴즈 풀고 싶어" },
-{ icon: "🎓", label: "추천금융쇼츠", text: "나한테 맞는 금융 공부 추천해줘" }];
-// Phase C: 플래그 ON이면 로컬 카드 칩(퀴즈·추천쇼츠) 제거, 데이터 칩(소비패턴 분석)만 노출. OFF면 원본.
-const LOCAL_CHIP_LABELS = ["금융퀴즈 풀기", "추천금융쇼츠"];
-const SUGGESTIONS = CARD_SIGNATURE_ON ? SUGGESTIONS_ALL.filter((s) => !LOCAL_CHIP_LABELS.includes(s.label)) : SUGGESTIONS_ALL;
+// Phase D: 로컬 카드(퀴즈·추천) 라우팅 제거 → 채팅뷰 빠른칩은 데이터 칩(소비패턴 분석)만 남긴다.
+const SUGGESTIONS = [
+{ icon: "📊", label: "소비패턴 분석", text: "내 소비 패턴 분석해줘" }];
 
 
 const FAVORITES = SUGGESTIONS;
@@ -501,15 +486,10 @@ const MenuIcons = {
 
 /* ── 금융친구 메뉴 홈 ──────────────────────────────────── */
 function MenuScreen({ onPick }) {
-  // Phase C: 플래그 ON이면 로컬(비데이터) 카드 칩(퀴즈·추천쇼츠·콘텐츠몰) 진입 제거. 데이터 칩(분석·지역상생몰)은 유지.
-  const LOCAL_CHIP_KEYS = ["quiz", "shorts", "content"];
+  // Phase D: 로컬(비데이터) 카드 칩(퀴즈·추천쇼츠·콘텐츠몰) 제거 확정. 데이터 칩(분석·지역상생몰)만 유지.
   const MENU = [
   { key: "analysis", label: "소비패턴\n분석", text: "내 소비 패턴 분석해줘" },
-  { key: "quiz", label: "금융퀴즈\n풀기", text: "금융 퀴즈 풀고 싶어" },
-  { key: "shorts", label: "추천 금융\n쇼츠", text: "나한테 맞는 금융 공부 추천해줘" },
-  { key: "content", label: "콘텐츠 몰", text: "추천 콘텐츠 보여줘" },
-  { key: "local", label: "지역상생 몰", text: "근처 사용 가능 가맹점 알려줘" }]
-  .filter((m) => !(CARD_SIGNATURE_ON && LOCAL_CHIP_KEYS.includes(m.key)));
+  { key: "local", label: "지역상생 몰", text: "근처 사용 가능 가맹점 알려줘" }];
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden edupay-fade px-5 pt-8 pb-6 bg-white">
@@ -694,7 +674,7 @@ const BLOCKED_MSG = "앗, 그건 도와주기 어려워 😅 결제·용돈·가
 // 응답 봉투 상태 → 표시할 말풍선 텍스트(있으면 렌더 대신 이 텍스트). null = 명시 상태 없음 → 기존 추정 경로 유지(패리티).
 //   OTHER→거절, BLOCKED→보안, HIL(hilRequired)→되묻기(hilPrompt), NO_DATA→없음(balance는 "정보 없어요").
 function statusGateMsg(resp, kind, scope, q) {
-  if (!CARD_SIGNATURE_ON || !resp) return null;
+  if (!resp) return null;
   if (resp.hilRequired) return sanitizeAnswer(resp.hilPrompt) || "조금만 더 자세히 알려줄래?";
   const s = resp.status == null ? "" : String(resp.status).toUpperCase();
   if (!s || s === "SUCCESS") return null;
@@ -723,8 +703,13 @@ function _dayPrefix(q) {
   if (/(지난\s*주|저번\s*주|전주)/.test(t)) return "지난 주엔";
   return "";
 }
+const _FOCUS_LABEL = { voucher: "바우처(지원금)", charge: "용돈 충전금", point: "에듀포인트" };
 function emptyMsgFor(q) {
   const t = String(q || "");
+  // Phase D: 잔액/포인트 질의는 "0원" 단정 금지(모름 ≠ 0). balanceIntent 로 감지해 "아직 …정보가 없어요" 톤.
+  //   (cardIntent 제거 후에도 balance 무데이터 톤을 보존 — 카드 선택은 시그니처가 하지만 빈응답엔 컬럼이 없어 텍스트로 판단.)
+  const _b = balanceIntent(t.replace(/\s/g, ""));
+  if (_b) return _b.focus ? `아직 ${_FOCUS_LABEL[_b.focus] || ""} 정보가 없어요.` : "아직 정보가 없어요.";
   const pre = _dayPrefix(t);
   if (/(금액|총액|합계|얼마|총\s*금액|얼마나\s*썼)/.test(t)) {
     return pre ? `${pre} 쓴 금액이 없어! 0원이야 👍` : "쓴 금액이 없어! 0원이야 👍";
@@ -780,7 +765,6 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
           </button>
           }
           {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} scope={msg.scope} forceTable={msg.chartType === "table"} onCardQuery={onCardQuery} onActiveSql={setChip} />}
-          {msg.card && <InlineCard kind={msg.card} scope={msg.scope} entry={msg.entry} only={msg.only} grade={grade} onSend={onSend} onOpenContent={onOpenContent} />}
         </div>
       </div>
       {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
@@ -1355,173 +1339,7 @@ function App() {
   const CARD_KINDS = ["spending", "report", "recommend", "quiz"];
 
   // 질의 → 날짜 추출 (오늘/어제/그저께/N일/M월 N일)
-  function parseDay(t) {
-    const T = DATA.TODAY;
-    const yr = T.slice(0, 4),ym = T.slice(0, 7),p2 = (n) => String(n).padStart(2, "0");
-    if (/(그끄제|그끄저께)/.test(t)) return DATA.dMinus(T, 3);
-    if (/(그저께|그제)/.test(t)) return DATA.dMinus(T, 2);
-    if (/(어제|어저께)/.test(t)) return DATA.dMinus(T, 1);
-    if (/오늘/.test(t)) return T;
-    // N일 전 / 한글 수 + 전
-    let m = t.match(/(\d{1,2})일전/);
-    if (m) return DATA.dMinus(T, +m[1]);
-    const wordN = { 하루: 1, 이틀: 2, 사흘: 3, 나흘: 4, 닷새: 5, 엿새: 6, 이레: 7 };
-    m = t.match(/(하루|이틀|사흘|나흘|닷새|엿새|이레)전/);
-    if (m) return DATA.dMinus(T, wordN[m[1]]);
-    m = t.match(/(\d{1,2})월(\d{1,2})일/);
-    if (m) return `${yr}-${p2(+m[1])}-${p2(+m[2])}`;
-    // 한국식 M/D (5/10 = 5월 10일)
-    m = t.match(/(\d{1,2})\/(\d{1,2})/);
-    if (m) return `${yr}-${p2(+m[1])}-${p2(+m[2])}`;
-    m = t.match(/(\d{1,2})일/);
-    if (m) return `${ym}-${p2(+m[1])}`;
-    return null;
-  }
-
-  // 명시적 기간 파싱: "6월3일부터 7일까지", "6/1~6/10", "최근 7일", "최근 2주"
-  function explicitRange(t) {
-    const T = DATA.TODAY,yr = T.slice(0, 4),p2 = (n) => String(n).padStart(2, "0");
-    // 최근 N일 / 일주일 / N주 / 한달
-    let m = t.match(/최근(\d{1,2})일/);
-    if (m) return { start: DATA.dMinus(T, +m[1] - 1), end: T, label: `최근 ${m[1]}일` };
-    if (/최근(일주일|한주|1주)/.test(t)) return { start: DATA.dMinus(T, 6), end: T, label: "최근 7일" };
-    m = t.match(/최근(\d{1,2})주/) || (/최근(이|두)주/.test(t) ? [0, "2"] : null);
-    if (m) return { start: DATA.dMinus(T, +m[1] * 7 - 1), end: T, label: `최근 ${+m[1] * 7}일` };
-    if (/최근(한달|1달|30일)/.test(t)) return { start: DATA.dMinus(T, 29), end: T, label: "최근 30일" };
-    if (/(최근|요즘)/.test(t)) return { start: DATA.dMinus(T, 6), end: T, label: "최근 7일" };
-    // M월D일 ~ M월D일
-    m = t.match(/(\d{1,2})월(\d{1,2})일.*?(?:부터|에서|~|-|–).*?(\d{1,2})월(\d{1,2})일/);
-    if (m) return { start: `${yr}-${p2(+m[1])}-${p2(+m[2])}`, end: `${yr}-${p2(+m[3])}-${p2(+m[4])}`, label: "선택 기간" };
-    // M/D ~ M/D
-    m = t.match(/(\d{1,2})\/(\d{1,2}).*?(?:부터|~|-|–).*?(\d{1,2})\/(\d{1,2})/);
-    if (m) return { start: `${yr}-${p2(+m[1])}-${p2(+m[2])}`, end: `${yr}-${p2(+m[3])}-${p2(+m[4])}`, label: "선택 기간" };
-    // 같은 달: D일 ~ D일
-    m = t.match(/(\d{1,2})일.*?(?:부터|~|-|–).*?(\d{1,2})일/);
-    if (m) {const mo = T.slice(5, 7);return { start: `${yr}-${mo}-${p2(+m[1])}`, end: `${yr}-${mo}-${p2(+m[2])}`, label: "선택 기간" };}
-    return null;
-  }
-
-  // 질의 → 시각화 카드 결정. 날짜 특정 → 일별 카드, 월 단위 → 도넛, 분석 → 막대.
-  // ※ 금액이 적힌 문장("오늘 4000원 썼어")은 '기록' 요청이므로 카드 조회로 가로채지 않는다.
-  // 질의에서 기간을 추출 → {start,end,label,sub,single} (없으면 null)
-  function periodScope(t) {
-    const T = DATA.TODAY;
-    const exp = explicitRange(t);
-    if (exp) return { ...exp, single: exp.start === exp.end };
-    if (/지지난주/.test(t)) return { ...DATA.weekRangeOf(DATA.dMinus(T, 14)), label: "지지난 주", sub: "월~일", single: false };
-    if (/(지난주|저번주|전주)/.test(t)) return { ...DATA.weekRangeOf(DATA.dMinus(T, 7)), label: "지난 주", sub: "월~일", single: false };
-    if (/(이번주|금주|한주|이번한주|일주일|이번주의)/.test(t)) return { ...DATA.weekRange, label: "이번 주", sub: "월~일", single: false };
-    if (/(지난달|저번달|전월)/.test(t)) {const a = DATA.dMinus(DATA.monthRangeOf(T).start, 1);return { ...DATA.monthRangeOf(a), label: "지난 달", single: false };}
-    if (/(이번달|이달|당월|금월)/.test(t)) return { ...DATA.monthRangeOf(T), label: "이번 달", single: false };
-    // "N월" 전체 (단, "N월 D일" 형태가 아닐 때만)
-    let mm = t.match(/(\d{1,2})월/);
-    if (mm && !/(\d{1,2})월(\d{1,2})일/.test(t)) {
-      const mo = +mm[1],curY = +T.slice(0, 4),curMo = +T.slice(5, 7);
-      const y = mo > curMo ? curY - 1 : curY; // 미래 달이면 작년으로 간주
-      return { ...DATA.monthRangeOf(`${y}-${String(mo).padStart(2, "0")}-01`), label: `${mo}월`, single: false };
-    }
-    const day = parseDay(t);
-    if (day) {
-      const rel = day === T ? "오늘" : day === DATA.dMinus(T, 1) ? "어제" : day === DATA.dMinus(T, 2) ? "그저께" : null;
-      return { start: day, end: day, label: rel || "선택 날짜", single: true };
-    }
-    return null;
-  }
-
-  function cardIntent(q) {
-    const t = (q || "").replace(/\s/g, "");
-    // ── 특수 인텐트 (비교·지원금·가맹점·채널·결제자) — 우선 매칭 ──
-    const psX = periodScope(t);
-    const rangeOf = () => psX ? { type: "range", ...psX } : null;
-    if (/(부모|보호자|엄마|아빠|가족).*(카드|결제|사용|내역)/.test(t)) return { kind: "parentCard" };
-    if (/(조르기|조른|충전.*요청|보채)/.test(t)) return { kind: /(비교|보다|대비|또래|친구|학교|충북)/.test(t) ? "nudgeCompare" : "nudgeList" };
-    if (/학교.*(별|비교|마다)/.test(t) || /(다른|타)학교/.test(t)) return { kind: "schoolCompare" };
-    if (/(친구|또래|애들|학우|반친구|다른학생).*(비교|보다|대비|랑|와|과)/.test(t) || /(또래|친구).*비교/.test(t)) return { kind: "friendCompare" };
-    if (/(가맹점|쓸수있는곳|사용가능.*곳|근처|주변|어디서쓸|지도)/.test(t)) return { kind: "merchantMap" };
-    // balance(잔액/포인트) — 자산 토큰 앵커(바레 '얼마'·소비질의 제외). 지목형은 scope.focus 로 단일-KPI 렌더.
-    { const _b = balanceIntent(t); if (_b) return { kind: "balance", scope: _b.focus ? { focus: _b.focus } : null }; }
-    if (/(온라인|오프라인|결제채널|어떻게결제)/.test(t)) {
-      const hasOn = /온라인/.test(t),hasOff = /오프라인/.test(t);
-      const only = hasOn && !hasOff ? "online" : hasOff && !hasOn ? "offline" : null;
-      return { kind: "channel", scope: rangeOf(), only };
-    }
-    if (/(가맹점별|가게별|상점별|사용처|주로어디|어디에주로|어디다주로|어디에많이|어디에썼|어디서썼|어디에|어디서|어디다)/.test(t)) return { kind: "merchantBreakdown", scope: rangeOf() };
-    // 금융퀴즈 → 내 소비 데이터 기반 맞춤 퀴즈 카드
-    if (/(금융퀴즈|퀴즈|문제풀|퀴즈풀)/.test(t)) return { kind: "quiz" };
-    // 금융공부/콘텐츠 추천 → 맞춤 추천 카드 (텍스트 설명 대신 보기 쉬운 카드로)
-    if (/(금융.*(공부|학습|교육|배우)|(공부|학습|콘텐츠|영상|쇼츠|금융).{0,3}추천|추천.{0,3}(공부|학습|콘텐츠|영상|쇼츠|금융)|금융교육|뭐.{0,2}배워|배울.{0,2}거)/.test(t)) return { kind: "recommend" };
-    // 11) 주로 언제 / 요일·시간대 패턴
-    if (/(언제|요일|시간대|몇시|시간별|주로.*쓰|주로.*써)/.test(t) && !/어디/.test(t)) return { kind: "timePattern", scope: rangeOf() };
-
-    // 특정 카테고리/가맹점 사용액 ("편의점 얼마 썼어", "교통비 얼마")
-    const CAT_KW = [
-    { re: /편의점|gs25|cu|세븐|이마트24|미니스톱/i, key: "편의점", label: "편의점" },
-    { re: /매점|간식/, key: "매점·간식", label: "매점·간식" },
-    { re: /식비|밥값|음식|분식|떡볶이|김밥|햄버거|급식/, key: "식비", label: "식비" },
-    { re: /교통|버스|지하철|택시|교통비/, key: "교통", label: "교통" },
-    { re: /학용품|문구|문제집|참고서|볼펜|노트/, key: "학용품", label: "학용품" },
-    { re: /문화|영화|웹툰|게임|공연|만화/, key: "문화", label: "문화" }];
-
-    const ckw = CAT_KW.find((c) => c.re.test(t));
-    if (ckw && /얼마|금액|썼|쓴|지출|사용|소비/.test(t)) {
-      return { kind: "catSpend", scope: { type: "cat", key: ckw.key, label: ckw.label, range: psX ? { start: psX.start, end: psX.end, label: psX.label } : null } };
-    }
-
-    // N개월 (예: "6개월") → 월별 추이 N개월
-    const moCount = t.match(/(\d{1,2})개월/);
-    // 소비패턴 분석 → 리포트. 기간이 있으면 그 기간 분석 카드, N개월이면 월별 추이, 없으면 기본 추이
-    if (/(소비패턴|패턴분석|소비습관|소비.*분석|분석.*소비|소비추이|추이분석|소비리포트|리포트|보고서)/.test(t)) {
-      const rp = periodScope(t);
-      if (rp) return { kind: "report", scope: { type: "range", ...rp } };
-      if (moCount) return { kind: "report", scope: { type: "trend", view: "month", months: +moCount[1] } };
-      return { kind: "report", scope: null };
-    }
-    // "월별/달별" 또는 "N개월" → 달별 추이 요약(막대), "일별/날짜별" → 일별 추이
-    if (/(월별|달별|매달|매월|달마다|월마다)/.test(t) || moCount) return { kind: "report", scope: { type: "trend", view: "month", months: moCount ? +moCount[1] : 3 } };
-    if (/(일별|날짜별)/.test(t)) return { kind: "report", scope: { type: "trend", view: "week" } };
-
-    const wantsList = /(내역|리스트|목록|기입장|가계부)/.test(t);
-    const spend = /(얼마|소비|지출|사용|썼|쓴|샀|구매|구입|결제|쓴돈)/.test(t);
-    const ps = periodScope(t);
-
-    // 하루 스코프(오늘/어제/특정일) + 사용/내역 → 건별 거래 리스트(dayTxns). operia 만(mock/backend 는 아래 기존 report 경로 유지 → 회귀 0).
-    //   질의는 operia 로 그대로 전달(userInput). 월별/달별·기간 추이는 위(1263~64)에서 이미 분기되어 여기 안 옴.
-    if (ps && ps.single && (wantsList || spend) && activeChannelName() === "operia") {
-      return { kind: "dayTxns", scope: { type: "day", date: ps.start, label: ps.label } };
-    }
-
-    // 0) '카테고리별/분류별/항목별' → 카테고리 비중 분석 카드 (기간 없으면 이번 달)
-    if (/(카테고리별|분류별|항목별|뭐에)/.test(t)) {
-      const rp = ps || { ...DATA.monthRangeOf(DATA.TODAY), label: "이번 달", single: false };
-      return { kind: "report", scope: { type: "range", ...rp } };
-    }
-
-    // 1) '내역/리스트/기입장/가계부' 요청 → 오페리아 결제 데이터 조회(report). 기간 없으면 이번 달 범위.
-    if (wantsList) return { kind: "report", scope: ps ? { type: "range", ...ps } : (DATA.monthRangeOf ? { type: "range", ...DATA.monthRangeOf(DATA.TODAY), label: "이번 달" } : null) };
-
-    // 2) 기간 + 소비 질의 → 금액 요약(리스트 X). 리스트는 '내역/리스트' 요청 때만
-    if (ps && spend) {
-      if (ps.single) return { kind: "spending", scope: { type: "day", date: ps.start } };
-      if (ps.label === "이번 달") return { kind: "spending", scope: { type: "month" } }; // 도넛(카테고리 비중)
-      return { kind: "report", scope: { type: "range", ...ps } }; // 주/지난달/명시기간 → 금액 요약 카드
-    }
-
-    // 3) 날짜/기간만 있는 짧은 후속 질문("5/14일은?", "지난주는?", "6월은?") → 기입장 리스트 카드(동일 형식)
-    //    ※ "오늘 날씨 어때?"처럼 날짜 외 다른 주제어가 섞이면 카드로 가로채지 않고 AI가 처리
-    if (ps) {
-      const leftover = t.
-      replace(/오늘|어제|어저께|그저께|그제|그끄제|이번주|지난주|저번주|전주|이번달|지난달|저번달|당월|금월|이번|최근|요즘|월별|일별|날짜별|\d{1,2}개월|\d{1,2}월|\d{1,2}일|\d{1,2}\/\d{1,2}|하루전|이틀전|사흘전/g, "").
-      replace(/[은는을를이가의에도만][\s]?|보여줘|보여|알려줘|알려|어때|어떰|뭐|머|줘|해줘|확인|해|좀|\?|!|\.|,/g, "");
-      if (leftover.length <= 1) return { kind: "report", scope: { type: "range", ...ps } };
-      return null; // 날짜 + 다른 주제 → AI가 판단(소비 외 주제면 정중히 거절)
-    }
-
-    // 4) 기간 없이 '이번 달 소비' 류 → 도넛
-    if (spend && /(이번달|이달|한달|월간|이번주|주간)/.test(t)) return { kind: "spending", scope: { type: "month" } };
-    return null;
-  }
-
-
+  // Phase D: cardIntent + 기간분류(parseDay·explicitRange·periodScope) 제거 — 질의는 operia 로 직행(카드는 시그니처가 결정).
 
   function parseAI(raw) {
     let t = (raw || "").trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
@@ -1570,9 +1388,8 @@ function App() {
   // 카드 내부 lazy 질의(예: 리포트 카드 '일별' 탭) — 새 말풍선/대화턴을 만들지 않고 데이터만 가져온다.
   // NL 텍스트가 '본 신호'다(실 오페리아는 텍스트만 받음). intentHint는 시뮬(operia.js) 템플릿/컬럼계약/폴백 라우팅용일 뿐.
   async function cardQuery(text, intentHint) {
-    const ci = cardIntent(text);
-    const intent = intentHint || (ci && ci.kind) || null;
-    return await queryDataSource(text, intent, ci ? ci.scope : null); // { result, sql, source, rawRows }
+    // Phase D: cardIntent 제거 — operia 는 텍스트만 소비(intentHint 는 시뮬 라우팅용 잔여). scope 없음.
+    return await queryDataSource(text, intentHint || null, null); // { result, sql, source, rawRows }
   }
 
   // operia 미분류(cardIntent===null) 응답 렌더 — 핵심 카드 경로(§ci useOperia)와 동일 규칙:
@@ -1611,9 +1428,10 @@ function App() {
       setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: emptyMsgFor(q) }]);
       return;
     }
-    // 렌더 지시(forceTable) + 표 데이터 有 → 카드/plan 스킵하고 범용 표. 미분류(kind=null)는 원래 table 폴백이라 reportPlan 억제만 유효.
+    // 렌더 지시(forceTable) → 범용 표. 아니면 chartType 을 non-table 센티널("card")로 둬 ChartRenderer 가
+    //   forceTable=false 로 인식 → 응답 컬럼 시그니처로 카드 선택(Phase D 단일 경로). intent 는 넘기지 않음(시그니처가 결정).
     const _tf = forceTable && (_hasCols || _rows.length > 0);
-    setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : chartTypeForIntent(kind), intent: _tf ? null : kind, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
+    setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : "card", intent: null, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
   }
 
   async function send(text) {
@@ -1627,103 +1445,10 @@ function App() {
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
     setTyping(true);
 
-    // 소비 조회/분석 질의 → 시각화 카드로 바로 응답
-    let ci = cardIntent(q);
-    // Phase C: 플래그 ON이면 로컬(비데이터) 카드 진입 차단 → ci 무효화해 operia 경로로 흘림(데이터 카드/거절). OFF면 현행 유지.
-    if (CARD_SIGNATURE_ON && ci && LOCAL_CARD_KINDS.includes(ci.kind)) ci = null;
-    // 렌더 지시("표/리스트/목록으로 보여줘") → 카드 템플릿·reportPlan 건너뛰고 범용 표로 강제(표현 계층만; 질의는 그대로 operia로 감).
-    //   채널 무관(operia/mock/backend 동일). 표 데이터가 있을 때만 적용 → plan-only 응답은 기존 렌더 유지.
+    // Phase D: 카드 선택은 응답 컬럼 시그니처가 담당(ChartRenderer). cardIntent 데이터 분류 제거 →
+    //   인사/자기소개 외 모든 질의는 operia 로 직행하고, 카드 종류는 응답 '모양'으로 결정된다.
     const tableForce = /(표|리스트|목록)\s*(으?로)\s*(보여|볼래|알려|출력|나열|정리|봐|줘|주)/.test(q);
-    setTypingIntent(ci ? ci.kind : null); // 로딩 말풍선 문구 풀 선택(미매칭/잡담 → 기타)
-    if (ci) {
-      // ── 데이터 질문 → 오페리아 API 호출 → ChartRenderer 렌더 ──
-      // 차트 유형은 응답이 아니라 프론트가 결정(chartTypeForIntent). 응답은 {question,sql,result}.
-      // 정적/실서버 모드: 알려진 10개 intent만. AI 시뮬 모드(§8): 미지정 데이터질문도 보내 table로 렌더
-      //   (recommend/quiz 같은 UI/비데이터 카드는 항상 로컬 보존).
-      const NON_OPERIA = ["recommend", "quiz"];
-      const useOperia = OPERIA_KINDS.includes(ci.kind) || (isOperiaAiMode() && !NON_OPERIA.includes(ci.kind));
-      if (useOperia) {
-        showApiToast(`${activeChannelName()} · ${ci.kind}`, "api");
-        try {
-          // ↓↓↓ [DEV MOCK] 채널 분기는 getDataSource() 한 곳: VITE_DATA_SOURCE(operia|backend|mock, 미설정→mock) ↓↓↓
-          const resp = await queryDataSource(q, ci.kind, ci.scope); // SSE(data→result) 시뮬 소비 → 브리지 resp
-          // ↑↑↑ [DEV MOCK] END ↑↑↑
-          if (stale()) return; // 그 사이 새 대화/전환 → stale 응답·로딩 반영 금지
-          setTyping(false);
-          // §8.5 키 게이팅: 미지원(키 없음) → 차트 대신 친절 텍스트 안내(에러 아님)
-          if (resp && resp.unsupported) {
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.message) }]);
-            return;
-          }
-          // §4.5/§8 오류: 채널이 success=false 로 응답 → errorMessage 표시(backend/operia). mock 은 항상 true.
-          if (resp && resp.success === false) {
-            showApiToast("채널 오류(success=false)", "error");
-            // 백엔드 한글 안내는 그대로, 영문/기술/빈값 errorMessage 는 친근 문구 + 다시 시도.
-            if (isTechErrorMessage(resp.errorMessage)) {
-              setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: NET_ERROR_MSG, retry: q }]);
-            } else {
-              setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: resp.errorMessage }]);
-            }
-            return;
-          }
-          // §9.5 폴백 가시화: Claude 시도 실패로 템플릿 사용된 경우 dev 토스트
-          if (resp && resp.source === "fallback") showApiToast(`⚠️ 템플릿 폴백 · ${ci.kind}`, "error");
-          // Phase B 상태 게이트(플래그 ON+봉투 status/hilRequired 有): 렌더 전 우선 소비. 없으면 null→기존 추정 경로.
-          {
-            const _gate = statusGateMsg(resp, ci.kind, ci.scope, q);
-            if (_gate) { setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: _gate }]); return; }
-          }
-          // OTHER/비관련 거절: 데이터 '구조' 자체가 없는 텍스트 응답(행 0 + columnMetadata 없음 + reportPlan 없음)
-          //   → 빈 "조회 결과가 없어요" 카드 대신 친근 회피 말풍선(chartType 미설정 = isChart false). 오페리아 사무적 answer 는 숨김.
-          //   ※ 진짜 0행 데이터 조회는 columnMetadata(또는 reportPlan)가 있어 아래 카드 경로 유지("조회 결과가 없어요").
-          const _rows = Array.isArray(resp && resp.tableData) ? resp.tableData : [];
-          const _hasCols = Array.isArray(resp && resp.columnMetadata) && resp.columnMetadata.length > 0;
-          const _hasPlan = !!(resp && resp.reportPlan && Array.isArray(resp.reportPlan.sections) && resp.reportPlan.sections.length > 0);
-          if (!_rows.length && !_hasCols && !_hasPlan) {
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: OFFTOPIC_MSG }]);
-            return;
-          }
-          // 구조는 있으나 데이터 없음(0행/전부 null 집계) → 빈 표·0 KPI 대신 친근 안내(operia 만; mock/backend 는 기존 렌더 유지 → 회귀 0).
-          if (activeChannelName() === "operia" && isEmptyResult(resp)) {
-            // balance: 행 자체가 없음(모름)이면 "0원" 단정 금지 → "아직 정보가 없어요"(지목형이면 그 자산 기준).
-            //   ※ 값 0 행이 실제로 있으면 isEmptyResult=false → 아래 카드 경로로 '0원/0P' 표시(참).
-            if (ci.kind === "balance") {
-              const _fl = { voucher: "바우처(지원금)", charge: "용돈 충전금", point: "에듀포인트" }[ci.scope && ci.scope.focus];
-              setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: _fl ? `아직 ${_fl} 정보가 없어요.` : "아직 정보가 없어요." }]);
-              return;
-            }
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: emptyMsgFor(q) }]);
-            return;
-          }
-          // answer 말풍선(§6/§9): 있으면 카드 위 텍스트, 없으면 생략(10개 intent 는 빈 answer → 기존과 동일, 시각 보존).
-          // 렌더 지시(tableForce) + 표 데이터 有 → 카드/plan 스킵하고 범용 표(intent:null·reportPlan:null → ChartRenderer TEMPLATES.table, 한글 헤더). 지시 없으면 기존 카드 그대로.
-          const _tf = tableForce && (_hasCols || _rows.length > 0);
-          setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : chartTypeForIntent(ci.kind), intent: _tf ? null : ci.kind, sql: resp.sql, source: resp.source, scope: ci.scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
-        } catch (e) {
-          if (stale()) return; // 새 대화/전환 후 도착한 오류 → 새 대화에 에러 말풍선 금지
-          console.error("[데이터] 호출 오류:", e);
-          showApiToast("데이터 오류", "error");
-          setTyping(false);
-          // 스트림 전 HTTP 오류(401/422 등)의 채널 한글 안내는 그대로 표시(§4.5).
-          // 네트워크/기술 문자열(Failed to fetch, datasource error, timeout 등)·빈값 → 친근 문구 + 다시 시도.
-          const em = e && e.message;
-          if (isTechErrorMessage(em)) {
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: NET_ERROR_MSG, retry: q }]);
-          } else {
-            setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: em }]);
-          }
-        }
-        return;
-      }
-      // ── 비데이터 카드(추천/퀴즈/용돈기입장 등) → 기존 로컬 로직 유지 ──
-      showApiToast(`로컬 카드 · ${ci.kind}`, "local");
-      await new Promise((r) => setTimeout(r, 450));
-      if (stale()) return; // 그 사이 새 대화/전환 → stale 카드 반영 금지
-      setTyping(false);
-      setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: ci.kind === "recommend" ? DATA.recommendIntro[grade] || "" : "", card: ci.kind, scope: ci.scope || null, only: ci.only || null }]);
-      return;
-    }
-
+    setTypingIntent(null);
     // 그 외(cardIntent 미분류) — operia 모드: 순수 인사/잡담만 로컬 한 줄, 나머지 null 질의는 operia로 전달(세션 맥락 누적+재조회, 오페리아팀 요청).
     //   mock/backend 모드: 기존 로컬/AI 토글 유지(operiaMode=false → 아래 신규 분기 건너뜀).
     const operiaMode = activeChannelName() === "operia";
@@ -1857,7 +1582,6 @@ function App() {
       </>
       }
 
-      {modal && <RecommendModal content={modal} grade={grade} onClose={() => setModal(null)} />}
 
       {/* [FAQ 등록 확인창] 말풍선 long-press → '등록' 선택 시에만 추가. 딤/블러 없음(투명 오버레이, 밖 탭=취소). 카드는 테두리+그림자로 시인성 확보(새 대화 확인창과 동일). */}
       {faqConfirm &&

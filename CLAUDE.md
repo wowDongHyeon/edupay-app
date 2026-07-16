@@ -79,8 +79,10 @@
 - **else/미분류 질의**는 `ReportPlanRenderer` 폴백으로 렌더(전용 카드 없음).
 - 사용처별/catSpend 카드의 기간 배지는 제거함(operia 쿼리에 기간 필터 없음=전체 기간). 월별 배지는 실제 월수로 동적 계산(정확)이라 유지.
 
-### 진행 중 (2026-07-09, 완료되면 이 블록 삭제)
+### 진행 중 (2026-07-10 세션 — 상세는 `_cli-handoff/세션상태_남은일.md`)
 
-- **대기 CLI ①** reportPlan 폴백 "KPI+표만"(chart·kpi_grid 섹션 숨김, else 질의 중복 제거) — 미착수.
-- **대기 CLI ②** Q6 잔액 새 반환 컬럼 선반영: `CARD_VOUCHER_BLNC`(남은 지원금)/`CARD_ADD_CHARG_BLNC`(충전 잔액)/`CURRENT_POINT`(포인트). operia semantic layer **미적용 상태**(적용 전엔 옛 `account/card` 컬럼이 옴) → 프론트 별칭만 선추가(하위호환).
-- **방금 완료**: 배지 '최근 3개월' 제거 + 긴 가맹점명 …클립(라이브 확인) / 긴 이름 **탭하면 펼치기**(`barlist.jsx`, CLI 완료보고 — 탭 펼침 라이브 재검증은 미완, 배지 제거는 확인됨).
+> 정본 폴더 = **Documents**(OneDrive 사본 폐기 예정, 거기서 dev/CLI 금지). 모든 CLI 핸드오프 고정: **커밋 금지(워킹트리만)** · 작업/dev 폴더 Documents · `.env.local`·dev 종료 게이트(동현).
+
+- **완료(미커밋)**: 진입칩 4/8 토글(`SHOW_ALL_QUICK_QUERIES`)+즐겨찾기 연동(`FAV_KEY`), report "집계중"→실사용액/없음 문구, 재진입 리셋 10s 임계값(`VITE_REENTRY_RESET_MS`), 여우 로더(세미업라이트+다리펌핑+먼지+출발 먼지구름 대시, `VITE_FOX_RUN_DUR`·`FOX_LOADER_CONFIG`), Q5 category_nm 업종명·주소" -" 트림·"기타"숨김, 채널 아이콘제거·"전체 내역/거래", 긴이름 탭펼치기(`ExpandableText`), 위치 getUserLocation seam(session.js).
+- **대기 CLI**(프롬프트 상세 = `_cli-handoff/세션상태_남은일.md`): 재진입 네이티브 신호 웹뷰측(Flutter 반영 후 — `_cli-handoff/재진입-네이티브신호-웹뷰.md`), 여우 on/off config(`VITE_FOX_LOADER_ENABLED`, 기본 OFF — 이사님 "여우 빼자"), `+`버튼 제거(이사님), 랜딩칩 왼쪽정렬(items-stretch), 4/8 `.env.local`화, 걷기속도 `VITE_FOX_WALK_DUR`, 위치 30km가드 제거+권한없음 안내, 로그인ID없음 안내, reportPlan 제목 프론트소유(+KPI·표만).
+- **외부 요청**: Flutter(재진입 신호 `window.eduPayOnReentry` — 네비 복귀 시점만, 화면꺼짐 제외 / getEduPayUser는 이미 lat·lng 제공), operia(Q5 전국 위치데이터·응답계약 최종 골든SQL 기준 갱신).
