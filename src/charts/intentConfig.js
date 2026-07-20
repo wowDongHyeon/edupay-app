@@ -103,6 +103,7 @@ export const INTENT_CONFIG = {
         { icon: "🎫", tint: "#E2F3F2", ink: "#0F5A57" },
         { icon: "💸", tint: "#FAEAF1", ink: "#8E2F52" },
         { icon: "⭐", tint: "#FFF4E0", ink: "#8A5A12" },
+        { icon: "💳", tint: "#E8EEFB", ink: "#1F3A8A" },
       ],
       noteStyle: { background: "#F6F6FB", color: "#6B6E78" },
     },

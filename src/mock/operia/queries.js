@@ -192,11 +192,20 @@ export const QUERIES = {
         const findSlotCol = (aliases) => { const set = new Set(aliases.map(normKey)); return keys.find((c) => set.has(normKey(c))); };
         const cVoucher = findSlotCol(SLOT_ALIASES.voucher), cCharge = findSlotCol(SLOT_ALIASES.charge), cPoint = findSlotCol(SLOT_ALIASES.point);
         if (cVoucher && cCharge && cPoint) {
-          return { items: [
+          const items = [
             { ...META.voucher, value: pos(row[cVoucher] || 0) },
             { ...META.charge, value: pos(row[cCharge] || 0) },
             { ...META.point, value: pos(row[cPoint] || 0) },
-          ] };
+          ];
+          // ★ 4번째 항목(카드 발급여부) — CARD_YN 컬럼이 있을 때만 append(없으면 기존 3항목 그대로, 회귀 0).
+          const cCardYn = keys.find((c) => normKey(c) === "CARD_YN");
+          if (cCardYn) {
+            const has = String(row[cCardYn]).trim().toUpperCase() === "Y";
+            const cLimit = keys.find((c) => normKey(c) === "CARD_DAY_LIMIT_AMT");
+            const limit = has && cLimit && row[cLimit] != null ? Number(row[cLimit]) : null;
+            items.push({ type: "cardStatus", has, limit });
+          }
+          return { items };
         }
       }
 

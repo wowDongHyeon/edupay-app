@@ -36,6 +36,7 @@ export const COLUMN_LABELS = {
   CURRENT_POINT: "에듀포인트",
   CARD_VOUCHER_BLNC: "남은 지원금(바우처)", // operia 회신#1 — V_USER_ASSET 자산 잔액(바우처), raw 노출 방지
   CARD_ADD_CHARG_BLNC: "충전 잔액",    // 0709 Q6 컬럼교체: 충전(용돈) 잔액 — raw 노출 방지
+  CARD_YN: "카드", CARD_DAY_LIMIT_AMT: "1일 한도", // 카드 발급여부 + 1일 한도(balance 4번째 항목)
   // 날짜/시간
   DLNG_YM: "월", DLNG_DT: "일자", DLNG_DTM: "거래일시", DLNG_TM: "시간",
   // 금액/집계

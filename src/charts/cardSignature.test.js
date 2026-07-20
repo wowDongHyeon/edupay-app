@@ -53,6 +53,11 @@ test("balance: 잔액 총액 단일 컬럼(ACCOUNT_BALANCE_AMT) → balance", ()
   eq([{ ACCOUNT_BALANCE_AMT: 57000 }], null, "balance");
 });
 
+test("balance: 3열 + CARD_YN/CARD_DAY_LIMIT_AMT(카드 발급여부 4번째 항목)이 섞여도 balance 유지(회귀 0)", () => {
+  eq([{ CARD_VOUCHER_BLNC: 45000, CARD_ADD_CHARG_BLNC: 12000, CURRENT_POINT: 300, CARD_YN: "Y", CARD_DAY_LIMIT_AMT: 63000 }], null, "balance");
+  eq([{ CARD_VOUCHER_BLNC: 45000, CARD_ADD_CHARG_BLNC: 12000, CURRENT_POINT: 300, CARD_YN: "N", CARD_DAY_LIMIT_AMT: null }], null, "balance");
+});
+
 test("단일KPI: 범주 없는 스칼라 1개(잔액명 아님) → kpi", () => {
   eq([{ TOTAL_COUNT: 42 }], null, "kpi");
 });

@@ -1,9 +1,11 @@
 import React from "react";
-import { num, ChartShell } from "../util";
+import { num, won, ChartShell } from "../util";
 /* 제네릭 statList 템플릿 — data {items:[{label,sub,value,unit?}]} + config.
    항목 스타일(아이콘/배경/글자색)은 config.options.itemStyles[i], 하단 안내문은 config.insight(). 합계 없음. */
 
 export function StatListTemplate({ data, config }) {
+  // ponytail: 카드 발급여부 항목(cardStatus)은 최대 1개뿐이라 단일 로컬 토글 상태로 충분(다건이면 인덱스맵 필요).
+  const [cardExpanded, setCardExpanded] = React.useState(false);
   const cfg = config || {};
   const opt = cfg.options || {};
   const items = (data && Array.isArray(data.items) ? data.items : []);
@@ -31,6 +33,39 @@ export function StatListTemplate({ data, config }) {
       <div className="mt-3 flex flex-col gap-2.5">
         {items.map((it, i) => {
           const st = styles[i] || {};
+          if (it.type === "cardStatus") {
+            const clickable = !!it.has;
+            return (
+              <div key={i}>
+                <div
+                  role={clickable ? "button" : undefined}
+                  className={"flex items-center gap-3 rounded-2xl px-3.5 py-3" + (clickable ? " cursor-pointer" : "")}
+                  style={{ background: clickable ? st.tint : "#F1F1F4" }}
+                  onClick={clickable ? () => setCardExpanded((v) => !v) : undefined}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[17px] shrink-0">{st.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13.5px] font-bold" style={{ color: clickable ? st.ink : "#9AA0AC" }}>카드</div>
+                    <div className="text-[11px]" style={{ color: clickable ? st.ink : "#9AA0AC", opacity: 0.7 }}>실물 카드 발급 여부</div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {clickable && (<span className="text-[11px]" style={{ color: st.ink, opacity: 0.7 }}>눌러서 한도 보기 ›</span>)}
+                    <span
+                      className="text-[13px] font-extrabold w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ background: clickable ? "#fff" : "#E4E5EA", color: clickable ? st.ink : "#9AA0AC" }}
+                    >
+                      {it.has ? "O" : "X"}
+                    </span>
+                  </div>
+                </div>
+                {clickable && cardExpanded && (
+                  <div className="mt-1.5 rounded-xl px-3.5 py-2.5 text-[12.5px] font-bold" style={{ background: st.tint, color: st.ink }}>
+                    1일 한도 {won(it.limit)}
+                  </div>
+                )}
+              </div>
+            );
+          }
           return (
             <div key={i} className="flex items-center gap-3 rounded-2xl px-3.5 py-3" style={{ background: st.tint }}>
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[17px] shrink-0">{st.icon}</div>
