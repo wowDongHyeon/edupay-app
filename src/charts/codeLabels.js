@@ -35,13 +35,20 @@ export const COLUMN_LABELS = {
   CARD_BALANCE_AMT: "용돈 충전금",
   CURRENT_POINT: "에듀포인트",
   CARD_VOUCHER_BLNC: "남은 지원금(바우처)", // operia 회신#1 — V_USER_ASSET 자산 잔액(바우처), raw 노출 방지
-  CARD_ADD_CHARG_BLNC: "충전 잔액",    // 0709 Q6 컬럼교체: 충전(용돈) 잔액 — raw 노출 방지
+  CARD_ADD_CHARG_BLNC: "용돈 충전금",  // 0709 Q6 컬럼교체 / 0716 라벨 일원화: CARD_BALANCE_AMT와 동일 표기(전체·focus 카드 라벨 통일)
   CARD_YN: "카드", CARD_DAY_LIMIT_AMT: "1일 한도", // 카드 발급여부 + 1일 한도(balance 4번째 항목)
   // 날짜/시간
   DLNG_YM: "월", DLNG_DT: "일자", DLNG_DTM: "거래일시", DLNG_TM: "시간",
   // 금액/집계
-  DLNG_AMT: "금액", TOTAL_AMOUNT: "금액", SUM_PAY_DLNG_AMT: "금액",
-  CNT_PAY: "건수", RATIO_PCT: "비율",
+  DLNG_AMT: "금액", TOTAL_AMOUNT: "금액", SUM_PAY_DLNG_AMT: "금액", SUM_DLNG_AMT: "금액",
+  CNT_PAY: "건수", CNT: "건수", RATIO_PCT: "비율",
+  // 오페리아 1000질의 최종(0722) — 소문자 별칭(labelForColumn 이 대문자 정규화 조회). 채널/친구비교/학교집계 컬럼.
+  CHANNEL: "채널", CHANNEL_NM: "채널",
+  SCOPE: "구분", AVG_AMT: "평균",
+  SCH_NM: "학교", USER_CNT: "인원수", AVG_PER_USER: "1인 평균",
+  // 코어50(0722) 신규 컬럼. dow/hour 는 값 매핑(요일·시)은 별도 — 여기선 헤더 라벨만.
+  DOW: "요일", HOUR: "시간대", MERCHANT_CNT: "가맹점 수", DAY_CNT: "사용 일수", GRADE: "학년",
+  AVG_PER_DAY: "하루 평균",
   // 가맹점/상품/분류
   MERCHANT_NM: "가맹점", GDS_NM: "상품명",
   CATEGORY_NM: "카테고리", CATEGORY_CD: "카테고리",

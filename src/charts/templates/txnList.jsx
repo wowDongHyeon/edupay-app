@@ -28,7 +28,7 @@ export function TxnListTemplate({ data, config }) {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[13.5px] font-bold text-gray-900 tabular-nums whitespace-nowrap">{num(e.amount)}원</div>
-                  {e.time ? <div className="text-[11px] text-gray-400 tabular-nums">{e.time}</div> : null}
+                  {(e.date || e.time) ? <div className="text-[11px] text-gray-400 tabular-nums">{[e.date, e.time].filter(Boolean).join(" ")}</div> : null}
                 </div>
               </div>
             ))}

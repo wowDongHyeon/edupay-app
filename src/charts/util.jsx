@@ -5,17 +5,19 @@ export const num = (n) =>
   n == null || isNaN(Number(n)) ? "" : Number(n).toLocaleString("ko-KR");
 export const won = (n) => num(n) + "원";
 
-// "2026-04" → "4월"
+// "2026-04" / "202604" → "4월" (대시·무대시 YYYYMM 모두)
 export const monthLabel = (ym) => {
-  const mm = +String(ym || "").slice(5, 7);
-  return mm ? mm + "월" : String(ym || "");
+  const s = String(ym || ""), g = s.replace(/\D/g, "");
+  const mm = g.length >= 6 ? +g.slice(4, 6) : +s.slice(5, 7);
+  return mm ? mm + "월" : s;
 };
 
-// "2026-06-13" → "6/13"
+// "2026-06-13" / "20260613" → "6월 13일" (대시·무대시 YYYYMMDD 모두)
 export const dayLabel = (ymd) => {
-  const s = String(ymd || "");
-  const mm = +s.slice(5, 7), dd = +s.slice(8, 10);
-  return mm && dd ? `${mm}/${dd}` : s;
+  const s = String(ymd || ""), g = s.replace(/\D/g, "");
+  const mm = g.length >= 8 ? +g.slice(4, 6) : +s.slice(5, 7);
+  const dd = g.length >= 8 ? +g.slice(6, 8) : +s.slice(8, 10);
+  return mm && dd ? `${mm}월 ${dd}일` : s;
 };
 
 export function ChartShell({ title, sub, badge, children }) {

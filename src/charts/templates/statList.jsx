@@ -50,11 +50,12 @@ export function StatListTemplate({ data, config }) {
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {clickable && (<span className="text-[11px]" style={{ color: st.ink, opacity: 0.7 }}>눌러서 한도 보기 ›</span>)}
+                    {/* ponytail: raw "O/X" → 사람 말. 제품 질문: '쓸 수 있는 금액' 카드에서 이 발급여부 항목을 아예 뺄지는 제품 판단(현재는 라벨만 정리). */}
                     <span
-                      className="text-[13px] font-extrabold w-6 h-6 rounded-full flex items-center justify-center"
+                      className="text-[11px] font-extrabold px-2.5 h-6 rounded-full flex items-center justify-center whitespace-nowrap"
                       style={{ background: clickable ? "#fff" : "#E4E5EA", color: clickable ? st.ink : "#9AA0AC" }}
                     >
-                      {it.has ? "O" : "X"}
+                      {it.has ? "발급 완료" : "미발급"}
                     </span>
                   </div>
                 </div>

@@ -87,39 +87,34 @@ export const QUERIES = {
     },
   },
 
-  // ③ friendCompare → compare 표준형 { bars:[{label,value,me?}], percentile }
+  // ③ friendCompare → barlist 표준형 { items:[{label,value,me}] } (나/우리 학교 평균/충북 전체 평균, "나" 강조)
   friendCompare: {
     sql: `SELECT 'me' AS k, SUM(PAY_AMT) AS v FROM TB_PAY_DTL WHERE USER_ID='${UID}' AND PAY_STTS='APPROVED' ` +
       `UNION ALL SELECT 'school' AS k, s AS v FROM (SELECT SUM(p.PAY_AMT) AS s FROM TB_PAY_DTL p JOIN TB_COM_USER u ON u.USER_ID=p.USER_ID WHERE u.USER_TYPE='STUDENT' AND u.SCH_NM='흥덕중' AND u.GRADE='2' AND p.PAY_STTS='APPROVED' GROUP BY p.USER_ID) sc ` +
       `UNION ALL SELECT 'province' AS k, s AS v FROM (SELECT SUM(p.PAY_AMT) AS s FROM TB_PAY_DTL p JOIN TB_COM_USER u ON u.USER_ID=p.USER_ID WHERE u.USER_TYPE='STUDENT' AND p.PAY_STTS='APPROVED' GROUP BY p.USER_ID) pv`,
-    // 두 형태 처리:
-    //  · (mock) 분포 행 {k:'me'/'school'/'province', v} → 학교/충북 평균 + 백분위 계산
-    //  · (2차요청 backend B-2) 직접 비교 행 {label, amount} = 나/또래/충북 3행 → 그대로 막대(백분위 없음)
+    // 두 입력 형태 → 공통 barlist items(행 순서 유지: 나 → 우리 학교 평균 → 충북 전체 평균):
+    //  · (sim/mock) 분포 행 {k:'me'/'school'(xN)/'province'(xN), v} → 나 + 그룹 평균 3막대
+    //  · (operia) scope/avg_amt 3행 {k:"나"/"우리 학교 평균"/"충북 전체 평균", v} → 그대로 3막대
     //  · 그 외(구형 #3=학교별 {sch_nm, avg} 등) → null 반환 → table 폴백(정상, 회귀 아님)
     shape: (rows) => {
       if (rows.some((r) => r.k === "me" || r.k === "school" || r.k === "province")) {
         const me = (rows.find((r) => r.k === "me") || {}).v || 0;
-        const school = rows.filter((r) => r.k === "school").map((r) => r.v || 0);
-        const province = rows.filter((r) => r.k === "province").map((r) => r.v || 0);
-        const sAvg = round(mean(school));
-        const pAvg = round(mean(province));
-        const le = province.filter((x) => x <= me).length;
-        const percentile = province.length ? round((le / province.length) * 100) : 0;
+        const sAvg = round(mean(rows.filter((r) => r.k === "school").map((r) => r.v || 0)));
+        const pAvg = round(mean(rows.filter((r) => r.k === "province").map((r) => r.v || 0)));
         return {
-          percentile,
-          bars: [
+          items: [
             { label: "나", value: me, me: true },
-            { label: "우리학교 같은학년", value: sAvg },
-            { label: "충북 평균", value: pAvg },
+            { label: "우리 학교 평균", value: sAvg },
+            { label: "충북 전체 평균", value: pAvg },
           ],
         };
       }
-      // 2차요청 직접 비교형: 라벨이 나/또래/충북류일 때만 compare(학교명 등 구형은 table 폴백)
-      const KNOWN = /나|본인|내|또래|친구|학년|우리학교|충북|도\s*평균|평균|^me$|peer|school|province/i;
+      // operia scope/avg_amt: 라벨이 나/평균류일 때만 barlist(학교명 등 구형은 table 폴백). "나" 강조.
+      const KNOWN = /나|본인|내|또래|친구|학년|우리\s*학교|충북|도\s*평균|평균|^me$|peer|school|province/i;
       if (rows.length >= 2 && rows.length <= 4 && rows.every((r) => KNOWN.test(String(r.k)))) {
-        const bars = rows.map((r) => ({ label: String(r.k), value: r.v || 0, me: /나|본인|내|^me$/i.test(String(r.k)) }));
-        if (!bars.some((b) => b.me)) bars[0].me = true;
-        return { percentile: null, bars };
+        const items = rows.map((r) => ({ label: String(r.k), value: r.v || 0, me: /^(나|본인|내|me)$/i.test(String(r.k).trim()) }));
+        if (!items.some((b) => b.me)) items[0].me = true;
+        return { items };
       }
       return null;
     },

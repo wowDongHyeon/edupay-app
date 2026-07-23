@@ -146,9 +146,8 @@ function isValidShape(intent, s) {
   switch (intent) {
     case "report": case "reportDaily": return Array.isArray(s.series) && s.series.length > 0;
     case "catSpend": return Array.isArray(s.slices) && s.slices.length > 0;
-    case "friendCompare": return Array.isArray(s.bars) && s.bars.length > 0;
     case "nudgeCompare": return Array.isArray(s.monthly);
-    case "balance": case "merchantBreakdown": case "schoolCompare": return Array.isArray(s.items) && s.items.length > 0;
+    case "friendCompare": case "balance": case "merchantBreakdown": case "schoolCompare": return Array.isArray(s.items) && s.items.length > 0;
     case "channel": return Array.isArray(s.groups) && Array.isArray(s.rows);
     case "parentCard": return Array.isArray(s.rows);
     case "merchantMap": return Array.isArray(s.items) && s.items.some((m) => m && m.lat != null && m.lng != null);

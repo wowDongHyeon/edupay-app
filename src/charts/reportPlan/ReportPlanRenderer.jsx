@@ -15,6 +15,8 @@ const CODE_LABEL = { OFFLINE: "오프라인", ONLINE: "온라인", VOUCHER: "바
 const fmtLabel = (v) => {
   const s = String(v == null ? "" : v);
   if (CODE_LABEL[s]) return CODE_LABEL[s];
+  if (/^\d{8}$/.test(s)) return dayLabel(s);    // YYYYMMDD (operia raw 무대시)
+  if (/^\d{6}$/.test(s)) return monthLabel(s);  // YYYYMM (operia raw 무대시)
   if (/^\d{4}-\d{2}$/.test(s)) return monthLabel(s);
   if (/^\d{4}-\d{2}-\d{2}/.test(s)) return dayLabel(s);
   return s;

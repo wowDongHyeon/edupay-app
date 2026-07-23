@@ -57,17 +57,29 @@ export const INTENT_CONFIG = {
     template: "donut",
     title: "사용처별 사용 내역", subtitle: "업종별 사용 금액 · 가맹점 기준", // badge 제거: operia 쿼리에 기간 필터 없음(전체 기간)
     insight: (d) => {
-      const t = (d.slices || [])[0];
-      return t ? `${t.label}이(가) 가장 커 (${num(t.value)}원, 전체의 ${t.pct}%).` : "";
+      const slices = d.slices || [];
+      const t = slices[0];
+      if (!t) return "";
+      if (slices.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;  // 단일 항목: "가장 커·전체의 100%" 자명해서 생략
+      return `${t.label}이(가) 가장 커 (${num(t.value)}원, 전체의 ${t.pct}%).`;
     },
   },
 
-  // ③ friendCompare (compare)
+  // ③ friendCompare (barlist) — 나/우리 학교 평균/충북 전체 평균 3막대, "나" 강조(N:1: schoolCompare와 공유 barlist)
   friendCompare: {
-    template: "compare",
-    title: "친구들과 사용 비교", subtitle: "같은 학년끼리 비교", badge: "이번 달",
-    options: { unit: "원" },
-    insight: (d) => (d.percentile != null ? `같은 학년 중 상위 ${100 - d.percentile}% 수준이야.` : ""),
+    template: "barlist",
+    title: "친구들과 사용 비교", subtitle: "같은 학년 평균과 비교",
+    options: { me: true, rank: false, avgRow: false, unit: "원", showPct: false },
+    insight: (d) => {
+      const items = (d && d.items) || [];
+      const me = items.find((x) => x.me);
+      const school = items.find((x) => /우리\s*학교/.test(String(x.label)));
+      if (!me || !school || !school.value) return "";
+      const diff = me.value - school.value;
+      return diff >= 0
+        ? `우리 학교 같은 학년 평균보다 ${num(Math.abs(diff))}원 더 썼어. 계획해서 써보자 📊`
+        : `우리 학교 같은 학년 평균보다 ${num(Math.abs(diff))}원 덜 썼어. 잘 쓰고 있어 👏`;
+    },
   },
 
   // ④ nudgeCompare (trend)
@@ -127,10 +139,18 @@ export const INTENT_CONFIG = {
   merchantBreakdown: {
     template: "barlist",
     title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", // badge 제거: operia 쿼리에 기간 필터 없음(전체 기간)
+    // 맥락 분기(catContext): 범주 컬럼이 dow/hour면 제목·부제만 교체(데이터·정렬 불변). 그 외(가맹점/업종)는 위 기본 유지.
+    contexts: {
+      dow:  { title: "요일별 사용", subtitle: "요일별 사용 금액" },
+      hour: { title: "시간대별 사용", subtitle: "시간대별 사용 금액" },
+    },
     options: { rank: true, showPct: true, unit: "" },
     insight: (d) => {
-      const t = (d.items || [])[0];
-      return t ? `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!` : "";
+      const items = d.items || [];
+      const t = items[0];
+      if (!t) return "";
+      if (items.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;  // 단일 항목: "제일 많이·전체의 100%·자주 가는 곳" 자명·어색해서 완화
+      return `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
     },
   },
 
@@ -145,6 +165,10 @@ export const INTENT_CONFIG = {
   schoolCompare: {
     template: "barlist",
     title: "학교별 사용 비교", subtitle: "충청북도 중학교 결제 TOP5 · 1인당 평균", badge: "충북 중학교",
+    // 맥락 분기(catContext): 범주 컬럼이 grade면 제목·부제 교체 + 행라벨 "N학년"·푸터 "전체 평균"(데이터·정렬 불변). sch_nm(학교)은 기본 유지.
+    contexts: {
+      grade: { title: "학년별 사용 비교", subtitle: "학년별 1인당 평균", gradeLabel: true, avgLabel: "전체 평균" },
+    },
     options: { rank: true, rankAccent: true, me: true, avgRow: true, unit: "원", showPct: false },
     insight: (d) => {
       if (!d.myRank) return "";

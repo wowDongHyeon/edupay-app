@@ -6,7 +6,7 @@
 //   fallbackShape.pickCardSignature 가 기존 shapeForIntent/pickFallbackShape 로 위임(패리티 안전).
 //
 // 반환 카드키(= QUERIES intent 와 동일):
-//   merchantMap | balance | channel | schoolCompare | report | reportDaily | merchantBreakdown
+//   merchantMap | balance | dayTxns | channel | schoolCompare | friendCompare | report | reportDaily | merchantBreakdown
 //   + "kpi"(단일 KPI) | "generic"(그 외 → 폴백 4템플릿)
 
 const TEMPORAL_RE = [/^\d{4}-\d{2}(-\d{2})?$/, /^\d{6}(\d{2})?$/]; // YYYY-MM[-DD] / YYYYMM[DD]
@@ -19,6 +19,11 @@ const isIdent = (c) => /_no$|_id$|_cd$|_code$|번호|코드/i.test(String(c));
 const BAL_RE = /bl?nc|balance|잔액|지원금|charg|voucher|바우처|용돈|충전|point|포인트|계좌/i;
 // 채널 범주 값 어휘(코드/영문/한글). 이 어휘로만 이뤄진 범주 컬럼 = 채널.
 const CHANNEL_VAL = /^(on|off|online|offline|온라인|오프라인)$/i;
+// dayTxns(L, 범용 건별 거래 리스트) 시그니처: 상품명(gds_nm)은 operia 1000질의(v2) 실측상 L(90행)에만 존재,
+//   타 13 intent 0 → gds_nm 이 L↔CH 유일 구분자(CH 는 category_nm 만, gds_nm 없음). "item" 은 스키마 BIZ_ITEM_NM(종목)과
+//   충돌하므로 제외. 행별 시각(dlng_tm/_tm$/시각)까지 있어야 '건별 거래'로 확정(집계형 오인 방지).
+const GDS_RE = /gds_nm|goods|상품|product/i;
+const TXN_TIME_RE = /dlng_tm|_tm$|시각/i;
 
 // 컬럼 → 역할. shapeForIntent.roleOf 미러(순수·import 없이): coord > temporal > value > category.
 //   좌표는 이름으로 먼저(숫자 오인 방지), 시간축은 type=date 또는 값패턴(YYYY-MM[-DD]).
@@ -70,8 +75,19 @@ export function classifyCard(rows, columnMetadata) {
   // 특이도 높은 순(§4). balance 는 잔액어휘라 다른 범주/값 카드와 충돌 안 함 → 좌표 다음 우선.
   if (byRole.coord.length >= 2) return "merchantMap";
   if (isBalanceSig(R, keys)) return "balance";
+  // dayTxns(L): 다행 + 상품명(gds_nm) + 행별 시각. 반드시 channel 체크보다 앞 — L 은 channel_nm 을 갖고 있어
+  //   뒤에 두면 channel 로 hijack 된다. CH 는 gds_nm 이 없어 이 체크(AND)를 통과 못 하고 channel 로 정상 진행 → 회귀 0.
+  if (R.length >= 2
+      && keys.some((c) => GDS_RE.test(String(c)) && !isIdent(c))
+      && keys.some((c) => TXN_TIME_RE.test(String(c)))) return "dayTxns";
   if (catCols.some((c) => isChannelCol(c, R))) return "channel";
-  if (catCols.some((c) => /sch|school|학교/i.test(String(c)))) return "schoolCompare";
+  // grade/학년도 학교별과 동일 비교 카드(barlist). operia 가 grade 를 문자열('2'/'중2')로 반환해 범주로 잡힘
+  //   (정수로 오면 roleOf 가 '값'으로 분류 → 여기 도달 못 하고 generic). ceiling: 정수 반환 시 operia 조정 필요.
+  if (catCols.some((c) => /sch|school|학교|grade|학년/i.test(String(c)))) return "schoolCompare";
+  // friendCompare: operia 친구비교 응답의 범주 컬럼명이 'scope'(값: 나/우리 학교 평균/충북 전체 평균, 3행).
+  //   결정적 이름 매칭 → schoolCompare 다음, report(시간축)·merchantBreakdown(범주+값)보다 앞에 둬야
+  //   scope 가 일반 범주카드로 새지 않는다. ponytail: 이름 매칭으로 충분(scope 는 F 카드 전용 컬럼).
+  if (catCols.some((c) => /^scope$/i.test(String(c).trim()))) return "friendCompare";
   if (byRole.temporal.length && byRole.value.length) {
     const tcol = byRole.temporal[0];
     const sample = R.map((r) => r[tcol]).find((v) => v != null);

@@ -4,8 +4,10 @@ import { INTENT_CONFIG } from "./intentConfig";
 import { ReportPlanRenderer } from "./reportPlan/ReportPlanRenderer";
 import { shapeForIntent } from "./shapeForIntent";
 import { labelForColumn } from "./codeLabels";
+import { dayLabel } from "./util";
 import { pickFallbackShape } from "./fallbackShape";
 import { classifyCard } from "./cardSignature";
+import { applyCatContext } from "./catContext";
 import { activeChannelName } from "../api/datasource";
 
 // Phase D: 카드 선택은 응답 '컬럼 시그니처' 단일 경로로 확정(플래그 제거). forceTable("표로 보여줘")만 예외.
@@ -291,12 +293,6 @@ function _fmtTime(v) {
   if (d.length >= 4) return d.slice(0, 2) + ":" + d.slice(2, 4); // "1200"/"120000" → "12:00"
   return "";
 }
-function dayBadge(scope) {
-  const d = scope && scope.date;
-  if (!d) return "사용";
-  const p = String(d).split("-");
-  return p[1] && p[2] ? `${+p[1]}월 ${+p[2]}일` : "사용";
-}
 function shapeDayTxns(tableData) {
   const rows = Array.isArray(tableData) ? tableData : [];
   if (!rows.length) return null;
@@ -311,10 +307,11 @@ function shapeDayTxns(tableData) {
     merchant: r[cMerchant],
     item: cItem ? r[cItem] : "",
     amount: Number(r[cAmount]) || 0,
+    date: cDate ? dayLabel(r[cDate]) : "",
     time: cTime ? _fmtTime(r[cTime]) : "",
-    _t: cTime ? String(r[cTime]).replace(/\D/g, "") : (cDate ? String(r[cDate]) : ""),
+    _t: (cDate ? String(r[cDate]).replace(/\D/g, "") : "") + (cTime ? String(r[cTime]).replace(/\D/g, "").padEnd(6, "0") : ""),
   }));
-  items.sort((a, b) => (a._t < b._t ? -1 : a._t > b._t ? 1 : 0)); // 시간순(오름차순)
+  items.sort((a, b) => (a._t > b._t ? -1 : a._t < b._t ? 1 : 0)); // 날짜+시각 최근순(내림차순)
   return { rows: items, total: items.reduce((s, x) => s + x.amount, 0), count: items.length };
 }
 
@@ -331,13 +328,19 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
     const shaped = shapeForIntent("report", tableData, columnMetadata);
     if (shaped) return <ReportToggleCard initialShaped={shaped} initialRows={tableData} sql={sql} source={source} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
   }
-  // 전용 1.5) dayTxns 하루 건별 거래 리스트 — operia 행(merchant/gds/amount/time)을 인라인 shape. 형태 안 맞으면 아래 폴백.
+  // 전용 1.2) reportDaily 일자별 지출 — 이미 온 tableData 를 그대로 shape(재조회 X). shapeForIntent("reportDaily")=
+  //   last7Days: 날짜 오름차순(과거→최근) + 짧은 "M/D" 라벨(dLabel) → bar 로 렌더. report 월/일 토글과 달리 단독 카드(toggle 없음).
+  //   config 는 report.tabs.day 재사용(제목/부제/배지/인사이트). shape 실패 시 아래 폴백으로 흘림.
+  else if (intent === "reportDaily") {
+    const shaped = shapeForIntent("reportDaily", tableData, columnMetadata);
+    if (shaped) return <TEMPLATES.bar data={shaped} config={reportTabConfig("day")} />;
+  }
+  // 전용 1.5) dayTxns 건별 거래 리스트(L) — operia 행(merchant/gds/amount/time)을 인라인 shape. 형태 안 맞으면 아래 폴백.
+  //   scope(구 mock 라우팅 잔여, 현 operia 응답은 scope=null) 의존 제거 → 제목·부제 고정, 날짜 배지 생략.
   else if (intent === "dayTxns") {
     const shaped = shapeDayTxns(tableData);
     if (shaped) {
-      const label = (scope && scope.label) || "";
-      const badge = label && label !== "선택 날짜" ? label : dayBadge(scope);
-      return <TEMPLATES.txnList data={shaped} config={{ title: `${badge} 사용 내역`, subtitle: "FOX PAY 결제 · 건별 내역", badge, options: { limit: 6 } }} />;
+      return <TEMPLATES.txnList data={shaped} config={{ title: "사용 내역", subtitle: "FOX PAY 결제 · 건별 내역", options: { limit: 6 } }} />;
     }
   }
   // 전용 2) merchantMap 지도 — shapeForIntent("merchantMap") {center,items}. 좌표 없으면(shape 실패) 아래 공통 폴백으로
@@ -369,7 +372,9 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
         const Tpl = TEMPLATES[cfg.template] || TEMPLATES.table;
         // payload 한글 제목은 operia 그룹 경로(grouped)일 때만 — mock/backend(shapeForIntent 폴백)는 cfg.title 유지(회귀 0)
         const mergedCfg = grouped ? mergeTitleFromPlan(intent, cfg, reportPlan) : cfg;
-        return <Tpl data={shaped} config={mergedCfg} intent={intent} />;
+        // 맥락 분기: 범주 컬럼(dow/hour/grade) 감지 시 제목·라벨만 오버라이드(분류·데이터·정렬 불변). 감지 안 되면 원본 그대로.
+        const c = applyCatContext(mergedCfg, shaped, tableData);
+        return <Tpl data={c.shaped} config={c.cfg} intent={intent} />;
       }
     }
   }
@@ -380,8 +385,9 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
     if (pick) {
       const _bst = (INTENT_CONFIG.balance && INTENT_CONFIG.balance.options && INTENT_CONFIG.balance.options.itemStyles) || [];
       if (pick.template === "kpi") {
-        const _cfg = { badge: (INTENT_CONFIG.balance && INTENT_CONFIG.balance.badge) || "실시간", title: pick.label, subtitle: "지금 사용할 수 있어요", options: { itemStyles: [_bst[0] || {}] } };
-        return <TEMPLATES.statList data={{ kpi: true, items: [{ label: pick.label, sub: "", value: pick.value, unit: pick.unit }] }} config={_cfg} intent={intent} />;
+        // ponytail: 폴백 단일-KPI는 잔액이 아닐 수 있음(지출 총액 등) → "지금 사용할 수 있어요" 오프레이밍 제거. 제목이 label을 이미 담으므로 내부 label은 비워 중복(금액/금액) 방지.
+        const _cfg = { badge: "요약", title: pick.label, subtitle: "", options: { itemStyles: [_bst[0] || {}] } };
+        return <TEMPLATES.statList data={{ kpi: true, items: [{ label: "", sub: "", value: pick.value, unit: pick.unit }] }} config={_cfg} intent={intent} />;
       }
       if (pick.template === "statList") {
         const _cfg = { badge: "요약", title: "조회 결과", subtitle: "항목별 값", options: { itemStyles: pick.items.map((_, i) => _bst[i % _bst.length] || {}) } };
