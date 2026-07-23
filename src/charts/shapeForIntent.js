@@ -140,6 +140,21 @@ function normalizeColumns(intent, rows, columnMetadata) {
   });
 }
 
+// report/reportDaily 값 메트릭 판정 — 인사이트 단위("N번" vs "N원"). 값 컬럼(value 역할) 중
+//   금액류(VALUE_PREF.amount)가 있으면 amount(그게 shape 의 값), 없고 건수류만이면 count. 기본 amount(회귀 안전).
+//   근거(코어50 #2): "달마다 몇 번 썼어"=건수 컬럼(CNT/count/건수)인데 won()으로 "27원" 오표기 → 메트릭 인식.
+const COUNT_RE = /cnt|count|건수|횟수|num/i;
+function reportMetric(rows, columnMetadata) {
+  const cols = Object.keys(rows[0] || {});
+  const meta = (Array.isArray(columnMetadata) && columnMetadata.length)
+    ? columnMetadata.filter((c) => cols.includes(c.column))
+    : cols.map((c) => ({ column: c, type: inferType(rows, c) }));
+  const valueCols = meta.filter((c) => roleOf(c.column, c.type, rows) === "value").map((c) => c.column);
+  if (valueCols.some((c) => VALUE_PREF.amount.test(c))) return "amount";
+  if (valueCols.some((c) => COUNT_RE.test(c))) return "count";
+  return "amount";
+}
+
 // shape 결과 유효성(핵심 필드 존재 + 비어있지 않음). 무효면 null → 폴백.
 function isValidShape(intent, s) {
   if (!s || typeof s !== "object") return false;
@@ -172,7 +187,10 @@ export function shapeForIntent(intent, tableData, columnMetadata) {
   if (!normalized) return null;
   let shaped;
   try { shaped = def.shape(normalized); } catch (e) { return null; }
-  return isValidShape(intent, shaped) ? shaped : null;
+  if (!isValidShape(intent, shaped)) return null;
+  // report/reportDaily 인사이트 단위 신호(건수/금액) — 원본 컬럼명 기준(정규화 전 rows/columnMetadata).
+  if (intent === "report" || intent === "reportDaily") shaped.metric = reportMetric(rows, columnMetadata);
+  return shaped;
 }
 
 export default shapeForIntent;

@@ -57,10 +57,15 @@ export const QUERIES = {
     // ★ backend 월별은 breakdown(means) 컬럼이 없을 수 있다 → 그 경우 막대만(§6-1·작업D). means 있으면 결제수단 분해.
     shape: (rows) => {
       const hasMeans = rows.some((r) => r.means != null);
+      // 최근 6개월만(막대): 오름차순 정렬 후 뒤에서 6개(최신). 6개 이하면 그대로.
+      const agg = sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).slice(-6);
+      // 연도 노출: 다년(연도 2개+) 또는 단일막대(peak)면 "YYYY년 N월"(모호 방지, 코어50 #7). 단일연도 추이는 "N월" 유지.
+      const years = new Set(agg.map((x) => digits(x.month).slice(0, 4)).filter((y) => y.length === 4));
+      const showYear = years.size > 1 || agg.length === 1;
+      const mLbl = (m) => { const d = digits(m); const mm = d.length >= 6 ? +d.slice(4, 6) : 0; return mm ? (showYear ? `${d.slice(0, 4)}년 ${mm}월` : `${mm}월`) : String(m == null ? "" : m); };
       return {
-        // key(YYYY-MM) = 진행중 당월 판정용(insight). label/value 는 기존과 동일(bar 템플릿은 label/value 만 사용).
-        // 최근 6개월만(막대): 오름차순 정렬 후 뒤에서 6개(최신). 6개 이하면 그대로 — 배지/인사이트가 이 series 기준으로 자동 연동.
-        series: sumBy(rows, "month").sort((a, b) => (a.month < b.month ? -1 : 1)).slice(-6).map((x) => ({ label: mLabel(x.month), value: x.amount, key: monthKey(x.month) })),
+        // key(YYYY-MM) = 진행중 당월 판정용(insight). label/value 는 bar 템플릿 입력(label/value 만 사용).
+        series: agg.map((x) => ({ label: mLbl(x.month), value: x.amount, key: monthKey(x.month) })),
         currentMonthKey: monthKey(TODAY), // 오늘(DATA.TODAY) 기준 현재월 — 마지막 막대가 진행중 당월인지 판정(insight)
         breakdown: hasMeans
           ? withPct(sumBy(rows, "means").sort((a, b) => b.amount - a.amount))
@@ -262,18 +267,22 @@ export const QUERIES = {
       // backend CHANNEL_CD 는 코드('ON'/'OFF')·영문·한글("온라인"/"오프라인"), mock 은 'ONLINE'/'OFFLINE'
       //   → canonChannel 로 표준키 정규화(trim·대소문자·한글 수용; 템플릿 groupStyles 키와 정렬).
       const canon = canonChannel;
-      const total = rows.reduce((s, r) => s + (r.amount || 0), 0) || 1;
       // backend 집계행은 cnt(cnt_pay)로 건수를 주고, mock 은 거래 1건=1행. count 는 cnt 있으면 합, 없으면 행 수.
       const group = (ch, label) => {
         const rs = rows.filter((r) => canon(r.channel) === ch);
         const amount = rs.reduce((s, r) => s + (r.amount || 0), 0);
         const count = rs.reduce((s, r) => s + (r.cnt != null ? r.cnt : 1), 0);
-        return { key: ch, label, amount, count, pct: round((amount / total) * 100) };
+        return { key: ch, label, amount, count, pct: 0 };
       };
+      const off = group("OFFLINE", "오프라인"), on = group("ONLINE", "온라인");
+      // ★% 기준 = 표시 채널(온+오프) 합계 → 합 100%(코어50 #24). 미분류 채널이 total 에 섞여 85+5≠100 되던 문제 방지.
+      const base = (off.amount + on.amount) || 1;
+      off.pct = round((off.amount / base) * 100);
+      on.pct = (off.amount > 0 && on.amount > 0) ? 100 - off.pct : round((on.amount / base) * 100);
       // 거래 단위 컬럼(item)이 있을 때만 tx 리스트 구성. backend 집계행(채널별 합계)엔 item 이 없어 리스트 생략(스택바+요약만).
       const hasItem = rows.some((r) => r.item != null);
       return {
-        groups: [group("OFFLINE", "오프라인"), group("ONLINE", "온라인")],
+        groups: [off, on],
         rows: hasItem ? rows.map((r) => ({ group: canon(r.channel), item: r.item, amount: r.amount, date: r.dt })) : [],
       };
     },

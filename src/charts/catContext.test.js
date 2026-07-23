@@ -2,7 +2,7 @@
 //   러너: node --test (stdlib, 새 의존성 없음).  실행: node --test src/charts/catContext.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { detectCatContext, applyCatContext } from "./catContext.js";
+import { detectCatContext, applyCatContext, catKindOf } from "./catContext.js";
 
 // intentConfig.contexts 미러(문자열 소유는 intentConfig, 여기선 적용 검증만)
 const MB = { title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", contexts: {
@@ -68,6 +68,21 @@ test("apply schoolCompare 기본(학교) → 원본 유지(회귀 0)", () => {
   assert.equal(r.cfg.title, "학교별 사용 비교");
   assert.equal(r.shaped.avgRow.label, "충북 평균");
 });
+test("catKindOf: 가맹점 컬럼 → merchant(장소 말투)", () => {
+  assert.equal(catKindOf([{ merchant: "GS25", amount: 1 }]), "merchant");
+  assert.equal(catKindOf([{ MERCHANT_NM: "GS25", amount: 1 }]), "merchant");
+  assert.equal(catKindOf([{ 상호명: "GS25", amount: 1 }]), "merchant");
+});
+test("catKindOf: 요일/시간대 → dow/hour(중립)", () => {
+  assert.equal(catKindOf([{ dow: "수", amount: 1 }]), "dow");
+  assert.equal(catKindOf([{ hour: "14시", amount: 1 }]), "hour");
+});
+test("catKindOf: 업종/상품 → other(중립, 장소 아님)", () => {
+  assert.equal(catKindOf([{ BIZ_ITEM_NM: "편의점", amount: 1 }]), "other");
+  assert.equal(catKindOf([{ GDS_NM: "우유", amount: 1 }]), "other");
+  assert.equal(catKindOf([]), "other");
+});
+
 test("contexts 없는 cfg → 무변경", () => {
   const cfg = { title: "x" };
   const r = applyCatContext(cfg, { items: [] }, [{ dow: "월" }]);

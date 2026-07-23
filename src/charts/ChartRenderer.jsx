@@ -7,7 +7,8 @@ import { labelForColumn } from "./codeLabels";
 import { dayLabel } from "./util";
 import { pickFallbackShape } from "./fallbackShape";
 import { classifyCard } from "./cardSignature";
-import { applyCatContext } from "./catContext";
+import { derivePeriod } from "./periodFromEnvelope";
+import { applyCatContext, catKindOf } from "./catContext";
 import { activeChannelName } from "../api/datasource";
 
 // Phase D: 카드 선택은 응답 '컬럼 시그니처' 단일 경로로 확정(플래그 제거). forceTable("표로 보여줘")만 예외.
@@ -184,6 +185,15 @@ export function SqlChip({ sql, source, result, rawRows, queryInfo }) {
   );
 }
 
+// 기간 배지 라벨: operia 봉투 appliedPeriod(문자열 또는 {label}) → 표시 문자열. 없으면 undefined(미표시).
+//   근거(기간정책 02 D1/D2): 기간 배지는 operia 가 date_filter 주체이므로 봉투 값만 표시(프론트 span 추측·하드코딩 금지).
+function periodLabel(appliedPeriod) {
+  if (!appliedPeriod) return undefined;
+  if (typeof appliedPeriod === "string") return appliedPeriod.trim() || undefined;
+  if (typeof appliedPeriod === "object") return appliedPeriod.label || appliedPeriod.text || undefined;
+  return undefined;
+}
+
 // report 탭별 표현 config 합성(같은 bar 템플릿 사용)
 const DAILY_TEXT = "최근 7일 사용 내역을 일별로 알려줘";
 function reportTabConfig(tab) {
@@ -194,7 +204,7 @@ function reportTabConfig(tab) {
 
 // report(bar) orchestrator — 월/일 토글 + 일별 lazy 로드·양쪽 캐시 + 활성 탭 SQL 상위 전달.
 // §6-1: 표준 tableData 를 shapeForIntent 가 카드 입력으로 변환(월=initialShaped, 일별=shapeForIntent("reportDaily")).
-function ReportToggleCard({ initialShaped, initialRows, sql, source, onCardQuery, onActiveSql }) {
+function ReportToggleCard({ initialShaped, initialRows, sql, source, periodBadge, onCardQuery, onActiveSql }) {
   const [tab, setTab] = useState("month");
   const [cache, setCache] = useState(() => ({
     month: { data: initialShaped, sql, source, rows: initialRows || [] },
@@ -228,16 +238,12 @@ function ReportToggleCard({ initialShaped, initialRows, sql, source, onCardQuery
   }, [active, onActiveSql]);
 
   const Bar = TEMPLATES.bar;
-  // 배지: 월 탭은 실제 막대(월) 수 기준 "최근 N개월"(1개면 "이번 달"). 일 탭은 기존("최근 7일") 유지.
+  // 배지: operia appliedPeriod 라벨만(데이터-span 추정 제거, 기간정책 02 D4). 없으면 미표시.
   const cfg = reportTabConfig(tab);
-  const monthCount = active && active.data && Array.isArray(active.data.series) ? active.data.series.length : 0;
-  const badge = tab === "month" && monthCount > 0
-    ? (monthCount <= 1 ? "이번 달" : `최근 ${monthCount}개월`)
-    : cfg.badge;
   return (
     <Bar
       data={active && active.data}
-      config={{ ...cfg, badge }}
+      config={{ ...cfg, badge: periodBadge }}
       tab={tab} onTab={onTab}
       loading={tab === "day" && loading}
       error={tab === "day" && error && !cache.day}
@@ -315,7 +321,9 @@ function shapeDayTxns(tableData) {
   return { rows: items, total: items.reduce((s, x) => s + x.amount, 0), count: items.length };
 }
 
-export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, forceTable, onCardQuery, onActiveSql }) {
+export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, appliedPeriod, queryBreakdown, queryInfo, forceTable, onCardQuery, onActiveSql }) {
+  // 기간정책 02 D6: operia appliedPeriod override 우선, 없으면 봉투 필터 도출(D1). 둘 다 없으면 undefined(미표시).
+  const periodBadge = periodLabel(appliedPeriod) ?? derivePeriod({ queryBreakdown, queryInfo }) ?? undefined;
   // Phase B: 플래그 ON이면 질의 대신 응답 컬럼 시그니처로 카드 결정. intent 만 덮어 아래 기존 큐레이션
   //   경로(report 월/일 토글·balance focus·merchantMap·grouped % payload·폴백)를 그대로 재사용 → 패리티 최상.
   //   generic/kpi 는 전용 브랜치가 없어 자연히 shape 폴백/표로 흐른다. forceTable("표로 보여줘")면 덮지 않음.
@@ -326,14 +334,14 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   // 전용 1) report 월/일 토글 — shapeForIntent("report") {series,breakdown}, 일별은 lazy
   if (intent === "report") {
     const shaped = shapeForIntent("report", tableData, columnMetadata);
-    if (shaped) return <ReportToggleCard initialShaped={shaped} initialRows={tableData} sql={sql} source={source} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
+    if (shaped) return <ReportToggleCard initialShaped={shaped} initialRows={tableData} sql={sql} source={source} periodBadge={periodBadge} onCardQuery={onCardQuery} onActiveSql={onActiveSql} />;
   }
   // 전용 1.2) reportDaily 일자별 지출 — 이미 온 tableData 를 그대로 shape(재조회 X). shapeForIntent("reportDaily")=
   //   last7Days: 날짜 오름차순(과거→최근) + 짧은 "M/D" 라벨(dLabel) → bar 로 렌더. report 월/일 토글과 달리 단독 카드(toggle 없음).
   //   config 는 report.tabs.day 재사용(제목/부제/배지/인사이트). shape 실패 시 아래 폴백으로 흘림.
   else if (intent === "reportDaily") {
     const shaped = shapeForIntent("reportDaily", tableData, columnMetadata);
-    if (shaped) return <TEMPLATES.bar data={shaped} config={reportTabConfig("day")} />;
+    if (shaped) return <TEMPLATES.bar data={shaped} config={{ ...reportTabConfig("day"), badge: periodBadge }} />;
   }
   // 전용 1.5) dayTxns 건별 거래 리스트(L) — operia 행(merchant/gds/amount/time)을 인라인 shape. 형태 안 맞으면 아래 폴백.
   //   scope(구 mock 라우팅 잔여, 현 operia 응답은 scope=null) 의존 제거 → 제목·부제 고정, 날짜 배지 생략.
@@ -374,7 +382,11 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
         const mergedCfg = grouped ? mergeTitleFromPlan(intent, cfg, reportPlan) : cfg;
         // 맥락 분기: 범주 컬럼(dow/hour/grade) 감지 시 제목·라벨만 오버라이드(분류·데이터·정렬 불변). 감지 안 되면 원본 그대로.
         const c = applyCatContext(mergedCfg, shaped, tableData);
-        return <Tpl data={c.shaped} config={c.cfg} intent={intent} />;
+        // merchantBreakdown 인사이트 말투 분기 신호(_catKind) 주입 — 데이터 불변(새 객체).
+        const finalShaped = intent === "merchantBreakdown" ? { ...c.shaped, _catKind: catKindOf(tableData) } : c.shaped;
+        // 기간 배지: 컨텍스트 배지(실시간/충북 중학교/전체 내역 등)가 없는 카드에만 operia appliedPeriod 표시(없으면 미표시).
+        const finalCfg = (!c.cfg.badge && periodBadge) ? { ...c.cfg, badge: periodBadge } : c.cfg;
+        return <Tpl data={finalShaped} config={finalCfg} intent={intent} />;
       }
     }
   }

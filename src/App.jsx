@@ -128,6 +128,8 @@ function queryDataSource(userInput, intent, scope) {
               columnMetadata,
               reportPlan: e && e.reportPlan,
               summaryStats,
+              appliedPeriod: (e && e.appliedPeriod) || null, // 기간정책 02: 기간 배지 소스(operia 미제공이면 null → 미표시)
+              queryBreakdown: (e && e.queryBreakdown) || null, // 기간정책 02 D1: appliedPeriod 없어도 봉투 필터로 기간 배지 도출(백업 queryInfo.조건)
               answer: sanitizeAnswer((e && e.answer) || ""),
               sql: qi.sql || extractOperiaSql(e && e.summary) || null,         // §9 SQL 칩(operia 는 summary 로그에서 추출)
               source: qi.source || "api",  // 칩 라벨용(mock=template, backend/operia=자기 값)
@@ -767,7 +769,7 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
             <span className="text-[13px]">↻</span>다시 시도
           </button>
           }
-          {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} scope={msg.scope} forceTable={msg.chartType === "table"} onCardQuery={onCardQuery} onActiveSql={setChip} />}
+          {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} scope={msg.scope} appliedPeriod={msg.appliedPeriod} queryBreakdown={msg.queryBreakdown} queryInfo={msg.queryInfo} forceTable={msg.chartType === "table"} onCardQuery={onCardQuery} onActiveSql={setChip} />}
         </div>
       </div>
       {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
@@ -1344,7 +1346,7 @@ function App() {
     // 렌더 지시(forceTable) → 범용 표. 아니면 chartType 을 non-table 센티널("card")로 둬 ChartRenderer 가
     //   forceTable=false 로 인식 → 응답 컬럼 시그니처로 카드 선택(Phase D 단일 경로). intent 는 넘기지 않음(시그니처가 결정).
     const _tf = forceTable && (_hasCols || _rows.length > 0);
-    setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : "card", intent: null, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, queryInfo: resp.queryInfo }]);
+    setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : "card", intent: null, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, appliedPeriod: resp.appliedPeriod, queryBreakdown: resp.queryBreakdown, queryInfo: resp.queryInfo }]);
   }
 
   async function send(text) {

@@ -43,6 +43,7 @@
  * @property {boolean}  [hasNext]
  * @property {number}   [totalCount]
  * @property {Object}   [queryInfo]    AI 판단 메타. queryInfo.sql 이 있으면 SQL 칩 노출(§9)
+ * @property {Object}   [queryBreakdown]  실행 필터 구조화(filters[]). 날짜필터 → 기간 배지 도출(기간정책 02 D1)
  * @property {Object}   [reportPlan]   UI 섹션 구성(§6, §7)
  * @property {Object}   [summaryStats] §4.4 — 클라 계산값을 단일 기준으로 사용(채널 값 무시 가능)
  * @property {string}   [summary]      에이전트 실행 로그(디버그/감사)
@@ -86,6 +87,7 @@ export function makeResultEvent(e = {}) {
     columnMetadata: e.columnMetadata,
     totalCount: e.totalCount,
     queryInfo: e.queryInfo,
+    queryBreakdown: e.queryBreakdown,  // 기간정책 02: 날짜필터 → 기간 배지 도출(백업 queryInfo.조건)
     reportPlan: e.reportPlan,
     summaryStats: e.summaryStats,
     summary: e.summary,

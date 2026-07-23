@@ -29,6 +29,19 @@ export function detectCatContext(tableData) {
   return null;
 }
 
+// barlist(merchantBreakdown) 인사이트 말투 판정: 범주가 '가맹점(장소)'이면 장소 말투("~에서…자주 가는 곳"),
+//   그 외(요일/시간대/업종/상품)는 중립. dow/hour 는 detectCatContext 재사용, 가맹점은 컬럼명으로 판정.
+//   근거(코어50 #5): 같은 barlist 를 요일/업종/상품에 재사용 → 장소 말투가 비-가맹점에서 어색.
+const MERCHANT_RE = /merchant|가맹|상호|store|shop/i;
+export function catKindOf(tableData) {
+  const ctx = detectCatContext(tableData);
+  if (ctx === "dow" || ctx === "hour") return ctx;
+  const rows = Array.isArray(tableData) ? tableData : [];
+  const keys = Object.keys(rows[0] || {});
+  if (keys.some((k) => MERCHANT_RE.test(k))) return "merchant";
+  return "other";
+}
+
 // 숫자 라벨에만 "학년" 접미(이미 "N학년"/"중2" 등 비숫자면 그대로).
 const gradeLabel = (l) => (/^\d+$/.test(String(l).trim()) ? String(l).trim() + "학년" : l);
 

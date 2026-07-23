@@ -10,15 +10,18 @@ export const INTENT_CONFIG = {
     template: "bar",
     options: { toggle: ["month", "day"], breakdown: true, breakdownHeader: "결제수단별 · 합계", loadingText: "일별 내역 불러오는 중…", errorText: "일별 내역을 불러오지 못했어요.", retryText: "다시 시도" },
     tabs: {
+      // badge 제거: 기간 배지는 operia appliedPeriod 로만(코어50 기간정책 02). 없으면 미표시.
       month: {
-        title: "월별 사용 내역", subtitle: "FOX PAY 결제 · 월별 추이", badge: "최근 3개월",
+        title: "월별 사용 내역", subtitle: "FOX PAY 결제 · 월별 추이",
         // 당월(막대 key === 오늘 YYYYMM) 처리: 비교는 완결월끼리(당월 제외), 당월은 별도 안내.
         //   · 당월에 사용액 있으면 "지금까지 N원 썼어요"(집계중 문구 금지 — 데이터 있는데 오해 소지).
         //   · 당월 데이터 없으면(series에 당월 막대 없음) "아직 사용 내역이 없어요".
         //   · 과거만 조회(당월 막대 없음)면 마지막 vs 직전 비교(기존).
+        //   · d.metric='count'(건수)면 단위 "N번", 아니면 "N원"(코어50 #2).
         insight: (d) => {
           const s = d.series || [];
           if (!s.length) return "";
+          const fmt = d.metric === "count" ? (v) => `${num(v)}번` : won;
           const curKey = d.currentMonthKey;
           const curBar = curKey ? s.find((x) => x.key === curKey) : null; // 당월 막대(있으면)
           const curLabel = curKey ? ((+String(curKey).slice(5, 7) || "") + "월") : "";
@@ -26,27 +29,28 @@ export const INTENT_CONFIG = {
           const cur = pool[pool.length - 1], prev = pool[pool.length - 2];
           // 당월 안내: 데이터 있으면 실제 사용액, 없으면 '아직 사용 내역 없음'(집계중 문구 폐기)
           const note = curBar
-            ? ` ${curLabel}은 지금까지 ${won(curBar.value)} 썼어요.`
+            ? ` ${curLabel}은 지금까지 ${fmt(curBar.value)} 썼어요.`
             : (curLabel ? ` ${curLabel}은 아직 사용 내역이 없어요.` : "");
           if (cur && prev && prev.value) {
             const diff = cur.value - prev.value, pct = Math.round(Math.abs(diff) / prev.value * 100);
             const msg = diff >= 0
-              ? `${cur.label}은 ${prev.label}보다 ${won(diff)}(${pct}%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪`
-              : `${cur.label}은 ${prev.label}보다 ${won(-diff)}(${pct}%) 덜 썼어. 잘하고 있어 👏`;
+              ? `${cur.label}은 ${prev.label}보다 ${fmt(diff)}(${pct}%) 더 썼어. 다음 달엔 조금 아껴볼까? 💪`
+              : `${cur.label}은 ${prev.label}보다 ${fmt(-diff)}(${pct}%) 덜 썼어. 잘하고 있어 👏`;
             return msg + note;
           }
-          if (cur) return `${cur.label}에 ${won(cur.value)} 썼어.${note || " 계획해서 써보자 📊"}`;
+          if (cur) return `${cur.label}에 ${fmt(cur.value)} 썼어.${note || " 계획해서 써보자 📊"}`;
           // 완결월 없음(당월 데이터뿐) → 당월 사용액만 안내(집계중 문구 없이)
-          return curBar ? `${curLabel}에 지금까지 ${won(curBar.value)} 썼어 📊` : "";
+          return curBar ? `${curLabel}에 지금까지 ${fmt(curBar.value)} 썼어 📊` : "";
         },
       },
       day: {
-        title: "일별 사용 내역", subtitle: "FOX PAY 결제 · 일별 흐름", badge: "최근 7일",
+        title: "일별 사용 내역", subtitle: "FOX PAY 결제 · 일별 흐름",
         insight: (d) => {
           const s = d.series || [];
           if (!s.length) return "";
+          const fmt = d.metric === "count" ? (v) => `${num(v)}번` : won;
           const sum = s.reduce((a, x) => a + (x.value || 0), 0);
-          return `최근 ${s.length}일 동안 ${won(sum)} 썼어. 하루 평균 ${won(Math.round(sum / s.length))} 정도야 📊`;
+          return `최근 ${s.length}일 동안 ${fmt(sum)} 썼어. 하루 평균 ${fmt(Math.round(sum / s.length))} 정도야 📊`;
         },
       },
     },
@@ -85,7 +89,8 @@ export const INTENT_CONFIG = {
   // ④ nudgeCompare (trend)
   nudgeCompare: {
     template: "trend",
-    title: "내 조르기 추이", subtitle: "이번 달 vs 지난달 · 월별 충전 요청", badge: "이번 달",
+    // badge 제거: 기간 배지는 operia appliedPeriod 로만(코어50 기간정책 02). 없으면 미표시.
+    title: "내 조르기 추이", subtitle: "이번 달 vs 지난달 · 월별 충전 요청",
     // countNoun/valueNoun = 박스 명사(접두 '이번 달'/'N월'은 trend.jsx 가 current.isCurrentMonth 로 결정). countBox/valueBox 는 폴백.
     options: { labels: { countBox: "이번 달 충전 요청", valueBox: "이번 달 충전 금액", countNoun: "충전 요청", valueNoun: "충전 금액", monthlyHeader: "월별 충전 요청", countUnit: "회" } },
     // 정직 표시: 이전 달이 있을 때만 비교 문구, 없으면 중립(지어내지 않음).
@@ -145,12 +150,19 @@ export const INTENT_CONFIG = {
       hour: { title: "시간대별 사용", subtitle: "시간대별 사용 금액" },
     },
     options: { rank: true, showPct: true, unit: "" },
+    // 범주 말투 분기(코어50 #5): d._catKind='merchant'(또는 미지정)면 장소 말투, dow/hour/other(요일/시간대/업종/상품)면 중립.
+    //   _catKind 는 ChartRenderer 가 catKindOf(tableData) 로 주입. 단일 항목 완화와 결합.
     insight: (d) => {
       const items = d.items || [];
       const t = items[0];
       if (!t) return "";
-      if (items.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;  // 단일 항목: "제일 많이·전체의 100%·자주 가는 곳" 자명·어색해서 완화
-      return `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
+      if (d._catKind === "merchant" || d._catKind == null) { // 가맹점(장소) — 미지정도 유지(회귀 0)
+        if (items.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;
+        return `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
+      }
+      const val = d._catKind === "dow" ? `${t.label}요일` : t.label; // 요일 라벨은 "수"→"수요일"
+      if (items.length === 1) return `${val}에 ${num(t.value)}원 썼어.`;
+      return `${val}에 가장 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%).`;
     },
   },
 
