@@ -58,7 +58,14 @@ function dayLabel(start, end, now) {
   const n = Math.round((Date.UTC(b.y, b.m - 1, b.d) - Date.UTC(a.y, a.m - 1, a.d)) / 86400000) + 1; // 포함 일수
   if (n < 1) return null;
   const isToday = b.y === now.getFullYear() && b.m === now.getMonth() + 1 && b.d === now.getDate();
-  if (isToday) return `최근 ${n}일`;
+  if (isToday) {
+    // 큰 일수는 개월로 자연화("최근 92일"→"최근 3개월"). A방식: 실제 범위의 캘린더 월 차이 환산(정책버킷 역매핑 아님).
+    if (n >= 60) {
+      const months = Math.round(((b.y * 12 + b.m) - (a.y * 12 + a.m)) + (b.d - a.d) / 30);
+      if (months >= 1) return `최근 ${months}개월`;
+    }
+    return `최근 ${n}일`;
+  }
   const p = (o) => `${o.m}/${o.d}`;
   return `${p(a)}~${p(b)}`;
 }

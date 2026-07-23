@@ -24,7 +24,10 @@ export const INTENT_CONFIG = {
           const fmt = d.metric === "count" ? (v) => `${num(v)}번` : won;
           const curKey = d.currentMonthKey;
           const curBar = curKey ? s.find((x) => x.key === curKey) : null; // 당월 막대(있으면)
-          const curLabel = curKey ? ((+String(curKey).slice(5, 7) || "") + "월") : "";
+          // 축과 일치: 당월 막대가 있으면 그 라벨(mLbl 결과, showYear 규칙 반영)을 그대로. 없으면 연도 포함 폴백.
+          const curDigits = curKey ? String(curKey).replace(/\D/g, "") : "";
+          const curLabel = curBar ? curBar.label
+            : (curDigits.length >= 6 ? `${curDigits.slice(0, 4)}년 ${+curDigits.slice(4, 6)}월` : "");
           const pool = curBar ? s.filter((x) => x.key !== curKey) : s; // 비교 대상 = 완결월(당월 제외)
           const cur = pool[pool.length - 1], prev = pool[pool.length - 2];
           // 당월 안내: 데이터 있으면 실제 사용액, 없으면 '아직 사용 내역 없음'(집계중 문구 폐기)

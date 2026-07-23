@@ -21,6 +21,18 @@ test("YYYYMMDD BETWEEN, end=오늘 → 최근 N일", () => {
   assert.equal(derivePeriod({ queryBreakdown: qbDay("20260717", "20260723") }, TODAY), "최근 7일");
 });
 
+test("YYYYMMDD BETWEEN, end=오늘, 큰 일수(≈92일) → 최근 N개월", () => {
+  assert.equal(derivePeriod({ queryBreakdown: qbDay("20260423", "20260723") }, TODAY), "최근 3개월");
+});
+
+test("YYYYMMDD BETWEEN, end=오늘, 경계 60일 → 개월(최근 2개월)", () => {
+  assert.equal(derivePeriod({ queryBreakdown: qbDay("20260525", "20260723") }, TODAY), "최근 2개월");
+});
+
+test("YYYYMMDD BETWEEN, end=오늘, 경계 59일 → 일 유지(최근 59일)", () => {
+  assert.equal(derivePeriod({ queryBreakdown: qbDay("20260526", "20260723") }, TODAY), "최근 59일");
+});
+
 test("YYYYMMDD BETWEEN, end=과거일 → M/D~M/D", () => {
   assert.equal(derivePeriod({ queryBreakdown: qbDay("20260701", "20260710") }, TODAY), "7/1~7/10");
 });
