@@ -24,6 +24,20 @@ const CHANNEL_VAL = /^(on|off|online|offline|온라인|오프라인)$/i;
 //   충돌하므로 제외. 행별 시각(dlng_tm/_tm$/시각)까지 있어야 '건별 거래'로 확정(집계형 오인 방지).
 const GDS_RE = /gds_nm|goods|상품|product/i;
 const TXN_TIME_RE = /dlng_tm|_tm$|시각/i;
+// 코어25 #74 채널 %가드: 채널카드는 '합계 대비 %' 스택바 전제 → 비가산 measure(평균/최대/최소)면 % 무의미.
+//   비가산 컬럼만 있고 가산(합계/건수) 컬럼이 없으면 channel 라우팅을 건너뛰고 일반 바리스트로 흘린다.
+//   ★ 영문+한글 both: operia 가 tableData/columnMetadata 키를 영문(max_amt)↔한글("최대 결제액") 오락가락 보냄
+//     (CLAUDE.md 기록) → 영문만이면 라이브 한글 컬럼에서 가드 미발동. catContext.MEASURE_RES 와 어휘 정렬.
+//   ⚠️ 컬럼명은 폴백일 뿐: 라이브 operia 는 MAX(dlng_amt) 를 하고도 응답 컬럼을 raw 'DLNG_AMT'(label "총 금액")로
+//     별칭을 버려 보낸다 → 컬럼명엔 max 신호 없음. 그래서 아래 hasNonAddMetric(queryBreakdown.metrics.func) 이 1차 신호.
+const NONADD_MEASURE_RE = /avg_amt|max_amt|min_amt|(^|_)(avg|average|mean|max|min)(_|$)|평균|최대|최소|최고|최저/i;
+const ADD_MEASURE_RE = /amt|amount|sum|tot|total|dlng|spend|금액|합계|결제액|사용액|(^|_)cnt(_|$)|count|건수|횟수/i;
+// queryBreakdown.metrics[].func 가 비가산(MAX/MIN/AVG) 집계면 '합계 대비 %'(채널 스택바) 부적합 — 구조적 신호(컬럼명보다 신뢰).
+const NONADD_FUNC_RE = /^(max|min|avg|average|mean)$/i;
+function hasNonAddMetric(queryBreakdown) {
+  const ms = queryBreakdown && Array.isArray(queryBreakdown.metrics) ? queryBreakdown.metrics : null;
+  return !!ms && ms.some((m) => m && m.aggregated && NONADD_FUNC_RE.test(String(m.func || "")));
+}
 
 // 컬럼 → 역할. shapeForIntent.roleOf 미러(순수·import 없이): coord > temporal > value > category.
 //   좌표는 이름으로 먼저(숫자 오인 방지), 시간축은 type=date 또는 값패턴(YYYY-MM[-DD]).
@@ -58,9 +72,10 @@ function isBalanceSig(rows, keys) {
  * 응답 컬럼 시그니처 → 카드키. 순수 함수.
  * @param {Object[]} rows tableData
  * @param {Array} [columnMetadata] [{column,type,label}] — 있으면 역할 판정에 type 사용, 없으면 값으로 추론
+ * @param {Object} [queryBreakdown] 봉투 queryBreakdown — metrics[].func(MAX/MIN/AVG) 로 비가산 measure 판별(#74 채널 %가드)
  * @returns {string} 카드키 | "generic"
  */
-export function classifyCard(rows, columnMetadata) {
+export function classifyCard(rows, columnMetadata, queryBreakdown) {
   const R = Array.isArray(rows) ? rows : [];
   if (!R.length) return "generic";
   const keys = Object.keys(R[0] || {});
@@ -80,7 +95,17 @@ export function classifyCard(rows, columnMetadata) {
   if (R.length >= 2
       && keys.some((c) => GDS_RE.test(String(c)) && !isIdent(c))
       && keys.some((c) => TXN_TIME_RE.test(String(c)))) return "dayTxns";
-  if (catCols.some((c) => isChannelCol(c, R))) return "channel";
+  if (catCols.some((c) => isChannelCol(c, R))) {
+    // #74 %가드: 채널 카드는 '합계 대비 %' 스택바 전제 → 비가산 measure(MAX/MIN/AVG)면 % 무의미 → merchantBreakdown 바리스트로.
+    //   1차 신호 = queryBreakdown.metrics.func(구조적, operia 가 별칭 버려도 살아있음). 2차 = 컬럼명 정규식(폴백).
+    if (!hasNonAddMetric(queryBreakdown)) {
+      const valCols = byRole.value;
+      const hasNonAdd = valCols.some((c) => NONADD_MEASURE_RE.test(String(c)));
+      const hasAdd = valCols.some((c) => !NONADD_MEASURE_RE.test(String(c)) && ADD_MEASURE_RE.test(String(c)));
+      if (!hasNonAdd || hasAdd) return "channel";
+    }
+    // func 가 비가산이면 여기로 흘러 merchantBreakdown(일반 바리스트).
+  }
   // grade/학년도 학교별과 동일 비교 카드(barlist). operia 가 grade 를 문자열('2'/'중2')로 반환해 범주로 잡힘
   //   (정수로 오면 roleOf 가 '값'으로 분류 → 여기 도달 못 하고 generic). ceiling: 정수 반환 시 operia 조정 필요.
   if (catCols.some((c) => /sch|school|학교|grade|학년/i.test(String(c)))) return "schoolCompare";

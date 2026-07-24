@@ -45,11 +45,10 @@ export function StatListTemplate({ data, config }) {
                 >
                   <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[17px] shrink-0">{st.icon}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13.5px] font-bold" style={{ color: clickable ? st.ink : "#9AA0AC" }}>카드</div>
-                    <div className="text-[11px]" style={{ color: clickable ? st.ink : "#9AA0AC", opacity: 0.7 }}>실물 카드 발급 여부</div>
+                    <div className="text-[13.5px] font-bold truncate" style={{ color: clickable ? st.ink : "#9AA0AC" }}>카드</div>
+                    <div className="text-[11px] truncate" style={{ color: clickable ? st.ink : "#9AA0AC", opacity: 0.7 }}>실물 카드 발급 여부</div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {clickable && (<span className="text-[11px]" style={{ color: st.ink, opacity: 0.7 }}>눌러서 한도 보기 ›</span>)}
                     {/* ponytail: raw "O/X" → 사람 말. 제품 질문: '쓸 수 있는 금액' 카드에서 이 발급여부 항목을 아예 뺄지는 제품 판단(현재는 라벨만 정리). */}
                     <span
                       className="text-[11px] font-extrabold px-2.5 h-6 rounded-full flex items-center justify-center whitespace-nowrap"
@@ -57,6 +56,8 @@ export function StatListTemplate({ data, config }) {
                     >
                       {it.has ? "발급 완료" : "미발급"}
                     </span>
+                    {/* ponytail: 긴 "눌러서 한도 보기 ›" 텍스트가 좁은 폭에서 제목/라벨을 글자단위로 깨뜨림 → 셰브런으로 축약(탭 시 1일 한도 펼침은 유지). */}
+                    {clickable && (<span className="text-[15px] leading-none" style={{ color: st.ink, opacity: 0.55 }} aria-label="한도 보기">›</span>)}
                   </div>
                 </div>
                 {clickable && cardExpanded && (

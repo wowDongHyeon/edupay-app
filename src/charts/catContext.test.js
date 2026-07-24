@@ -2,7 +2,7 @@
 //   러너: node --test (stdlib, 새 의존성 없음).  실행: node --test src/charts/catContext.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { detectCatContext, applyCatContext, catKindOf } from "./catContext.js";
+import { detectCatContext, applyCatContext, catKindOf, measureKind, classifyMeasureName, orderDirection } from "./catContext.js";
 
 // intentConfig.contexts 미러(문자열 소유는 intentConfig, 여기선 적용 검증만)
 const MB = { title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", contexts: {
@@ -87,4 +87,34 @@ test("contexts 없는 cfg → 무변경", () => {
   const cfg = { title: "x" };
   const r = applyCatContext(cfg, { items: [] }, [{ dow: "월" }]);
   assert.equal(r.cfg, cfg);
+});
+
+// ── 코어25: measure(컬럼 alias) 판별 ──
+test("classifyMeasureName: alias → measure 종류", () => {
+  assert.equal(classifyMeasureName("avg_amt"), "avg");
+  assert.equal(classifyMeasureName("max_amt"), "max");
+  assert.equal(classifyMeasureName("min_amt"), "min");
+  assert.equal(classifyMeasureName("sum_dlng_amt"), "sum");
+  assert.equal(classifyMeasureName("TOTAL_AMOUNT"), "sum");
+  assert.equal(classifyMeasureName("cnt"), "count");
+  assert.equal(classifyMeasureName("CNT_PAY"), "count");
+  assert.equal(classifyMeasureName("merchant_nm"), null);
+});
+test("measureKind: 표시 measure(amount-like 우선, 없으면 건수, 기본 sum)", () => {
+  assert.equal(measureKind([{ merchant_nm: "GS25", max_amt: 30000 }]), "max"); // #70
+  assert.equal(measureKind([{ merchant_nm: "GS25", min_amt: 1500 }]), "min");  // #71
+  assert.equal(measureKind([{ dow: "월", avg_amt: 8000 }]), "avg");            // #72
+  assert.equal(measureKind([{ merchant_nm: "GS25", cnt: 5 }]), "count");       // #69
+  assert.equal(measureKind([{ merchant_nm: "GS25", sum_dlng_amt: 12000 }]), "sum");
+  assert.equal(measureKind([{ merchant_nm: "GS25", sum_dlng_amt: 12000, cnt: 5 }]), "sum"); // amount-like 우선
+  assert.equal(measureKind([]), "sum");
+  assert.equal(measureKind([{ channel_nm: "온라인", max_amt: 30000 }]), "max"); // #74
+});
+test("orderDirection: order_by.direction → asc|desc|null (봉투 shape 방어)", () => {
+  assert.equal(orderDirection({ order_by: { column: "sum_dlng_amt", direction: "ASC" } }), "asc"); // #66
+  assert.equal(orderDirection({ order_by: [{ column: "cnt", direction: "DESC" }] }), "desc");
+  assert.equal(orderDirection({ order_by: "asc" }), "asc");
+  assert.equal(orderDirection({}), null);            // 신호 없음 → 기존 동작
+  assert.equal(orderDirection(null), null);
+  assert.equal(orderDirection({ order_by: { column: "x" } }), null); // direction 없음
 });

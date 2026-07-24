@@ -42,6 +42,61 @@ export function catKindOf(tableData) {
   return "other";
 }
 
+// 컬럼 alias → measure 종류(avg|max|min|sum|count) 또는 null. 코어25 계약: 프론트는 컬럼 alias 로 의미 판별.
+//   avg/max/min 은 '_amt' 를 포함(=sum 정규식과 겹침)하므로 반드시 sum 보다 먼저 검사. count 는 겹치지 않음.
+const MEASURE_RES = [
+  ["avg", /avg_amt|(^|_)(avg|average|mean)(_|$)|평균/i],
+  ["max", /max_amt|(^|_)max(_|$)|최대/i],
+  ["min", /min_amt|(^|_)min(_|$)|최소/i],
+  ["sum", /amt|amount|sum|tot|total|dlng|spend|금액|합계/i],
+  ["count", /(^|_)cnt(_|$)|count|건수|횟수|(^|_)num(_|$)/i],
+];
+export function classifyMeasureName(col) {
+  const s = String(col == null ? "" : col);
+  for (const [kind, re] of MEASURE_RES) if (re.test(s)) return kind;
+  return null;
+}
+
+// queryBreakdown.metrics[].func → measure 종류(구조적 신호, 컬럼명보다 우선). operia 가 별칭(max_amt)을 버리고
+//   raw 컬럼(DLNG_AMT "총 금액")으로 보내도 func 는 살아있어 신뢰 가능. 비가산(max/min/avg) 우선 선택.
+const FUNC_KIND = { MAX: "max", MIN: "min", AVG: "avg", AVERAGE: "avg", MEAN: "avg", SUM: "sum", COUNT: "count", CNT: "count" };
+export function measureKindFromBreakdown(queryBreakdown) {
+  const ms = queryBreakdown && Array.isArray(queryBreakdown.metrics) ? queryBreakdown.metrics : null;
+  if (!ms) return null;
+  const agg = ms.filter((m) => m && m.aggregated && m.func);
+  for (const pref of ["max", "min", "avg", "sum", "count"]) {
+    if (agg.some((m) => FUNC_KIND[String(m.func).toUpperCase()] === pref)) return pref;
+  }
+  return null;
+}
+
+// barlist(merchantBreakdown) 표시 measure 판정 — 표시 값 = amount-like(합계/평균/최대/최소) 우선(shape amount 슬롯과 정렬),
+//   없으면 건수. 판정 대상은 '숫자 값' 컬럼만(문자 범주/시간축 배제). 미상 → "sum"(기존 합계 전제 = 회귀 안전).
+export function measureKind(tableData) {
+  const rows = Array.isArray(tableData) ? tableData : [];
+  if (!rows.length) return "sum";
+  const keys = Object.keys(rows[0] || {});
+  const numCols = keys.filter((k) => {
+    const vals = rows.map((r) => r[k]).filter((v) => v != null);
+    return vals.length > 0 && vals.every((v) => typeof v === "number" && !Number.isNaN(v));
+  });
+  for (const c of numCols) { const k = classifyMeasureName(c); if (k && k !== "count") return k; }
+  if (numCols.some((c) => classifyMeasureName(c) === "count")) return "count";
+  return "sum";
+}
+
+// queryBreakdown.order_by → 정렬 방향("asc"|"desc"|null). 봉투 shape 미확정 대비 방어(객체/배열/direction·dir·order 키 수용).
+//   신호 없으면 null → 호출부는 기존(내림차순=많이) 동작 유지(안전). 코어25 #66·69 '적게/하위N' 톤 근거.
+export function orderDirection(queryBreakdown) {
+  const ob = queryBreakdown && queryBreakdown.order_by;
+  if (!ob) return null;
+  const first = Array.isArray(ob) ? ob[0] : ob;
+  if (first == null) return null;
+  const raw = typeof first === "string" ? first : (first.direction || first.dir || first.order);
+  const s = String(raw == null ? "" : raw).trim().toUpperCase();
+  return s === "ASC" ? "asc" : s === "DESC" ? "desc" : null;
+}
+
 // 숫자 라벨에만 "학년" 접미(이미 "N학년"/"중2" 등 비숫자면 그대로).
 const gradeLabel = (l) => (/^\d+$/.test(String(l).trim()) ? String(l).trim() + "학년" : l);
 

@@ -45,6 +45,8 @@ export const COLUMN_LABELS = {
   // 오페리아 1000질의 최종(0722) — 소문자 별칭(labelForColumn 이 대문자 정규화 조회). 채널/친구비교/학교집계 컬럼.
   CHANNEL: "채널", CHANNEL_NM: "채널",
   SCOPE: "구분", AVG_AMT: "평균",
+  // 코어25(0723) measure — 사용처/채널별 최대·최소 결제액(id 70·71·74). 영문 헤더 노출 방지(table 폴백용).
+  MAX_AMT: "최대 결제액", MIN_AMT: "최소 결제액",
   SCH_NM: "학교", USER_CNT: "인원수", AVG_PER_USER: "1인 평균",
   // 코어50(0722) 신규 컬럼. dow/hour 는 값 매핑(요일·시)은 별도 — 여기선 헤더 라벨만.
   DOW: "요일", HOUR: "시간대", MERCHANT_CNT: "가맹점 수", DAY_CNT: "사용 일수", GRADE: "학년",

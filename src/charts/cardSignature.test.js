@@ -70,6 +70,42 @@ test("channel: 코드값(ON/OFF)이어도 채널 → channel", () => {
   eq([{ PAY_CHANNEL: "ON", amount: 3000 }, { PAY_CHANNEL: "OFF", amount: 9000 }], null, "channel");
 });
 
+test("코어25 #74 %가드: 채널명 + max_amt(비가산)는 채널카드 아님 → merchantBreakdown(일반 바리스트)", () => {
+  eq([{ channel_nm: "온라인", max_amt: 30000 }, { channel_nm: "오프라인", max_amt: 50000 }], null, "merchantBreakdown");
+});
+test("코어25 %가드 회귀: 채널명 + 합계(sum)는 기존대로 channel", () => {
+  eq([{ channel_nm: "온라인", sum_dlng_amt: 30000 }, { channel_nm: "오프라인", sum_dlng_amt: 50000 }], null, "channel");
+});
+test("코어25 %가드 회귀: 채널명 + 건수(cnt, 가산)는 channel 유지", () => {
+  eq([{ channel_nm: "온라인", cnt: 5 }, { channel_nm: "오프라인", cnt: 3 }], null, "channel");
+});
+// ★ 라이브 버그: operia 가 컬럼키를 한글로 보내면 영문 전용 정규식이 못 잡아 채널 %카드로 오분류됐음.
+//   영문 케이스만으론 false-pass — 한글 컬럼 케이스로 갭 고정.
+test("코어25 #74 %가드(한글컬럼): '채널' + '최대 결제액'(비가산)은 채널카드 아님 → merchantBreakdown", () => {
+  eq([{ "채널": "온라인", "최대 결제액": 30000 }, { "채널": "오프라인", "최대 결제액": 50000 }], null, "merchantBreakdown");
+});
+test("코어25 %가드(한글컬럼): '채널' + '평균 결제액'(비가산)도 merchantBreakdown", () => {
+  eq([{ "채널": "온라인", "평균 결제액": 12000 }, { "채널": "오프라인", "평균 결제액": 8000 }], null, "merchantBreakdown");
+});
+test("코어25 %가드 회귀(한글컬럼): '채널' + '사용액'(가산 합계)은 channel 유지", () => {
+  eq([{ "채널": "온라인", "사용액": 30000 }, { "채널": "오프라인", "사용액": 50000 }], null, "channel");
+});
+// ★ 라이브 실 캡처(#74): operia 가 MAX 를 하고도 응답 컬럼을 raw 'DLNG_AMT'(label "총 금액")로 별칭을 버려 보냄
+//   → 컬럼명엔 max 신호 없음. queryBreakdown.metrics[].func='MAX' 가 유일한 신뢰 신호. 이걸로 가드가 터져야 함.
+const qbMax = { metrics: [{ name: "channel", aggregated: false, func: null, label: "CHANNEL_NM" }, { name: "max_amt", aggregated: true, func: "MAX", source_column: "dlng_amt", label: "DLNG_AMT" }] };
+const qbSum = { metrics: [{ name: "channel", aggregated: false, label: "CHANNEL_NM" }, { name: "total", aggregated: true, func: "SUM", source_column: "dlng_amt", label: "DLNG_AMT" }] };
+const rowsCh = [{ CHANNEL_NM: "온라인", DLNG_AMT: 12000 }, { CHANNEL_NM: "오프라인", DLNG_AMT: 80000 }];
+const cmCh = [{ column: "CHANNEL_NM", label: "채널" }, { column: "DLNG_AMT", label: "총 금액" }];
+test("코어25 #74 라이브: 컬럼명 DLNG_AMT(가산처럼 보임) + queryBreakdown func=MAX → merchantBreakdown(func 우선)", () => {
+  assert.equal(classifyCard(rowsCh, cmCh, qbMax), "merchantBreakdown");
+});
+test("코어25 회귀: DLNG_AMT + queryBreakdown func=SUM → channel(가산은 채널 %카드 유지)", () => {
+  assert.equal(classifyCard(rowsCh, cmCh, qbSum), "channel");
+});
+test("코어25 회귀: queryBreakdown 없어도 기존 컬럼명 경로 동작(sum_dlng_amt → channel)", () => {
+  eq([{ channel_nm: "온라인", sum_dlng_amt: 30000 }, { channel_nm: "오프라인", sum_dlng_amt: 50000 }], null, "channel");
+});
+
 test("merchantBreakdown: 가맹점명 + 금액 → merchantBreakdown", () => {
   eq([{ MERCHANT_NM: "GS25", amount: 12000 }, { MERCHANT_NM: "CU", amount: 8000 }], null, "merchantBreakdown");
 });

@@ -8,7 +8,7 @@ import { dayLabel } from "./util";
 import { pickFallbackShape } from "./fallbackShape";
 import { classifyCard } from "./cardSignature";
 import { derivePeriod } from "./periodFromEnvelope";
-import { applyCatContext, catKindOf } from "./catContext";
+import { applyCatContext, catKindOf, measureKind, measureKindFromBreakdown, orderDirection } from "./catContext";
 import { activeChannelName } from "../api/datasource";
 
 // Phase D: 카드 선택은 응답 '컬럼 시그니처' 단일 경로로 확정(플래그 제거). forceTable("표로 보여줘")만 예외.
@@ -328,7 +328,7 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   //   경로(report 월/일 토글·balance focus·merchantMap·grouped % payload·폴백)를 그대로 재사용 → 패리티 최상.
   //   generic/kpi 는 전용 브랜치가 없어 자연히 shape 폴백/표로 흐른다. forceTable("표로 보여줘")면 덮지 않음.
   if (!forceTable) {
-    const sig = classifyCard(tableData, columnMetadata);
+    const sig = classifyCard(tableData, columnMetadata, queryBreakdown);
     if (sig) intent = sig;
   }
   // 전용 1) report 월/일 토글 — shapeForIntent("report") {series,breakdown}, 일별은 lazy
@@ -382,10 +382,23 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
         const mergedCfg = grouped ? mergeTitleFromPlan(intent, cfg, reportPlan) : cfg;
         // 맥락 분기: 범주 컬럼(dow/hour/grade) 감지 시 제목·라벨만 오버라이드(분류·데이터·정렬 불변). 감지 안 되면 원본 그대로.
         const c = applyCatContext(mergedCfg, shaped, tableData);
-        // merchantBreakdown 인사이트 말투 분기 신호(_catKind) 주입 — 데이터 불변(새 객체).
-        const finalShaped = intent === "merchantBreakdown" ? { ...c.shaped, _catKind: catKindOf(tableData) } : c.shaped;
+        // merchantBreakdown 인사이트 말투 분기 신호 주입 — 데이터 불변(새 객체).
+        //   _catKind(장소/요일/시간대), _metric(sum|count|avg|max|min), _direction(asc|desc|null) 로 measure·정렬 톤 결정.
+        let finalShaped = c.shaped;
+        let baseCfg = c.cfg;
+        if (intent === "merchantBreakdown") {
+          const metric = measureKindFromBreakdown(queryBreakdown) || measureKind(tableData);
+          finalShaped = { ...c.shaped, _catKind: catKindOf(tableData), _metric: metric, _direction: orderDirection(queryBreakdown) };
+          // 코어25: 비가산 measure(평균/최대/최소)는 합계 대비 % 무의미 → % 숨김 + "원". 건수→"번". 합계(sum)는 기존 유지(회귀 0).
+          const nonAdd = metric === "avg" || metric === "max" || metric === "min";
+          if (metric === "count" || nonAdd) {
+            const opt = { ...(baseCfg.options || {}), unit: metric === "count" ? "번" : "원" };
+            if (nonAdd) opt.showPct = false;
+            baseCfg = { ...baseCfg, options: opt };
+          }
+        }
         // 기간 배지: 컨텍스트 배지(실시간/충북 중학교/전체 내역 등)가 없는 카드에만 operia appliedPeriod 표시(없으면 미표시).
-        const finalCfg = (!c.cfg.badge && periodBadge) ? { ...c.cfg, badge: periodBadge } : c.cfg;
+        const finalCfg = (!baseCfg.badge && periodBadge) ? { ...baseCfg, badge: periodBadge } : baseCfg;
         return <Tpl data={finalShaped} config={finalCfg} intent={intent} />;
       }
     }

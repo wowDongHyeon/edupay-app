@@ -22,6 +22,12 @@ export const INTENT_CONFIG = {
           const s = d.series || [];
           if (!s.length) return "";
           const fmt = d.metric === "count" ? (v) => `${num(v)}번` : won;
+          // 코어25 #75: 월별 avg/max/min 은 합계 비교("더 썼어") 부적합 → '한 번에 평균/최대/최소' 맥락 문구.
+          if (d.metric === "avg" || d.metric === "max" || d.metric === "min") {
+            const last = s[s.length - 1];
+            const word = d.metric === "avg" ? "평균" : d.metric === "max" ? "최대" : "최소";
+            return last ? `${last.label}엔 한 번에 ${word} ${fmt(last.value)} 썼어 📊` : "";
+          }
           const curKey = d.currentMonthKey;
           const curBar = curKey ? s.find((x) => x.key === curKey) : null; // 당월 막대(있으면)
           // 축과 일치: 당월 막대가 있으면 그 라벨(mLbl 결과, showYear 규칙 반영)을 그대로. 없으면 연도 포함 폴백.
@@ -154,18 +160,45 @@ export const INTENT_CONFIG = {
     },
     options: { rank: true, showPct: true, unit: "" },
     // 범주 말투 분기(코어50 #5): d._catKind='merchant'(또는 미지정)면 장소 말투, dow/hour/other(요일/시간대/업종/상품)면 중립.
-    //   _catKind 는 ChartRenderer 가 catKindOf(tableData) 로 주입. 단일 항목 완화와 결합.
+    //   _catKind 는 ChartRenderer 가 catKindOf 로, _metric(sum|count|avg|max|min)·_direction(asc|desc|null)은 measureKind/orderDirection 으로 주입.
+    //   합계(sum)+desc 는 기존 코어50 문구 100% 보존(회귀 0). 나머지는 코어25 measure/정렬 톤.
     insight: (d) => {
       const items = d.items || [];
       const t = items[0];
       if (!t) return "";
-      if (d._catKind === "merchant" || d._catKind == null) { // 가맹점(장소) — 미지정도 유지(회귀 0)
-        if (items.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;
-        return `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
+      const m = d._metric || "sum";
+      const asc = d._direction === "asc";
+      const kind = d._catKind;
+      const isPlace = (kind === "merchant" || kind == null);
+      const nameOf = (x) => (kind === "dow" ? `${x.label}요일` : x.label); // 요일 라벨은 "수"→"수요일"
+      const least = items[items.length - 1]; // shape 는 값 내림차순 → 최솟값은 마지막(하위N 톤용)
+
+      // 합계(sum) — 기존 문구 보존. asc(하위N, 코어25 #66)만 신규 '적게' 분기.
+      if (m === "sum") {
+        if (asc) return isPlace
+          ? `${nameOf(least)}에서 제일 적게 썼어 (${num(least.value)}원).`
+          : `${nameOf(least)}에 제일 적게 썼어 (${num(least.value)}원).`;
+        if (isPlace) {
+          if (items.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;
+          return `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
+        }
+        const val = nameOf(t);
+        if (items.length === 1) return `${val}에 ${num(t.value)}원 썼어.`;
+        return `${val}에 가장 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%).`;
       }
-      const val = d._catKind === "dow" ? `${t.label}요일` : t.label; // 요일 라벨은 "수"→"수요일"
-      if (items.length === 1) return `${val}에 ${num(t.value)}원 썼어.`;
-      return `${val}에 가장 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%).`;
+      // 건수(count, 코어25 #69) — "번". asc=적게/desc=자주.
+      if (m === "count") {
+        const b = asc ? least : t;
+        const nm = nameOf(b);
+        if (asc) return isPlace ? `${nm}에 제일 안 갔어 (${num(b.value)}번).` : `${nm}이(가) 제일 적어 (${num(b.value)}번).`;
+        return isPlace ? `${nm}에 제일 자주 갔어 (${num(b.value)}번).` : `${nm}이(가) 제일 많아 (${num(b.value)}번).`;
+      }
+      // 비가산 measure(평균/최대/최소, 코어25 #70·71·72·73) — % 없음(합계 아님), "원".
+      const label = nameOf(t);
+      if (m === "avg") return `${label}이(가) 평균이 제일 높아 (${num(t.value)}원).`;
+      if (m === "max") return isPlace ? `${label}에서 한 번에 제일 크게 썼어 (${num(t.value)}원).` : `${label}은(는) 한 번에 최대 ${num(t.value)}원 썼어.`;
+      if (m === "min") return isPlace ? `${label}에서 한 번에 제일 적게 썼어 (${num(t.value)}원).` : `${label}은(는) 한 번에 최소 ${num(t.value)}원 썼어.`;
+      return "";
     },
   },
 

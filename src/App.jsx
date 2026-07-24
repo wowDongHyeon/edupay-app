@@ -526,13 +526,13 @@ function MenuScreen({ onPick }) {
    userName 없으면 "반가워요"로 폴백. 전송되면 started=true → 숨김(호출부 조건). */
 function IntroLanding({ userName, onPick }) {
   return (
-    <div className="flex-1 flex flex-col items-center pt-14 px-6 edupay-fade">
+    <div className="flex-1 flex flex-col items-center pt-6 px-6 edupay-fade">
       <img src={logoFoxpay} alt="FOX PAY" className="w-[150px] h-auto" />
       <h2 className="mt-6 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
         {userName ? <>{userName}님<br />반가워요</> : "반가워요"}
       </h2>
-      {/* 핵심질의 4개 칩 — 세로 스택, full-width 왼쪽정렬(items-stretch), 넉넉한 간격. 인사말과의 간격 확대(iPhone에서 붙어보임 방지). 탭 → 전송 */}
-      <div className="mt-14 w-full flex flex-col items-stretch gap-3">
+      {/* 핵심질의 4개 칩 — 세로 스택, full-width 왼쪽정렬(items-stretch). 콘텐츠 상단 붙이기(pt-6 + mt-8): 넓은 뷰에서 아래 여백만 남고 위로 정렬. iPhone에서도 인사말과 최소 간격 유지. 탭 → 전송 */}
+      <div className="mt-8 w-full flex flex-col items-stretch gap-3">
         {QUICK_QUERIES.map((q, i) =>
         <button key={i} onClick={() => onPick(q.text)}
         className="flex items-center gap-2 px-5 py-3 rounded-full text-[14px] font-semibold whitespace-nowrap text-left bg-[#F3F4F6] text-gray-700 active:bg-violet-50 active:text-violet-600 active:scale-95 transition">
@@ -1161,6 +1161,50 @@ function App() {
     };
   }, []);
 
+  // [웹뷰 대화버튼 드래그] 기본=최상단 좌측(safe-area). 드래그로 이동(포인터=마우스+터치), 뷰포트 clamp.
+  //   이동 6px 미만=탭(대화기록 열기), 이상=드래그(onClick 억제). 위치는 세션 메모리만(localStorage 저장 안 함).
+  //   드래그 중엔 setState 대신 transform 직접 적용(rAF 스로틀)으로 부드럽게 추종, 릴리즈 시 최종 위치만 커밋.
+  const [histPos, setHistPos] = useState(null); // {left,top}px | null(기본 좌상단)
+  const histBtnRef = useRef(null);
+  const histDrag = useRef({ active: false, moved: false, raf: null });
+  const HIST_M = 12; // 뷰포트 여백
+  const onHistDown = (e) => {
+    const btn = e.currentTarget;
+    const pr = btn.getBoundingClientRect();
+    const par = btn.offsetParent ? btn.offsetParent.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    histDrag.current = { active: true, moved: false, raf: null, startX: e.clientX, startY: e.clientY,
+      baseLeft: pr.left - par.left, baseTop: pr.top - par.top, parentW: par.width, parentH: par.height,
+      pinW: pr.width, pinH: pr.height };
+    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+  };
+  const onHistMove = (e) => {
+    const d = histDrag.current; if (!d.active) return;
+    const dx = e.clientX - d.startX, dy = e.clientY - d.startY;
+    if (!d.moved && Math.abs(dx) + Math.abs(dy) < 6) return; // 임계값 미만 → 탭으로 간주
+    d.moved = true;
+    d.lastLeft = Math.max(HIST_M, Math.min(d.baseLeft + dx, d.parentW - d.pinW - HIST_M)); // 뷰포트 clamp
+    d.lastTop = Math.max(HIST_M, Math.min(d.baseTop + dy, d.parentH - d.pinH - HIST_M));
+    d.tx = d.lastLeft - d.baseLeft; d.ty = d.lastTop - d.baseTop;
+    if (d.raf == null) d.raf = requestAnimationFrame(() => {
+      d.raf = null;
+      const node = histBtnRef.current;
+      if (node) node.style.transform = `translate3d(${d.tx}px, ${d.ty}px, 0)`;
+    });
+  };
+  const onHistUp = () => {
+    const d = histDrag.current; if (!d.active) return;
+    d.active = false;
+    if (d.raf != null) { cancelAnimationFrame(d.raf); d.raf = null; }
+    const node = histBtnRef.current;
+    if (node) node.style.transform = ""; // transform 제거, 위치는 아래 state(left/top)가 소유
+    if (d.moved) setHistPos({ left: d.lastLeft, top: d.lastTop }); // 드래그 → clamp된 최종 위치 커밋
+  };
+  const onHistClick = () => {
+    if (histDrag.current.moved) { histDrag.current.moved = false; return; } // 드래그였으면 탭(대화기록) 억제
+    setShowHistory(true);
+  };
+  useEffect(() => () => { if (histDrag.current.raf != null) cancelAnimationFrame(histDrag.current.raf); }, []); // 언마운트 시 rAF 정리
+
   // 대화가 시작되면(메시지 존재) FAQ 패널 자동 접힘 — 채팅 가림 방지(최초 빈 화면만 펼침)
   useEffect(() => { if (started) setFaqOpen(false); }, [started]);
 
@@ -1515,11 +1559,14 @@ function App() {
         </div>
       </div>
       }
-      {/* [웹뷰] 대화기록 진입점 — 헤더는 웹뷰에 없으므로(!WEBVIEW), 좌상단 '대화' 버튼 하나로 일원화(반투명+스크롤 자동숨김). 드래그/팝오버 없음(비웹뷰는 헤더 🕘 사용). 좌측=사용자 말풍선(우측정렬)과 충돌 회피. */}
+      {/* [웹뷰] 대화기록 진입점 — 헤더는 웹뷰에 없으므로(!WEBVIEW), 좌상단 '대화' 버튼 하나로 일원화(반투명+스크롤 자동숨김). 기본=최상단 좌측, 드래그로 이동 가능(포인터=마우스+터치, 뷰포트 clamp, 6px 임계=탭/드래그 구분). 팝오버/엣지접힘은 없음(비웹뷰는 헤더 🕘 사용). */}
       {WEBVIEW && entered && tab === "금융친구" &&
-      <button onClick={() => setShowHistory(true)} aria-label="대화 기록"
-        className="absolute z-20 flex items-center gap-1 rounded-full active:scale-95"
-        style={{ left: 12, top: "max(env(safe-area-inset-top), 12px)", height: HISTORY_BTN.size, padding: "0 12px",
+      <button ref={histBtnRef} onClick={onHistClick}
+        onPointerDown={onHistDown} onPointerMove={onHistMove} onPointerUp={onHistUp} onPointerCancel={onHistUp}
+        aria-label="대화 기록"
+        className="absolute z-20 flex items-center gap-1 rounded-full active:scale-95 select-none touch-none"
+        style={{ ...(histPos ? { left: histPos.left, top: histPos.top } : { left: 12, top: "max(env(safe-area-inset-top), 12px)" }),
+          height: HISTORY_BTN.size, padding: "0 12px", touchAction: "none",
           background: "rgba(91,77,214,0.92)", boxShadow: "0 4px 14px rgba(91,77,214,0.35)",
           opacity: historyHidden ? 0 : HISTORY_BTN.idleOpacity, transition: "opacity .25s" }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
