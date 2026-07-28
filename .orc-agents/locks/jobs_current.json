@@ -1,15 +1,15 @@
 {
-  "WS-20260727-t1-a2f9": {
+  "WS-20260728-t1-b3e7": {
     "agent_id": "t1",
     "files": [
-      "src/charts/josa.js",
-      "src/charts/josa.test.js",
-      "src/charts/intentConfig.js"
+      "src/App.jsx",
+      "src/skills/registry.js",
+      "src/skills/SlashSkillMenu.jsx"
     ],
-    "started_at": "2026-07-27T05:57:35+00:00",
+    "started_at": "2026-07-28T08:01:32+00:00",
     "status": "released",
-    "task_id": "josa 조사 자동선택",
-    "updated_at": "2026-07-27T06:00:21+00:00",
-    "why": "josa 유틸 신규 + intentConfig 6곳 조사 치환"
+    "task_id": "스킬 슬래시 런처 v1",
+    "updated_at": "2026-07-28T08:11:46+00:00",
+    "why": "registry 신설 + QUICK_QUERIES 투영 + send skillId + 슬래시 드롭다운 배선"
   }
 }

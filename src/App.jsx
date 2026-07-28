@@ -11,6 +11,8 @@ import { getUserId } from "./api/session";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
 import { balanceIntent } from "./util/balanceIntent";
+import { SKILLS, QUICK_QUERIES_FROM_SKILLS } from "./skills/registry";
+import SlashSkillMenu from "./skills/SlashSkillMenu";
 // Phase D: InlineCard/RecommendModal(로컬 카드)·isOperiaAiMode·OPERIA_KINDS·chartTypeForIntent import 제거(시그니처 단일 경로).
 /* FOX PAY AI 금융친구 — 메인 앱 */
 const { useState, useRef, useEffect } = React;
@@ -187,15 +189,8 @@ const FAVORITES = SUGGESTIONS;
 //   SHOW_ALL_QUICK_QUERIES = false → 핵심 4개(기본/운영), true → 전체 8개(테스트).
 //   메인 칩(IntroLanding)·즐겨찾기 시드 모두 QUICK_QUERIES 참조 → 이 값 하나로 둘 다 바뀜.
 const SHOW_ALL_QUICK_QUERIES = import.meta.env.VITE_SHOW_ALL_QUICK_QUERIES === 'true'; // .env.local 로 4↔8 전환(미설정=4개). QUICK_QUERIES·FAV_KEY 자동 연동.
-const QUICK_QUERIES_ALL = [
-{ icon: "💰", text: "현재 사용할 수 있는 금액 알려줘" },
-{ icon: "📅", text: "월별 사용 내역 알려줘" },
-{ icon: "📍", text: "근처 사용 가능 가맹점 알려줘" },
-{ icon: "🧾", text: "사용처별 내역 알려줘" },
-{ icon: "👫", text: "친구랑 사용내역 비교 해줘" },
-{ icon: "🛒", text: "온라인/오프라인 결제내역 확인해줘" },
-{ icon: "📊", text: "어디에 주로 쓰고 있는지 알려줘" },
-{ icon: "🏫", text: "학교별 사용 내역 비교해줘" }];
+// 단일 소스: skills/registry.js 투영({icon, text:prompt}). 진입칩·즐겨찾기 시드가 스킬 레지스트리를 공유.
+const QUICK_QUERIES_ALL = QUICK_QUERIES_FROM_SKILLS;
 const QUICK_QUERIES = SHOW_ALL_QUICK_QUERIES ? QUICK_QUERIES_ALL : QUICK_QUERIES_ALL.slice(0, 4);
 // 즐겨찾기 시드 키를 질의 개수에 묶음 → 플래그로 4↔8 바뀌면 즐겨찾기도 그 세트로 재시드(같은 모드 내 편집은 유지).
 const FAV_KEY = "edupay_favorites_v1_" + QUICK_QUERIES.length;
@@ -1011,6 +1006,7 @@ function App() {
   const [entered, setEntered] = useState(WEBVIEW); // webview면 인트로 건너뛰고 바로 진입
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const slashRef = useRef(null); // 슬래시 스킬 런처 드롭다운: composer onKeyDown이 handleKey로 위임
   const [inputFocused, setInputFocused] = useState(false); // 폴백용(visualViewport 미지원). 입력 포커스 시 FAQ 패널 숨김
   const [keyboardOpen, setKeyboardOpen] = useState(false);  // 키보드 가시성(visualViewport 기반) → FAQ 패널 숨김 트리거
   // 키보드 가시성 판정: visualViewport.height 가 기준(관측 최대) 대비 충분히 작으면 keyboardOpen=true.
@@ -1393,7 +1389,7 @@ function App() {
     setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : "card", intent: null, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, appliedPeriod: resp.appliedPeriod, queryBreakdown: resp.queryBreakdown, queryInfo: resp.queryInfo }]);
   }
 
-  async function send(text) {
+  async function send(text, skillId) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
     const myEpoch = convoEpochRef.current;              // 이 요청의 대화 세대. await 후 바뀌면(새 대화/전환) 반영 스킵.
@@ -1401,7 +1397,8 @@ function App() {
     setFavOpen(false); // 전송 시 즐겨찾기 팝업 닫힘
     setInput("");
     const history = messages;
-    setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
+    // skillId: 스킬 슬래시 런처로 보낸 메시지 태깅(v1 렌더 미사용 — 사용량 측정/v2 전용템플릿 대비). 모든 전송 경로가 이 user 메시지를 만들므로 여기서 태깅.
+    setMessages((m) => [...m, { id: Date.now(), role: "user", text: q, ...(skillId ? { skillId } : {}) }]);
     setTyping(true);
 
     // Phase D: 카드 선택은 응답 컬럼 시그니처가 담당(ChartRenderer). cardIntent 데이터 분류 제거 →
@@ -1506,6 +1503,9 @@ function App() {
       {favOpen && <FavoritesPopup items={favItems} onPick={(t) => { send(t); setFavOpen(false); }} onDelete={deleteFav} openKey={openFaqKey} setOpenKey={setOpenFaqKey} onClose={() => { setFavOpen(false); setOpenFaqKey(null); }} />}
       {/* 입력 바: relative z-10 으로 팝업 시트 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
+        {/* 슬래시(/) 스킬 런처: input이 '/'로 시작할 때만 이 relative 컨테이너 기준 위(bottom-full)로 뜸 */}
+        <SlashSkillMenu ref={slashRef} input={input}
+          onPick={(skill) => { send(skill.prompt, skill.command); setInput(""); }} />
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
           {/* ★ 즐겨찾기 버튼 (ChatGPT '+' 위치) */}
           <button onClick={() => setFavOpen((o) => !o)} aria-label="즐겨찾기"
@@ -1521,7 +1521,10 @@ function App() {
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
-                onKeyDown={(e) => {if (e.key === "Enter") send();}}
+                onKeyDown={(e) => {
+                  if (slashRef.current?.handleKey(e)) return; // 드롭다운 열림 시 ↑↓/Enter/Esc 가로채기
+                  if (e.key === "Enter") send();
+                }}
                 placeholder="메시지를 입력하세요"
                 className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" />
 
