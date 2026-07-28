@@ -28,6 +28,9 @@ const SOURCE_META = {
   mock:     { label: "목업",           icon: "</>", header: "출처: 정적 목업",                  warn: false },
 };
 
+// 단일 KPI 폴백 카드 제목: queryBreakdown func/alias 로 지표 라벨(질의텍스트 분류 부활 금지 — 구조적 신호만).
+const KPI_FUNC_TITLE = { avg: "평균 결제액", sum: "총 사용액", count: "결제 건수", max: "최대 결제", min: "최소 결제" };
+
 const fmtCell = (v) =>
   v == null ? "" : typeof v === "object" ? JSON.stringify(v) : typeof v === "number" ? v.toLocaleString() : String(v);
 const isRows = (v) => Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && v[0] !== null;
@@ -348,7 +351,7 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
   else if (intent === "dayTxns") {
     const shaped = shapeDayTxns(tableData);
     if (shaped) {
-      return <TEMPLATES.txnList data={shaped} config={{ title: "사용 내역", subtitle: "FOX PAY 결제 · 건별 내역", options: { limit: 6 } }} />;
+      return <TEMPLATES.txnList data={shaped} config={{ title: "사용 내역", subtitle: "FOX PAY 결제 · 건별 내역", badge: periodBadge, options: { limit: 6 } }} />;
     }
   }
   // 전용 2) merchantMap 지도 — shapeForIntent("merchantMap") {center,items}. 좌표 없으면(shape 실패) 아래 공통 폴백으로
@@ -411,19 +414,21 @@ export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, 
       const _bst = (INTENT_CONFIG.balance && INTENT_CONFIG.balance.options && INTENT_CONFIG.balance.options.itemStyles) || [];
       if (pick.template === "kpi") {
         // ponytail: 폴백 단일-KPI는 잔액이 아닐 수 있음(지출 총액 등) → "지금 사용할 수 있어요" 오프레이밍 제거. 제목이 label을 이미 담으므로 내부 label은 비워 중복(금액/금액) 방지.
-        const _cfg = { badge: "요약", title: pick.label, subtitle: "", options: { itemStyles: [_bst[0] || {}] } };
+        //   제목 = func 지표 라벨(avg_amt→"평균 결제액" 등, 구조적 신호). func 없으면 컬럼 라벨 폴백. 배지 = 날짜필터 기간(derivePeriod).
+        const kMetric = measureKindFromBreakdown(queryBreakdown);
+        const _cfg = { badge: periodBadge, title: (kMetric && KPI_FUNC_TITLE[kMetric]) || pick.label, subtitle: "", options: { itemStyles: [_bst[0] || {}] } };
         return <TEMPLATES.statList data={{ kpi: true, items: [{ label: "", sub: "", value: pick.value, unit: pick.unit }] }} config={_cfg} intent={intent} />;
       }
       if (pick.template === "statList") {
-        const _cfg = { badge: "요약", title: "조회 결과", subtitle: "항목별 값", options: { itemStyles: pick.items.map((_, i) => _bst[i % _bst.length] || {}) } };
+        const _cfg = { badge: periodBadge || "요약", title: "조회 결과", subtitle: "항목별 값", options: { itemStyles: pick.items.map((_, i) => _bst[i % _bst.length] || {}) } };
         return <TEMPLATES.statList data={{ items: pick.items }} config={_cfg} intent={intent} />;
       }
       if (pick.template === "line") {
-        return <TEMPLATES.line data={{ series: pick.series }} config={{ badge: "추이", title: pick.valLabel || "추이", subtitle: "시간별 흐름" }} intent={intent} />;
+        return <TEMPLATES.line data={{ series: pick.series }} config={{ badge: periodBadge || "추이", title: pick.valLabel || "추이", subtitle: "시간별 흐름" }} intent={intent} />;
       }
       if (pick.template === "barlist") {
         // 가드레일: 폴백은 items 합이 데이터 전체인지 보장 못 함(LIMIT 등 부분집합 가능) → % 숨김(정직).
-        return <TEMPLATES.barlist data={{ items: pick.items }} config={{ badge: "순위", title: "조회 결과", subtitle: "값이 큰 순", options: { unit: pick.unit, showPct: false } }} intent={intent} />;
+        return <TEMPLATES.barlist data={{ items: pick.items }} config={{ badge: periodBadge || "순위", title: "조회 결과", subtitle: "값이 큰 순", options: { unit: pick.unit, showPct: false } }} intent={intent} />;
       }
     }
   }

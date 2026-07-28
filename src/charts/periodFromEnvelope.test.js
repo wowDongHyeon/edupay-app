@@ -33,6 +33,12 @@ test("YYYYMMDD BETWEEN, end=오늘, 경계 59일 → 일 유지(최근 59일)", 
   assert.equal(derivePeriod({ queryBreakdown: qbDay("20260526", "20260723") }, TODAY), "최근 59일");
 });
 
+test("허용오차: end=오늘-2일(±3일 이내) → '최근 N' 계열(날짜범위 아님)", () => {
+  assert.equal(derivePeriod({ queryBreakdown: qbDay("20260715", "20260721") }, TODAY), "최근 7일"); // TODAY=20260723, end 2일전
+});
+test("허용오차 밖: end=오늘-5일 → 날짜범위 M/D~M/D", () => {
+  assert.equal(derivePeriod({ queryBreakdown: qbDay("20260712", "20260718") }, TODAY), "7/12~7/18");
+});
 test("YYYYMMDD BETWEEN, end=과거일 → M/D~M/D", () => {
   assert.equal(derivePeriod({ queryBreakdown: qbDay("20260701", "20260710") }, TODAY), "7/1~7/10");
 });

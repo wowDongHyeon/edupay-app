@@ -18,13 +18,18 @@ export function detectCatContext(tableData) {
     if (n === "dow") return "dow";
     if (n === "hour") return "hour";
     if (n === "grade") return "grade";
+    // 범주 컬럼명 → 맥락(부제 분기용). operia 가 raw 컬럼명(CHANNEL_NM/GDS_NM/BIZ_TYPE_NM)으로 줌.
+    if (/channel|채널/.test(n)) return "channel";
+    if (/gds|goods|상품|product/.test(n)) return "gds";
+    if (/biz_?type|biz_?item|업종|종목/.test(n)) return "biz";
   }
-  // 값 기반 폴백(dow/hour만 — 값이 결정적). 어떤 컬럼이든 값이 전부 요일/N시면 그 맥락.
+  // 값 기반 폴백. 어떤 컬럼이든 값이 전부 요일/N시/채널어휘면 그 맥락(값이 결정적).
   for (const k of keys) {
     const vals = rows.map((r) => r[k]).filter((v) => v != null).map((v) => String(v).trim());
     if (!vals.length) continue;
     if (vals.every((v) => DOW_SET.has(v.replace(/요일$/, "")))) return "dow";
     if (vals.every((v) => HOUR_RE.test(v))) return "hour";
+    if (vals.every((v) => /^(온라인|오프라인|online|offline|on|off)$/i.test(v))) return "channel";
   }
   return null;
 }
@@ -63,9 +68,10 @@ const FUNC_KIND = { MAX: "max", MIN: "min", AVG: "avg", AVERAGE: "avg", MEAN: "a
 export function measureKindFromBreakdown(queryBreakdown) {
   const ms = queryBreakdown && Array.isArray(queryBreakdown.metrics) ? queryBreakdown.metrics : null;
   if (!ms) return null;
-  const agg = ms.filter((m) => m && m.aggregated && m.func);
+  const agg = ms.filter((m) => m && m.aggregated);
+  // func(구조적) 우선, 없으면 metric.name 의 alias(avg_amt/max_amt/…)로 추론 — operia 가 func 를 안 실어줄 때 대비(라이브 실측: avg 는 func 누락, name='avg_amt').
   for (const pref of ["max", "min", "avg", "sum", "count"]) {
-    if (agg.some((m) => FUNC_KIND[String(m.func).toUpperCase()] === pref)) return pref;
+    if (agg.some((m) => FUNC_KIND[String(m.func || "").toUpperCase()] === pref || classifyMeasureName(m.name) === pref)) return pref;
   }
   return null;
 }

@@ -57,7 +57,10 @@ function dayLabel(start, end, now) {
   if (!a || !b) return null;
   const n = Math.round((Date.UTC(b.y, b.m - 1, b.d) - Date.UTC(a.y, a.m - 1, a.d)) / 86400000) + 1; // 포함 일수
   if (n < 1) return null;
-  const isToday = b.y === now.getFullYear() && b.m === now.getMonth() + 1 && b.d === now.getDate();
+  // "오늘" 판정 ±3일 허용오차: operia date_filter 의 end 가 오늘 근처(수집지연·경계)여도 "최근 N" 계열로(날짜범위 대신).
+  const endMs = Date.UTC(b.y, b.m - 1, b.d);
+  const nowMs = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const isToday = Math.abs(nowMs - endMs) <= 3 * 86400000;
   if (isToday) {
     // 큰 일수는 개월로 자연화("최근 92일"→"최근 3개월"). A방식: 실제 범위의 캘린더 월 차이 환산(정책버킷 역매핑 아님).
     if (n >= 60) {

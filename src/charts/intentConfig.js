@@ -3,6 +3,7 @@
 // 제목·부제·배지·💡문구·옵션은 '여기서만' 편집. 같은 template을 여러 intent가 공유(N:1).
 // 데이터(§4 표준형)는 queries.js shaper가, 렌더는 charts/templates/* 가 담당(텍스트/필드 하드코딩 없음).
 import { num, won } from "./util";
+import { josa } from "./josa.js";
 
 export const INTENT_CONFIG = {
   // ① report (bar) — 월/일 토글. 탭별 제목·부제·배지·insight는 tabs로 분기(같은 bar 템플릿 사용).
@@ -74,7 +75,7 @@ export const INTENT_CONFIG = {
       const t = slices[0];
       if (!t) return "";
       if (slices.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;  // 단일 항목: "가장 커·전체의 100%" 자명해서 생략
-      return `${t.label}이(가) 가장 커 (${num(t.value)}원, 전체의 ${t.pct}%).`;
+      return `${josa(t.label, "이가")} 가장 커 (${num(t.value)}원, 전체의 ${t.pct}%).`;
     },
   },
 
@@ -153,10 +154,13 @@ export const INTENT_CONFIG = {
   merchantBreakdown: {
     template: "barlist",
     title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", // badge 제거: operia 쿼리에 기간 필터 없음(전체 기간)
-    // 맥락 분기(catContext): 범주 컬럼이 dow/hour면 제목·부제만 교체(데이터·정렬 불변). 그 외(가맹점/업종)는 위 기본 유지.
+    // 맥락 분기(catContext): 범주 컬럼(detectCatContext)에 따라 제목·부제만 교체(데이터·정렬 불변). 미감지(가맹점 등)는 위 기본 유지.
     contexts: {
-      dow:  { title: "요일별 사용", subtitle: "요일별 사용 금액" },
-      hour: { title: "시간대별 사용", subtitle: "시간대별 사용 금액" },
+      dow:     { title: "요일별 사용", subtitle: "요일별 사용 금액" },
+      hour:    { title: "시간대별 사용", subtitle: "시간대별 사용 금액" },
+      channel: { title: "채널별 사용", subtitle: "온·오프라인별 금액" },
+      gds:     { title: "상품별 사용", subtitle: "상품별 사용 금액" },
+      biz:     { title: "업종별 사용", subtitle: "업종별 사용 금액" },
     },
     options: { rank: true, showPct: true, unit: "" },
     // 범주 말투 분기(코어50 #5): d._catKind='merchant'(또는 미지정)면 장소 말투, dow/hour/other(요일/시간대/업종/상품)면 중립.
@@ -190,14 +194,14 @@ export const INTENT_CONFIG = {
       if (m === "count") {
         const b = asc ? least : t;
         const nm = nameOf(b);
-        if (asc) return isPlace ? `${nm}에 제일 안 갔어 (${num(b.value)}번).` : `${nm}이(가) 제일 적어 (${num(b.value)}번).`;
-        return isPlace ? `${nm}에 제일 자주 갔어 (${num(b.value)}번).` : `${nm}이(가) 제일 많아 (${num(b.value)}번).`;
+        if (asc) return isPlace ? `${nm}에 제일 안 갔어 (${num(b.value)}번).` : `${josa(nm, "이가")} 제일 적어 (${num(b.value)}번).`;
+        return isPlace ? `${nm}에 제일 자주 갔어 (${num(b.value)}번).` : `${josa(nm, "이가")} 제일 많아 (${num(b.value)}번).`;
       }
       // 비가산 measure(평균/최대/최소, 코어25 #70·71·72·73) — % 없음(합계 아님), "원".
       const label = nameOf(t);
-      if (m === "avg") return `${label}이(가) 평균이 제일 높아 (${num(t.value)}원).`;
-      if (m === "max") return isPlace ? `${label}에서 한 번에 제일 크게 썼어 (${num(t.value)}원).` : `${label}은(는) 한 번에 최대 ${num(t.value)}원 썼어.`;
-      if (m === "min") return isPlace ? `${label}에서 한 번에 제일 적게 썼어 (${num(t.value)}원).` : `${label}은(는) 한 번에 최소 ${num(t.value)}원 썼어.`;
+      if (m === "avg") return `${josa(label, "이가")} 평균이 제일 높아 (${num(t.value)}원).`;
+      if (m === "max") return isPlace ? `${label}에서 한 번에 제일 크게 썼어 (${num(t.value)}원).` : `${josa(label, "은는")} 한 번에 최대 ${num(t.value)}원 썼어.`;
+      if (m === "min") return isPlace ? `${label}에서 한 번에 제일 적게 썼어 (${num(t.value)}원).` : `${josa(label, "은는")} 한 번에 최소 ${num(t.value)}원 썼어.`;
       return "";
     },
   },

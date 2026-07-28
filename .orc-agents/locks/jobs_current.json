@@ -1,0 +1,15 @@
+{
+  "WS-20260727-t1-a2f9": {
+    "agent_id": "t1",
+    "files": [
+      "src/charts/josa.js",
+      "src/charts/josa.test.js",
+      "src/charts/intentConfig.js"
+    ],
+    "started_at": "2026-07-27T05:57:35+00:00",
+    "status": "released",
+    "task_id": "josa 조사 자동선택",
+    "updated_at": "2026-07-27T06:00:21+00:00",
+    "why": "josa 유틸 신규 + intentConfig 6곳 조사 치환"
+  }
+}

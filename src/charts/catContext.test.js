@@ -2,12 +2,24 @@
 //   러너: node --test (stdlib, 새 의존성 없음).  실행: node --test src/charts/catContext.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { detectCatContext, applyCatContext, catKindOf, measureKind, classifyMeasureName, orderDirection } from "./catContext.js";
+import { detectCatContext, applyCatContext, catKindOf, measureKind, measureKindFromBreakdown, classifyMeasureName, orderDirection } from "./catContext.js";
+
+test("measureKindFromBreakdown: func 있으면 func, 없으면 metric.name alias 폴백", () => {
+  assert.equal(measureKindFromBreakdown({ metrics: [{ name: "max_amt", aggregated: true, func: "MAX" }] }), "max");
+  // 라이브 avg KPI: func 누락 + name='avg_amt' → name 으로 avg 추론
+  assert.equal(measureKindFromBreakdown({ metrics: [{ name: "avg_amt", aggregated: true, source_column: "dlng_amt" }] }), "avg");
+  assert.equal(measureKindFromBreakdown({ metrics: [{ name: "sum_dlng_amt", aggregated: true }] }), "sum");
+  assert.equal(measureKindFromBreakdown({ metrics: [] }), null);
+  assert.equal(measureKindFromBreakdown(null), null);
+});
 
 // intentConfig.contexts 미러(문자열 소유는 intentConfig, 여기선 적용 검증만)
 const MB = { title: "주로 어디에 썼을까?", subtitle: "가맹점별 사용 금액 순", contexts: {
-  dow:  { title: "요일별 사용", subtitle: "요일별 사용 금액" },
-  hour: { title: "시간대별 사용", subtitle: "시간대별 사용 금액" },
+  dow:     { title: "요일별 사용", subtitle: "요일별 사용 금액" },
+  hour:    { title: "시간대별 사용", subtitle: "시간대별 사용 금액" },
+  channel: { title: "채널별 사용", subtitle: "온·오프라인별 금액" },
+  gds:     { title: "상품별 사용", subtitle: "상품별 사용 금액" },
+  biz:     { title: "업종별 사용", subtitle: "업종별 사용 금액" },
 } };
 const SC = { title: "학교별 사용 비교", subtitle: "충청북도 중학교 결제 TOP5 · 1인당 평균", contexts: {
   grade: { title: "학년별 사용 비교", subtitle: "학년별 1인당 평균", gradeLabel: true, avgLabel: "전체 평균" },
@@ -41,6 +53,23 @@ test("apply merchantBreakdown dow: 제목·부제 교체, 데이터 불변", () 
 test("apply merchantBreakdown hour", () => {
   const r = applyCatContext(MB, { items: [{ label: "14시", value: 100 }] }, [{ hour: "14시", amount: 100 }]);
   assert.equal(r.cfg.title, "시간대별 사용");
+});
+test("detect: channel/gds/biz 컬럼명 + channel 값 폴백", () => {
+  assert.equal(detectCatContext([{ CHANNEL_NM: "온라인", DLNG_AMT: 1 }]), "channel"); // 라이브 id74 컬럼
+  assert.equal(detectCatContext([{ gds_nm: "삼각김밥", amount: 1 }]), "gds");
+  assert.equal(detectCatContext([{ BIZ_TYPE_NM: "음식점", amount: 1 }]), "biz");
+  assert.equal(detectCatContext([{ ch: "온라인", v: 1 }, { ch: "오프라인", v: 2 }]), "channel"); // 값 폴백
+});
+test("apply merchantBreakdown channel(id74): 부제 채널 맥락, 데이터 불변", () => {
+  const shaped = { items: [{ label: "오프라인", value: 80000 }, { label: "온라인", value: 12000 }] };
+  const r = applyCatContext(MB, shaped, [{ CHANNEL_NM: "오프라인", DLNG_AMT: 80000 }, { CHANNEL_NM: "온라인", DLNG_AMT: 12000 }]);
+  assert.equal(r.cfg.title, "채널별 사용");
+  assert.equal(r.cfg.subtitle, "온·오프라인별 금액");
+  assert.deepEqual(r.shaped, shaped);
+});
+test("apply merchantBreakdown gds/biz 부제", () => {
+  assert.equal(applyCatContext(MB, { items: [] }, [{ gds_nm: "우유", amount: 1 }]).cfg.subtitle, "상품별 사용 금액");
+  assert.equal(applyCatContext(MB, { items: [] }, [{ BIZ_ITEM_NM: "카페", amount: 1 }]).cfg.subtitle, "업종별 사용 금액");
 });
 test("apply merchantBreakdown 기본(가맹점) → 원본 유지(회귀 0)", () => {
   const shaped = { items: [{ label: "GS25", value: 100 }] };
