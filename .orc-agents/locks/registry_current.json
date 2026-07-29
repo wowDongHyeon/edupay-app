@@ -1,1 +1,22 @@
-{}
+{
+  "src/App.jsx": {
+    "agent_id": "t1",
+    "claimed_at": "2026-07-29T01:03:35+00:00",
+    "heartbeat_at": "2026-07-29T01:03:35+00:00",
+    "host": "webcash0000",
+    "pid": 22380,
+    "session_key": "WS-20260729-t1-e4a8",
+    "task_id": "스킬 UI 폴리시 3종",
+    "why": "CompositeReport 폴리시(직접) + App 레이아웃/로딩문구(aegis)"
+  },
+  "src/charts/CompositeReport.jsx": {
+    "agent_id": "t1",
+    "claimed_at": "2026-07-29T01:03:35+00:00",
+    "heartbeat_at": "2026-07-29T01:03:35+00:00",
+    "host": "webcash0000",
+    "pid": 22380,
+    "session_key": "WS-20260729-t1-e4a8",
+    "task_id": "스킬 UI 폴리시 3종",
+    "why": "CompositeReport 폴리시(직접) + App 레이아웃/로딩문구(aegis)"
+  }
+}

@@ -324,13 +324,17 @@ function shapeDayTxns(tableData) {
   return { rows: items, total: items.reduce((s, x) => s + x.amount, 0), count: items.length };
 }
 
-export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, appliedPeriod, queryBreakdown, queryInfo, forceTable, onCardQuery, onActiveSql }) {
+export function ChartRenderer({ intent, sql, source, tableData, columnMetadata, reportPlan, summaryStats, scope, appliedPeriod, queryBreakdown, queryInfo, forceTable, forceCard, onCardQuery, onActiveSql }) {
   // 기간정책 02 D6: operia appliedPeriod override 우선, 없으면 봉투 필터 도출(D1). 둘 다 없으면 undefined(미표시).
   const periodBadge = periodLabel(appliedPeriod) ?? derivePeriod({ queryBreakdown, queryInfo }) ?? undefined;
   // Phase B: 플래그 ON이면 질의 대신 응답 컬럼 시그니처로 카드 결정. intent 만 덮어 아래 기존 큐레이션
   //   경로(report 월/일 토글·balance focus·merchantMap·grouped % payload·폴백)를 그대로 재사용 → 패리티 최상.
   //   generic/kpi 는 전용 브랜치가 없어 자연히 shape 폴백/표로 흐른다. forceTable("표로 보여줘")면 덮지 않음.
-  if (!forceTable) {
+  // forceCard(스킬 강제 슬롯): cardSignature 자동판정을 우회하고 이 카드 템플릿으로 렌더.
+  //   해당 카드 브랜치가 shape 실패하면 아래 기존 폴백 체인(shape-driven→reportPlan→table)으로 자연 degrade.
+  if (forceCard) {
+    intent = forceCard;
+  } else if (!forceTable) {
     const sig = classifyCard(tableData, columnMetadata, queryBreakdown);
     if (sig) intent = sig;
   }

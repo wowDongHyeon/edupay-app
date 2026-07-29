@@ -70,7 +70,9 @@ function ensureSession(userId, signal) {
 
 export const operiaSource = {
   /**
-   * @param {{userInput:string, context?:object, hints?:object}} req
+   * @param {{userInput:string, context?:object, hints?:object, ephemeral?:boolean}} req
+   *   ephemeral=true → 이 호출 전용 1회성 세션(createSession 직접). 모듈 sessionPromise 무접촉 →
+   *   앵커별 독립 세션(스킬 복합 호출의 SQL 교차오염 0). 일반 채팅(ensureSession/캐시)은 불변.
    * @param {{onData?:Function, onResult?:Function, onError?:Function}} handlers
    * @param {AbortSignal} [signal]
    */
@@ -79,10 +81,12 @@ export const operiaSource = {
     // userId: App(session.getUserId)이 context.userId 로 넘겨준 값. 서버로는 헤더로만 보낸다.
     const userId = req && req.context && req.context.userId;
     const userInput = String((req && req.userInput) || "").slice(0, MAX_INPUT);
+    const ephemeral = !!(req && req.ephemeral); // 앵커 전용 세션 여부
     // 서버로 보내는 context 는 companyId 만(userId 는 헤더). §4.2
     const context = { companyId: COMPANY_ID };
     try {
-      const sessionId = await ensureSession(userId, signal);
+      // ephemeral: 공유 캐시(sessionPromise) 우회, 이 호출만의 새 sessionId. 아니면 대화 캐시 재사용.
+      const sessionId = ephemeral ? await createSession(userId, signal) : await ensureSession(userId, signal);
       const headers = {
         "Content-Type": "application/json",
         Accept: "text/event-stream",
@@ -97,7 +101,8 @@ export const operiaSource = {
       });
       if (!r.ok) {
         // 세션 무효(401/403) 가능성 → 캐시를 비워 다음 시도에 새 세션 생성.
-        if (r.status === 401 || r.status === 403) resetOperiaSession();
+        //   ephemeral 은 공유 캐시를 안 쓰므로 리셋 금지(일반 채팅 세션 오염 방지).
+        if ((r.status === 401 || r.status === 403) && !ephemeral) resetOperiaSession();
         // 기술 상태코드만 전달(한글 미포함) → App 이 친근 문구+다시시도로 흡수(기술문자열 노출 0).
         onError && onError({ httpStatus: r.status, message: `operia ${r.status}` });
         return;
@@ -113,7 +118,8 @@ export const operiaSource = {
     } catch (err) {
       if (err && err.name === "AbortError") return; // 취소는 조용히 종료
       // 세션 생성/네트워크 실패 → 캐시 무효화(다음 재시도 재생성). 기술 메시지 → 친근 문구로 흡수.
-      resetOperiaSession();
+      //   ephemeral 은 공유 캐시 미사용 → 리셋 금지(일반 채팅 경로 불변).
+      if (!ephemeral) resetOperiaSession();
       onError && onError({ httpStatus: err && err.httpStatus, message: (err && err.message) || String(err) });
     }
   },

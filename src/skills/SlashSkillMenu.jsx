@@ -1,29 +1,40 @@
 // 슬래시(/) 스킬 런처 드롭다운. 입력창 바로 위 팝오버.
 //   open 판정·필터·키보드네비를 자체 소유하고, App composer의 onKeyDown은 ref.handleKey로 위임한다.
 //   ponytail: portal/floating-ui 없이 순수 state + 절대위치 div. 부모(relative) 기준 bottom-full.
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
-import { SKILLS } from "./registry";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { SKILLS } from "../skills.js"; // 통합 스키마(객체, 키=command). 명시 .js로 폴더 동명 충돌 회피.
 
 const norm = (s) => (s || "").toLowerCase().replace(/\s+/g, "");
+// 객체 → 리스트(키=command 주입). 순수 데이터층(skills.js)에 로직을 두지 않으려 여기서 1회 파생.
+const SKILL_LIST = Object.entries(SKILLS).map(([command, s]) => ({ command, ...s }));
 
 const SlashSkillMenu = forwardRef(function SlashSkillMenu({ input, onPick }, ref) {
   const isSlash = (input || "").startsWith("/");
-  const q = isSlash ? input.slice(1) : "";
-  const [dismissed, setDismissed] = useState(false); // Esc로 닫음 → 다음 입력까지 유지
+  const raw = isSlash ? input.slice(1) : "";
+  // 첫 토큰=명령어 필터, 나머지=파라미터(예 "/자금보고서 지난달" → firstToken '자금보고서', rest '지난달').
+  //   공백 뒤 기간을 타이핑해도 메뉴가 열린 채 유지되도록 필터는 firstToken 만 사용.
+  const firstToken = raw.split(/\s+/)[0] || "";
+  const rest = raw.slice(firstToken.length).trim();
+  const [dismissed, setDismissed] = useState(false); // Esc/선택으로 닫음
   const [idx, setIdx] = useState(0);
+  const pickedRef = useRef(null); // 선택한 명령어("/자금보고서"). 그 명령어 편집 중엔 메뉴 재오픈 안 함.
 
-  // 사용자가 타이핑하면(입력 변경) Esc 닫힘 해제 + 선택 리셋
-  useEffect(() => { setDismissed(false); setIdx(0); }, [input]);
+  // 입력 변경 시: 선택한 명령어를 계속 편집 중(접두 일치)이면 닫힘 유지, 아니면 재오픈(+선택 리셋).
+  useEffect(() => {
+    if (pickedRef.current && (input || "").startsWith(pickedRef.current)) return;
+    pickedRef.current = null;
+    setDismissed(false); setIdx(0);
+  }, [input]);
 
   const filtered = useMemo(() => {
-    const nq = norm(q);
-    if (!nq) return SKILLS;
-    return SKILLS.filter((s) =>
+    const nq = norm(firstToken);
+    if (!nq) return SKILL_LIST;
+    return SKILL_LIST.filter((s) =>
       norm(s.label).includes(nq) ||
       norm(s.command).includes(nq) ||
       (s.keywords || []).some((k) => norm(k).includes(nq))
     );
-  }, [q]);
+  }, [firstToken]);
 
   const open = isSlash && !dismissed;
 
@@ -36,11 +47,13 @@ const SlashSkillMenu = forwardRef(function SlashSkillMenu({ input, onPick }, ref
       if (e.key === "Escape")    { e.preventDefault(); setDismissed(true); return true; }
       if (e.key === "Enter") {
         e.preventDefault();
-        if (filtered.length) onPick(filtered[Math.min(idx, filtered.length - 1)]);
-        return true; // 매칭 없어도 소비 → "/xxx" 원문 전송 방지
+        if (filtered.length) onPick(filtered[Math.min(idx, filtered.length - 1)], rest);
+        return true; // 선택=입력 채움(전송 아님). 매칭 없어도 소비 → "/xxx" 원문 전송 방지
       }
       return false;
     },
+    // 선택 후 메뉴 닫기(App onPick이 호출). cmd = "/명령어" — 그 명령어 편집 중엔 재오픈 안 함.
+    dismiss(cmd) { pickedRef.current = cmd || null; setDismissed(true); },
   }), [open, filtered, idx, onPick]);
 
   if (!open) return null;
@@ -58,7 +71,7 @@ const SlashSkillMenu = forwardRef(function SlashSkillMenu({ input, onPick }, ref
                 <button
                   type="button"
                   onMouseEnter={() => setIdx(i)}
-                  onMouseDown={(e) => { e.preventDefault(); onPick(s); }} // onMouseDown: input blur 전에 선택
+                  onMouseDown={(e) => { e.preventDefault(); onPick(s, rest); }} // onMouseDown: input blur 전에 선택
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition"
                   style={{ background: i === idx ? "#F3F4F6" : "transparent" }}>
                   <span className="text-[18px] shrink-0">{s.icon}</span>

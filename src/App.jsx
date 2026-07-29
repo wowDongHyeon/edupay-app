@@ -10,8 +10,9 @@ import { resetOperiaSession } from "./api/datasource/operia";
 import { getUserId } from "./api/session";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
+import { CompositeReport } from "./charts/CompositeReport";
 import { balanceIntent } from "./util/balanceIntent";
-import { SKILLS, QUICK_QUERIES_FROM_SKILLS } from "./skills/registry";
+import { SKILLS } from "./skills.js";
 import SlashSkillMenu from "./skills/SlashSkillMenu";
 // Phase D: InlineCard/RecommendModal(로컬 카드)·isOperiaAiMode·OPERIA_KINDS·chartTypeForIntent import 제거(시그니처 단일 경로).
 /* FOX PAY AI 금융친구 — 메인 앱 */
@@ -91,8 +92,9 @@ function enrichColumnMetadata(columnMetadata, reportPlan) {
 // StreamState: data 의 tableData 를 rows 에 누적, isLast 로 종료. 데이터 확정 시 computeSummaryStats 계산(§4.4, §8).
 // ★Phase A 브리지: result 이벤트를 "기존 렌더가 기대하는 입력"{ result, rawRows, sql, source } 로 변환해 resolve.
 //   (Phase B 에서 reportPlan 렌더러로 전환하며 이 브리지를 제거한다.)
-function queryDataSource(userInput, intent, scope) {
+function queryDataSource(userInput, intent, scope, opts) {
   const ds = getDataSource();
+  const ephemeral = !!(opts && opts.ephemeral); // 스킬 앵커 전용 1회성 세션(operia). mock/backend 는 무시.
   return new Promise((resolve, reject) => {
     const state = { rows: [], columnMetadata: null, done: false };
     let settled = false;
@@ -100,7 +102,7 @@ function queryDataSource(userInput, intent, scope) {
     // 어댑터(operia/backend)는 context 를 스프레드로 그대로 실어 보낸다(companyId 만 채널값으로 덮음). mock 은 context 무시.
     getUserId().then((userId) =>
       ds.query(
-        { userInput, context: { companyId: COMPANY_ID, userId }, hints: { intent, scope } },
+        { userInput, context: { companyId: COMPANY_ID, userId }, hints: { intent, scope }, ephemeral },
         {
           onData: (e) => {
             if (e && Array.isArray(e.tableData)) {
@@ -189,8 +191,18 @@ const FAVORITES = SUGGESTIONS;
 //   SHOW_ALL_QUICK_QUERIES = false → 핵심 4개(기본/운영), true → 전체 8개(테스트).
 //   메인 칩(IntroLanding)·즐겨찾기 시드 모두 QUICK_QUERIES 참조 → 이 값 하나로 둘 다 바뀜.
 const SHOW_ALL_QUICK_QUERIES = import.meta.env.VITE_SHOW_ALL_QUICK_QUERIES === 'true'; // .env.local 로 4↔8 전환(미설정=4개). QUICK_QUERIES·FAV_KEY 자동 연동.
-// 단일 소스: skills/registry.js 투영({icon, text:prompt}). 진입칩·즐겨찾기 시드가 스킬 레지스트리를 공유.
-const QUICK_QUERIES_ALL = QUICK_QUERIES_FROM_SKILLS;
+// 진입칩·즐겨찾기 전용 질의(스킬과 분리). 스킬 = 특화 슬래시 명령(SKILLS), 진입칩 = 빠른 자연어 질의.
+//   문자열·순서·아이콘 = v1 고정(FAV_KEY 시드/회귀 0). 단일 스킬 제거와 무관하게 진입칩 불변.
+const QUICK_QUERIES_ALL = [
+  { icon: "💰", text: "현재 사용할 수 있는 금액 알려줘" },
+  { icon: "📅", text: "월별 사용 내역 알려줘" },
+  { icon: "📍", text: "근처 사용 가능 가맹점 알려줘" },
+  { icon: "🧾", text: "사용처별 내역 알려줘" },
+  { icon: "👫", text: "친구랑 사용내역 비교 해줘" },
+  { icon: "🛒", text: "온라인/오프라인 결제내역 확인해줘" },
+  { icon: "📊", text: "어디에 주로 쓰고 있는지 알려줘" },
+  { icon: "🏫", text: "학교별 사용 내역 비교해줘" },
+];
 const QUICK_QUERIES = SHOW_ALL_QUICK_QUERIES ? QUICK_QUERIES_ALL : QUICK_QUERIES_ALL.slice(0, 4);
 // 즐겨찾기 시드 키를 질의 개수에 묶음 → 플래그로 4↔8 바뀌면 즐겨찾기도 그 세트로 재시드(같은 모드 내 편집은 유지).
 const FAV_KEY = "edupay_favorites_v1_" + QUICK_QUERIES.length;
@@ -629,6 +641,24 @@ function useSwipeReveal({ reveal, openTh, isOpen, onOpen, onClose }) {
 /* ── 사용자 말풍선 — long-press(~500ms) → onRegisterFaq(text)(App에서 등록 확인창). 짧은 탭/스크롤 무동작. ──
    웹 long-press 억제: user-select/touch-callout none(style) + contextmenu/dragstart preventDefault.
    10px 이상 이동 시 타이머 취소(스크롤 보호). AOS 네이티브 가로채기는 Flutter 억제(별도)로 보완, iOS는 웹 억제로 동작. */
+// 스킬(슬래시) 명령 칩 — skillId 있는 user 메시지 전용. text = "/명령어 [인자]".
+//   '/'만 accent 컬러 + 명령어 = 둥근 pill, 인자는 오른쪽 평문(CLI/Cowork 슬래시 렌더와 동일 감각).
+function SkillChip({ text }) {
+  const raw = String(text || "");
+  const sp = raw.indexOf(" ");
+  const cmd = sp === -1 ? raw : raw.slice(0, sp);          // "/자금보고서"
+  const rest = sp === -1 ? "" : raw.slice(sp + 1).trim();  // "지난달"
+  const name = cmd.replace(/^\//, "");
+  return (
+    <div className="flex justify-end items-center gap-1.5">
+      {rest && <span className="text-[13px] text-gray-500">{rest}</span>}
+      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[14px] font-semibold shadow-sm select-none"
+        style={{ background: "#DDE1FB", border: "1px solid #C3C9F7", color: "#2D2870" }}>
+        <span style={{ color: "#5B4DD6", marginRight: 1 }}>/</span>{name}
+      </span>
+    </div>);
+}
+
 function UserBubble({ text, onRegisterFaq }) {
   const lp = React.useRef({ timer: null, x: 0, y: 0 });
   const clear = () => { if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = null; } };
@@ -727,6 +757,63 @@ function isEmptyResult(resp) {
     ? Object.values(r).every((v) => v == null || v === "")
     : (r == null || r === ""));
 }
+// ── 복합 스킬 요약문 조립 헬퍼(모듈 레벨, 상태 무관) ──
+//   template(skill.summary)의 {기간}{총액}{최다사용처}{잔액} 을 슬롯 데이터에서 best-effort 추출.
+//   빈 슬롯 절은 생략(SSOT §3). shape 이 비결정적/flaky 라 어느 단계든 실패하면 그 절만 빠지고 throw 0.
+function _rowsOf(slot) { return slot && !slot.error && Array.isArray(slot.tableData) ? slot.tableData : []; }
+function _num(v) { const n = Number(String(v == null ? "" : v).replace(/[^\d.-]/g, "")); return Number.isFinite(n) ? n : null; }
+// 금액 컬럼 '하나'를 골라 행 전체 합산(여러 금액 컬럼 동시합산 시 이중계상 방지). 없으면 첫 숫자 컬럼. 값 없으면 null.
+function _sumAmount(rows) {
+  if (!rows.length) return null;
+  const keys = Object.keys(rows[0] || {});
+  const amtKeys = keys.filter((k) => /amt|amount|금액|사용|총|합|price|pay|spend/i.test(k) && !/count|건수|_no$|_id$/i.test(k));
+  const col = amtKeys[0] || keys.find((k) => rows.some((r) => _num(r[k]) != null));
+  if (!col) return null;
+  let sum = 0, hit = false;
+  for (const r of rows) { const n = _num(r[col]); if (n != null) { sum += n; hit = true; } }
+  return hit ? sum : null;
+}
+// 첫 행의 이름류 문자열(가맹점/상품명) — merchantBreakdown 은 desc 정렬 가정 → row[0] 이 최다사용처.
+function _topLabel(rows) {
+  if (!rows.length) return null;
+  for (const [k, v] of Object.entries(rows[0] || {})) {
+    if (typeof v === "string" && v.trim() && !/^\d/.test(v.trim()) && !/(sql|source)/i.test(k)) return v.trim();
+  }
+  return null;
+}
+// filters 는 문자열/배열/객체(중첩) 혼재 → primitive leaf 만 수집 후 '기간 냄새'(년월일/분기/최근/지난/YYYY-MM) 조각만.
+//   객체를 그대로 join 하면 "[object Object]" 가 새므로 leaf-walk 로 방지. 잡값이면 "" → 기간 절 생략.
+function _periodOf(slot) {
+  const f = slot && !slot.error && slot.queryBreakdown && slot.queryBreakdown.filters;
+  if (!f) return "";
+  const leaves = [];
+  const walk = (v) => {
+    if (v == null) return;
+    if (typeof v === "string") { const s = v.trim(); if (s) leaves.push(s); }
+    else if (typeof v === "number") leaves.push(String(v));
+    else if (Array.isArray(v)) v.forEach(walk);
+    else if (typeof v === "object") Object.values(v).forEach(walk);
+  };
+  walk(f);
+  const picked = leaves.filter((s) => /[년월일]|분기|기간|최근|지난|이번|\d{4}[-./]\d{1,2}/.test(s));
+  return picked.length ? [...new Set(picked)].join(" ").slice(0, 40) : "";
+}
+function _wonFmt(n) { return n == null ? null : Math.round(n).toLocaleString(); }
+function buildCompositeSummary(cards, slots, period) {
+  try {
+    const at = (card) => slots[cards.findIndex((c) => c.card === card)];
+    const total = _wonFmt(_sumAmount(_rowsOf(at("report"))));       // 총액 ← 월 슬롯
+    const top = _topLabel(_rowsOf(at("merchantBreakdown")));         // 최다사용처 ← 사용처 슬롯(첫 merchantBreakdown)
+    const bal = _wonFmt(_sumAmount(_rowsOf(at("balance"))));         // 잔액 ← balance 슬롯
+    const 기간 = period || _periodOf(at("report")) || _periodOf(at("merchantBreakdown"));
+    const parts = [];
+    if (total) parts.push(`${기간 ? 기간 + " 동안 " : ""}${total}원 썼어요.`);
+    if (top && bal) parts.push(`${top}에 제일 많이 썼고, 지금 ${bal}원 남았어요.`);
+    else if (top) parts.push(`${top}에 제일 많이 썼어요.`);
+    else if (bal) parts.push(`지금 ${bal}원 남았어요.`);
+    return parts.join(" ");
+  } catch (e) { return ""; }
+}
 // 판정: 비었거나 한글이 하나도 없으면(Failed to fetch, NetworkError, datasource error, timeout 등 영문/기술 문자열)
 //   → 친근 문구로 치환. 백엔드가 준 '한글 사용자 안내'는 기술 메시지가 아니므로 그대로 노출(현행 유지).
 function isTechErrorMessage(em) {
@@ -742,10 +829,12 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
   // 사용자 말풍선은 좌측 스와이프 → '등록' 버튼(UserBubble). long-press 등록/복사는 모두 제거됨.
   //   AI 말풍선은 아무 제스처도 부착하지 않음(무동작).
   if (msg.role === "user") {
-    return <UserBubble text={msg.text} onRegisterFaq={onRegisterFaq} />;
+    // 스킬 발동 메시지(skillId)는 칩으로, 일반 전송은 기존 말풍선으로.
+    return msg.skillId ? <SkillChip text={msg.text} /> : <UserBubble text={msg.text} onRegisterFaq={onRegisterFaq} />;
   }
+  const isReport = !!msg.report; // 복합 스킬(/자금보고서) 보고서 말풍선
   const isChart = !!msg.chartType; // 오페리아 데이터 메시지(ChartRenderer 렌더)
-  const bigCard = isChart || ["spending", "report", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
+  const bigCard = isChart || isReport || ["spending", "report", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex gap-2 items-start">
@@ -764,6 +853,7 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
             <span className="text-[13px]">↻</span>다시 시도
           </button>
           }
+          {isReport && <CompositeReport report={msg.report} />}
           {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} scope={msg.scope} appliedPeriod={msg.appliedPeriod} queryBreakdown={msg.queryBreakdown} queryInfo={msg.queryInfo} forceTable={msg.chartType === "table"} onCardQuery={onCardQuery} onActiveSql={setChip} />}
         </div>
       </div>
@@ -1389,16 +1479,18 @@ function App() {
     setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: sanitizeAnswer(resp.answer || ""), chartType: _tf ? "table" : "card", intent: null, sql: resp.sql, source: resp.source, scope: scope || null, reportPlan: _tf ? null : resp.reportPlan, tableData: resp.tableData, columnMetadata: resp.columnMetadata, summaryStats: resp.summaryStats, appliedPeriod: resp.appliedPeriod, queryBreakdown: resp.queryBreakdown, queryInfo: resp.queryInfo }]);
   }
 
-  async function send(text, skillId) {
+  async function send(text, skillId, displayText) {
     const q = (text != null ? text : input).trim();
     if (!q || typing) return;
+    // 화면 표시 텍스트(스킬은 "/명령어", 일반 전송은 질의문 그대로). operia로 가는 건 항상 q(앵커).
+    const shown = displayText != null ? displayText : q;
     const myEpoch = convoEpochRef.current;              // 이 요청의 대화 세대. await 후 바뀌면(새 대화/전환) 반영 스킵.
     const stale = () => convoEpochRef.current !== myEpoch;
     setFavOpen(false); // 전송 시 즐겨찾기 팝업 닫힘
     setInput("");
     const history = messages;
     // skillId: 스킬 슬래시 런처로 보낸 메시지 태깅(v1 렌더 미사용 — 사용량 측정/v2 전용템플릿 대비). 모든 전송 경로가 이 user 메시지를 만들므로 여기서 태깅.
-    setMessages((m) => [...m, { id: Date.now(), role: "user", text: q, ...(skillId ? { skillId } : {}) }]);
+    setMessages((m) => [...m, { id: Date.now(), role: "user", text: shown, ...(skillId ? { skillId } : {}) }]);
     setTyping(true);
 
     // Phase D: 카드 선택은 응답 컬럼 시그니처가 담당(ChartRenderer). cardIntent 데이터 분류 제거 →
@@ -1457,6 +1549,75 @@ function App() {
     setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", text: res.text, card: res.card }]);
   }
 
+  // 컴포저 전송 — 입력이 "/명령어 [인자]"이고 등록된 스킬이면 스킬로 라우팅, 아니면 일반 전송.
+  //   (드롭다운 선택은 입력만 채우고, 실제 발동은 여기서. 사용자가 전송을 눌러야 실행.)
+  function submitComposer() {
+    const t = (input || "").trim();
+    if (t.startsWith("/")) {
+      const body = t.slice(1);
+      const cmd = body.split(/\s+/)[0] || "";
+      const skill = SKILLS[cmd];
+      if (skill) {
+        const rest = body.slice(cmd.length).trim();
+        setInput("");
+        if (skill.summary) runComposite({ command: cmd, ...skill }, rest);
+        else send(skill.cards[0].anchor, cmd, "/" + cmd + (rest ? " " + rest : ""));
+        return;
+      }
+    }
+    send();
+  }
+
+  // 복합 스킬(/자금보고서) 핸들러 — 앵커 N개를 앵커별 ephemeral 세션으로 (병렬) 호출 →
+  //   슬롯별 강제카드 + 프론트 템플릿 요약문을 보고서 말풍선 1개로 렌더(SSOT §3). 단일 스킬은 send() 유지.
+  async function runComposite(skill, periodText) {
+    if (typing) return;
+    const command = skill.command;
+    const period = (periodText || "").trim();
+    const myEpoch = convoEpochRef.current;
+    const stale = () => convoEpochRef.current !== myEpoch;
+    setFavOpen(false);
+    // 화면 user 메시지 = /명령어(+기간). operia 로는 앵커(prompt)만 나감(description 미전송).
+    setMessages((m) => [...m, { id: Date.now(), role: "user", text: "/" + command + (period ? " " + period : ""), skillId: command }]);
+    setTyping(true);
+    setTypingIntent(null);
+    showApiToast(`${activeChannelName()} · /${command}`, "api");
+
+    const cards = Array.isArray(skill.cards) ? skill.cards : [];
+    // 기간 삽입: non-skipPeriod 슬롯에만 앞에 붙임(슬롯1 balance 는 skipPeriod → bare anchor).
+    const anchorFor = (c) => (period && !c.skipPeriod) ? `${period} ${c.anchor}` : c.anchor;
+    // 슬롯 실패 판정: 에러/미지원/실패/빈결과 → 재시도 대상.
+    const badResp = (r) => !r || r.unsupported || r.success === false || isEmptyResult(r);
+    // 앵커 1개 실행(실패 시 1회 자동 재시도). 성공=응답필드, 실패=error.
+    const runOne = async (c) => {
+      const text = anchorFor(c);
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const r = await queryDataSource(text, null, null, { ephemeral: true }); // 앵커별 독립 세션 → SQL 교차오염 0
+          if (badResp(r)) continue; // 재시도
+          return { title: c.title, card: c.card, tableData: r.tableData, columnMetadata: r.columnMetadata,
+            queryBreakdown: r.queryBreakdown, queryInfo: r.queryInfo, reportPlan: r.reportPlan,
+            summaryStats: r.summaryStats, appliedPeriod: r.appliedPeriod, sql: r.sql, source: r.source };
+        } catch (e) { /* 다음 시도 */ }
+      }
+      return { title: c.title, card: c.card, error: true };
+    };
+
+    let slots;
+    const parallel = import.meta.env.VITE_SKILL_PARALLEL !== 'false'; // 기본 병렬. 'false' 면 순차 폴백(flaky 대비).
+    if (parallel) {
+      slots = await Promise.all(cards.map(runOne)); // runOne 은 내부에서 흡수 → 항상 fulfilled
+    } else {
+      slots = [];
+      for (const c of cards) slots.push(await runOne(c));
+    }
+
+    if (stale()) return; // 그 사이 새 대화/전환 → 반영 금지
+    setTyping(false);
+    const summary = buildCompositeSummary(cards, slots, period);
+    setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", skillId: command, report: { summary, slots } }]);
+  }
+
   return (
     <div className={"relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
     style={{ maxWidth: WEBVIEW ? undefined : 390 }}>
@@ -1505,7 +1666,7 @@ function App() {
       <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
         {/* 슬래시(/) 스킬 런처: input이 '/'로 시작할 때만 이 relative 컨테이너 기준 위(bottom-full)로 뜸 */}
         <SlashSkillMenu ref={slashRef} input={input}
-          onPick={(skill) => { send(skill.prompt, skill.command); setInput(""); }} />
+          onPick={(skill, rest) => { const cmd = "/" + skill.command; setInput(cmd + (rest ? " " + rest : "")); slashRef.current?.dismiss?.(cmd); }} />
         <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
           {/* ★ 즐겨찾기 버튼 (ChatGPT '+' 위치) */}
           <button onClick={() => setFavOpen((o) => !o)} aria-label="즐겨찾기"
@@ -1522,15 +1683,17 @@ function App() {
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 onKeyDown={(e) => {
-                  if (slashRef.current?.handleKey(e)) return; // 드롭다운 열림 시 ↑↓/Enter/Esc 가로채기
-                  if (e.key === "Enter") send();
+                  if (slashRef.current?.handleKey(e)) return; // 드롭다운 열림 시 ↑↓/Enter/Esc 가로채기(Enter=선택→입력채움)
+                  if (e.key === "Enter") submitComposer(); // 메뉴 닫힘 시: "/명령어"면 스킬 라우팅, 아니면 일반 전송
                 }}
                 placeholder="메시지를 입력하세요"
+                // 슬래시 명령 입력 중이면 파란색+굵게(스킬 발동 신호). 일반 입력은 기본색.
+                style={(input || "").startsWith("/") ? { color: "#5B4DD6", fontWeight: 600 } : undefined}
                 className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" />
 
           </div>
           {/* 전송 버튼: 항상 보이게 — shrink-0 고정폭, 비활성도 흐리게(opacity) 하지 않고 선명한 회색배경+흰 화살표 유지 */}
-          <button onClick={() => send()} disabled={!input.trim() || typing}
+          <button onClick={() => submitComposer()} disabled={!input.trim() || typing}
             aria-label="전송"
             className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition active:scale-90"
             style={{ background: input.trim() && !typing ? "linear-gradient(135deg,#5B4DD6,#4A3FB0)" : "#A7AAB8" }}>
