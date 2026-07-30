@@ -1,14 +1,31 @@
 {
-  "WS-20260729-t1-e4a8": {
+  "WS-20260730-t1-a1b6": {
     "agent_id": "t1",
     "files": [
+      "src/charts/templates/barlist.jsx",
       "src/charts/CompositeReport.jsx",
-      "src/App.jsx"
+      "src/App.jsx",
+      "src/index.css"
     ],
-    "started_at": "2026-07-29T01:03:35+00:00",
+    "started_at": "2026-07-30T01:56:15+00:00",
     "status": "released",
-    "task_id": "스킬 UI 폴리시 3종",
-    "updated_at": "2026-07-29T01:15:48+00:00",
-    "why": "CompositeReport 폴리시(직접) + App 레이아웃/로딩문구(aegis)"
+    "task_id": "모바일 버그 2종",
+    "updated_at": "2026-07-30T02:05:40+00:00",
+    "why": "barlist 금액폭(직접)+CompositeReport 패딩(직접)+랜딩 키보드 고착(aegis)"
+  },
+  "WS-20260730-t1-f9c3": {
+    "agent_id": "t1",
+    "files": [
+      "src/charts/money.js",
+      "src/charts/money.test.js",
+      "src/charts/util.jsx",
+      "src/charts/templates/barlist.jsx",
+      "src/charts/intentConfig.js"
+    ],
+    "started_at": "2026-07-30T01:14:06+00:00",
+    "status": "released",
+    "task_id": "wonCompact 금액축약",
+    "updated_at": "2026-07-30T01:18:29+00:00",
+    "why": "wonCompact 순수함수+테스트, util re-export, barlist·merchantBreakdown insight 금액 교체"
   }
 }

@@ -4,6 +4,8 @@ import React from "react";
 export const num = (n) =>
   n == null || isNaN(Number(n)) ? "" : Number(n).toLocaleString("ko-KR");
 export const won = (n) => num(n) + "원";
+// 큰 금액 조건부 축약(모바일 랭킹 카드 오버플로 방지). 순수 로직은 money.js(테스트 가능) → 여기선 re-export만.
+export { numCompact, wonCompact } from "./money.js";
 
 // "2026-04" / "202604" → "4월" (대시·무대시 YYYYMM 모두)
 export const monthLabel = (ym) => {

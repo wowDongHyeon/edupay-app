@@ -1,5 +1,5 @@
 import React from "react";
-import { num, ChartShell, InsightBox } from "../util";
+import { numCompact, ChartShell, InsightBox } from "../util";
 /* 제네릭 barlist 템플릿 (N:1) — data {items:[{label,value,pct?,rank?,me?}], avgRow?:{label,value}} + config.
    options:
      rank      : 순위번호 표시
@@ -40,7 +40,7 @@ export function BarListTemplate({ data, config }) {
         <div className="mt-4 flex flex-col items-center justify-center py-4">
           <div className="text-[13px] text-gray-500 mb-1">{it.label}</div>
           <div className="text-[34px] font-extrabold tracking-[-0.03em] tabular-nums text-violet-700">
-            {num(it.value)}<span className="text-[18px] font-bold ml-0.5">{opt.unit || ""}</span>
+            {numCompact(it.value)}<span className="text-[18px] font-bold ml-0.5">{opt.unit || ""}</span>
           </div>
         </div>
         <InsightBox className="mt-4" text={cfg.insight ? cfg.insight(data || {}) : ""} />
@@ -62,13 +62,14 @@ export function BarListTemplate({ data, config }) {
               <div role="button" title={m.label} onClick={() => toggle(i)}
                 className={"cursor-pointer " + (expanded.has(i)
                   ? (ranked ? "flex-1 flex items-center gap-1 min-w-0" : "flex-1 min-w-0")
-                  : (ranked ? "w-[92px] flex items-center gap-1 min-w-0" : "w-[96px] shrink-0 min-w-0 overflow-hidden"))}>
+                  : (ranked ? "w-[72px] flex items-center gap-1 min-w-0" : "w-[72px] shrink-0 min-w-0 overflow-hidden"))}>
                 {me && <span className="shrink-0">🦊</span>}
                 <span className={"text-[12.5px] " + (expanded.has(i) ? "block break-words " : "truncate " + (ranked ? "flex-1 min-w-0 " : "block w-full ")) + (me ? "font-extrabold text-violet-700" : "text-gray-700")}>{m.label}</span>
               </div>
               <Bar frac={(m.value || 0) / maxV} color={barColor} />
               {opt.showPct && <span className="text-[11px] text-gray-400 w-8 text-right tabular-nums">{m.pct != null ? m.pct + "%" : Math.round((m.value || 0) / maxV * 100) + "%"}</span>}
-              <span className={"font-bold text-gray-800 tabular-nums text-right shrink-0 whitespace-nowrap " + (ranked ? "text-[12px] w-[68px]" : "text-[12.5px] w-[62px]")}>{num(m.value)}{opt.unit || ""}</span>
+              {/* 금액: 고정폭 대신 min-w(작은값 정렬 유지·회귀 0) + shrink-0 → 넓은 폰트에서도 안 잘리고 grow(Bar가 flex-1로 흡수). */}
+              <span className={"font-bold text-gray-800 tabular-nums text-right shrink-0 whitespace-nowrap pr-0.5 " + (ranked ? "text-[12px] min-w-[68px]" : "text-[12.5px] min-w-[62px]")}>{numCompact(m.value)}{opt.unit || ""}</span>
             </div>
           );
         })}
@@ -84,7 +85,7 @@ export function BarListTemplate({ data, config }) {
           <div className="flex-1 h-3 rounded-full bg-gray-100 overflow-hidden">
             <div className="h-full rounded-full" style={{ width: Math.max((avgRow.value || 0) / maxV * 100, 5) + "%", background: "#A99DF6" }}></div>
           </div>
-          <span className="text-[12px] font-bold text-gray-500 tabular-nums shrink-0 w-[58px] text-right whitespace-nowrap">{num(avgRow.value)}{opt.unit || ""}</span>
+          <span className="text-[12px] font-bold text-gray-500 tabular-nums shrink-0 min-w-[58px] pr-0.5 text-right whitespace-nowrap">{numCompact(avgRow.value)}{opt.unit || ""}</span>
         </div>
       )}
       <InsightBox className={ranked ? "mt-3" : "mt-4"} text={cfg.insight ? cfg.insight(data || {}) : ""} />

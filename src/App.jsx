@@ -1223,11 +1223,25 @@ function App() {
   };
 
   const scrollRef = useRef(null);
+  const frameRef = useRef(null);
   const started = messages.length > 0;
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, typing]);
+
+  // [빈 랜딩 키보드 고착] 입력 포커스 시 브라우저가 focus를 화면에 넣으려고 overflow-hidden 프레임에
+  //   scrollTop을 주입한다(재현 관측: 프레임 scrollTop 117). AOS는 키보드 닫힘 후 dvh 복원이 늦거나
+  //   콘텐츠가 근소하게 넘쳐 이 scrollTop이 남아 그룹이 바닥에 고착된다. 키보드가 닫히면(!started) 리셋.
+  //   started(대화중) 하단 도킹은 영향 없음(!started 가드). rAF로 close 리플로우 뒤에 실행.
+  useEffect(() => {
+    if (keyboardOpen || started) return;
+    const id = requestAnimationFrame(() => {
+      if (frameRef.current) frameRef.current.scrollTop = 0;
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    });
+    return () => cancelAnimationFrame(id);
+  }, [keyboardOpen, started]);
 
   // [웹뷰] 채팅 스크롤 중이면 우상단 🕘 버튼 페이드아웃(말풍선 가림 방지). 마지막 스크롤 후 hideDelayMs 지나면 복귀.
   // passive + rAF 스로틀(프레임당 1회). setState는 값이 true로 동일하면 React가 리렌더 생략 → 스크롤 성능 무영향.
@@ -1627,7 +1641,7 @@ function App() {
   }
 
   return (
-    <div className={"relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
+    <div ref={frameRef} className={"relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
     style={{ maxWidth: WEBVIEW ? undefined : 390 }}>
       {/* 웹뷰에서 사용자 ID 미해석 시 비차단 안내 배너(계속 사용 가능, 원인만 안내). dev 브라우저(비웹뷰)엔 안 뜸. */}
       {WEBVIEW && noUserId &&
@@ -1715,8 +1729,8 @@ function App() {
           </button>
         </div>
       </div>
-      {/* 빈 랜딩 하단 스페이서: 상단 스페이서보다 크게(flex-[1.7]) → 입력창 묶음이 정중앙보다 살짝 위(중상단)에 위치. */}
-      {!started && <div className="flex-[1.7]" aria-hidden="true" />}
+      {/* 빈 랜딩 하단 스페이서: 상단과 동일(flex-1) → 로고+칩+입력 그룹이 화면 세로 정중앙(위아래 여백 균등). */}
+      {!started && <div className="flex-1" aria-hidden="true" />}
       </>
       }
 

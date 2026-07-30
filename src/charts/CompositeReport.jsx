@@ -19,7 +19,8 @@ function SlotTitle({ title }) {
 
 // 슬롯 프레이밍: 흰 라운드 카드 + 가벼운 그림자(공용 카드 내부는 그대로, 래퍼만).
 function SlotCard({ children }) {
-  return <div className="bg-white rounded-2xl px-3 py-3 shadow-sm border border-[#EDEBF7]">{children}</div>;
+  // 좌우 패딩 최소화(px-1.5) → 안쪽 바리스트가 폭을 최대한 써서 큰 금액이 카드 경계를 안 넘게. 세로는 유지.
+  return <div className="bg-white rounded-2xl px-1.5 py-3 shadow-sm border border-[#EDEBF7]">{children}</div>;
 }
 
 function SlotFail({ title }) {
@@ -38,7 +39,7 @@ export function CompositeReport({ report }) {
   const slots = (report && Array.isArray(report.slots)) ? report.slots : [];
   return (
     // 리포트 프레임: accent 테두리 + 연보라 배경 → 일반 답변 말풍선과 시각적으로 구분(차별화 c).
-    <div className="rounded-2xl rounded-tl-md p-3" style={{ background: "#F5F3FD", border: "1px solid #E3DEF7" }}>
+    <div className="rounded-2xl rounded-tl-md px-1.5 py-3" style={{ background: "#F5F3FD", border: "1px solid #E3DEF7" }}>
       {/* 스킬 헤더 배지 */}
       <div className="flex items-center gap-2 mb-2.5 px-0.5">
         <span className="text-[15px] font-extrabold text-gray-900">📊 자금보고서</span>

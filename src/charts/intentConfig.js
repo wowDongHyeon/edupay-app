@@ -2,7 +2,7 @@
 // intent별 { template, title, subtitle, badge, options, insight(data) }.
 // 제목·부제·배지·💡문구·옵션은 '여기서만' 편집. 같은 template을 여러 intent가 공유(N:1).
 // 데이터(§4 표준형)는 queries.js shaper가, 렌더는 charts/templates/* 가 담당(텍스트/필드 하드코딩 없음).
-import { num, won } from "./util";
+import { num, won, wonCompact } from "./util";
 import { josa } from "./josa.js";
 
 export const INTENT_CONFIG = {
@@ -22,7 +22,7 @@ export const INTENT_CONFIG = {
         insight: (d) => {
           const s = d.series || [];
           if (!s.length) return "";
-          const fmt = d.metric === "count" ? (v) => `${num(v)}번` : won;
+          const fmt = d.metric === "count" ? (v) => `${num(v)}번` : wonCompact;
           // 코어25 #75: 월별 avg/max/min 은 합계 비교("더 썼어") 부적합 → '한 번에 평균/최대/최소' 맥락 문구.
           if (d.metric === "avg" || d.metric === "max" || d.metric === "min") {
             const last = s[s.length - 1];
@@ -58,7 +58,7 @@ export const INTENT_CONFIG = {
         insight: (d) => {
           const s = d.series || [];
           if (!s.length) return "";
-          const fmt = d.metric === "count" ? (v) => `${num(v)}번` : won;
+          const fmt = d.metric === "count" ? (v) => `${num(v)}번` : wonCompact;
           const sum = s.reduce((a, x) => a + (x.value || 0), 0);
           return `최근 ${s.length}일 동안 ${fmt(sum)} 썼어. 하루 평균 ${fmt(Math.round(sum / s.length))} 정도야 📊`;
         },
@@ -180,15 +180,15 @@ export const INTENT_CONFIG = {
       // 합계(sum) — 기존 문구 보존. asc(하위N, 코어25 #66)만 신규 '적게' 분기.
       if (m === "sum") {
         if (asc) return isPlace
-          ? `${nameOf(least)}에서 제일 적게 썼어 (${num(least.value)}원).`
-          : `${nameOf(least)}에 제일 적게 썼어 (${num(least.value)}원).`;
+          ? `${nameOf(least)}에서 제일 적게 썼어 (${wonCompact(least.value)}).`
+          : `${nameOf(least)}에 제일 적게 썼어 (${wonCompact(least.value)}).`;
         if (isPlace) {
-          if (items.length === 1) return `${t.label}에서 ${num(t.value)}원 썼어.`;
-          return `${t.label}에서 제일 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
+          if (items.length === 1) return `${t.label}에서 ${wonCompact(t.value)} 썼어.`;
+          return `${t.label}에서 제일 많이 썼어 (${wonCompact(t.value)}, 전체의 ${t.pct}%). 자주 가는 곳이네!`;
         }
         const val = nameOf(t);
-        if (items.length === 1) return `${val}에 ${num(t.value)}원 썼어.`;
-        return `${val}에 가장 많이 썼어 (${num(t.value)}원, 전체의 ${t.pct}%).`;
+        if (items.length === 1) return `${val}에 ${wonCompact(t.value)} 썼어.`;
+        return `${val}에 가장 많이 썼어 (${wonCompact(t.value)}, 전체의 ${t.pct}%).`;
       }
       // 건수(count, 코어25 #69) — "번". asc=적게/desc=자주.
       if (m === "count") {
@@ -199,9 +199,9 @@ export const INTENT_CONFIG = {
       }
       // 비가산 measure(평균/최대/최소, 코어25 #70·71·72·73) — % 없음(합계 아님), "원".
       const label = nameOf(t);
-      if (m === "avg") return `${josa(label, "이가")} 평균이 제일 높아 (${num(t.value)}원).`;
-      if (m === "max") return isPlace ? `${label}에서 한 번에 제일 크게 썼어 (${num(t.value)}원).` : `${josa(label, "은는")} 한 번에 최대 ${num(t.value)}원 썼어.`;
-      if (m === "min") return isPlace ? `${label}에서 한 번에 제일 적게 썼어 (${num(t.value)}원).` : `${josa(label, "은는")} 한 번에 최소 ${num(t.value)}원 썼어.`;
+      if (m === "avg") return `${josa(label, "이가")} 평균이 제일 높아 (${wonCompact(t.value)}).`;
+      if (m === "max") return isPlace ? `${label}에서 한 번에 제일 크게 썼어 (${wonCompact(t.value)}).` : `${josa(label, "은는")} 한 번에 최대 ${wonCompact(t.value)} 썼어.`;
+      if (m === "min") return isPlace ? `${label}에서 한 번에 제일 적게 썼어 (${wonCompact(t.value)}).` : `${josa(label, "은는")} 한 번에 최소 ${wonCompact(t.value)} 썼어.`;
       return "";
     },
   },
