@@ -649,12 +649,14 @@ function SkillChip({ text }) {
   const cmd = sp === -1 ? raw : raw.slice(0, sp);          // "/자금보고서"
   const rest = sp === -1 ? "" : raw.slice(sp + 1).trim();  // "지난달"
   const name = cmd.replace(/^\//, "");
+  const icon = SKILLS[name]?.icon;                         // 레지스트리 아이콘(없으면 생략)
   return (
     <div className="flex justify-end items-center gap-1.5">
       {rest && <span className="text-[13px] text-gray-500">{rest}</span>}
-      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[14px] font-semibold shadow-sm select-none"
-        style={{ background: "#DDE1FB", border: "1px solid #C3C9F7", color: "#2D2870" }}>
-        <span style={{ color: "#5B4DD6", marginRight: 1 }}>/</span>{name}
+      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[14px] shadow-sm select-none"
+        style={{ background: "#EEF0FE", border: "1px solid #9A8FF0", color: "#5B4DD6", fontWeight: 700 }}>
+        {icon && <span aria-hidden="true" style={{ fontWeight: 400 }}>{icon}</span>}
+        <span><span style={{ marginRight: 1 }}>/</span>{name}</span>
       </span>
     </div>);
 }
@@ -954,18 +956,21 @@ function FoxRunner({ stage }) {
   );
 }
 
-function Typing({ intent }) {
-  const runPool = LOADING_POOLS[poolKeyForIntent(intent)] || LOADING_POOLS["기타"];
+function Typing({ intent, skill }) {
+  // skill(복합 스킬 label) 있으면 스킬 전용 문구, 없으면 기존 intent별 LOADING_POOLS.
+  const runPool = skill
+    ? [`${skill} 만드는 중이에요`, "여러 화면을 한 장으로 모으는 중!", "잔액·사용처·상품을 정리하는 중이에요", "거의 다 됐어요!"]
+    : (LOADING_POOLS[poolKeyForIntent(intent)] || LOADING_POOLS["기타"]);
   const [idx, setIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  // 마운트/intent 변경 시 리셋 후, 경과시간(단계 판정)·문구순환 두 타이머. 언마운트 시 clear. (달리기 리듬은 CSS)
+  // 마운트/intent·skill 변경 시 리셋 후, 경과시간(단계 판정)·문구순환 두 타이머. 언마운트 시 clear. (달리기 리듬은 CSS)
   useEffect(() => {
     setIdx(0); setElapsed(0);
     const start = Date.now();
     const tick = setInterval(() => setElapsed(Date.now() - start), 250);
     const msg = setInterval(() => setIdx((i) => i + 1), 1800);
     return () => { clearInterval(tick); clearInterval(msg); };
-  }, [intent]);
+  }, [intent, skill]);
   const stage = elapsed >= FOX_LOADER_CONFIG.cheerAt ? "cheer"
     : elapsed >= FOX_LOADER_CONFIG.tiredAt ? "tired" : "run";
   const pool = stage === "cheer" ? FOX_LOADER_CONFIG.cheerMessages : runPool;
@@ -1134,6 +1139,7 @@ function App() {
   }, []);
   const [typing, setTyping] = useState(false);
   const [typingIntent, setTypingIntent] = useState(null); // 로딩 말풍선 문구 풀 선택용(send 에서 cardIntent 결과 저장)
+  const [typingSkill, setTypingSkill] = useState(null); // 복합 스킬(runComposite) 실행 중 스킬 전용 로딩 문구용. 일반 send는 null.
   const [modal, setModal] = useState(null);
   const [tab, setTab] = useState("금융친구");
   const [convos, setConvos] = useState(() => {
@@ -1326,7 +1332,7 @@ function App() {
   // 대화 세대(epoch): 대화 리셋/전환 시 ++. 진행 중 send()가 이 값을 캡처해, await 후 값이 바뀌었으면
   //   (=그 사이 새 대화/전환) stale 응답·로딩을 새 대화에 반영하지 않고 무시한다(레이스 가드).
   const convoEpochRef = useRef(0);
-  function resetConvoEpoch() { convoEpochRef.current++; setTyping(false); setTypingIntent(null); } // 진행 중 요청 무효화 + 로딩 클리어
+  function resetConvoEpoch() { convoEpochRef.current++; setTyping(false); setTypingIntent(null); setTypingSkill(null); } // 진행 중 요청 무효화 + 로딩 클리어
   function newChat() {
     resetConvoEpoch();
     resetOperiaSession(); // 새 대화 = 새 세션(다음 질문에서 lazy 생성)
@@ -1497,6 +1503,7 @@ function App() {
     //   인사/자기소개 외 모든 질의는 operia 로 직행하고, 카드 종류는 응답 '모양'으로 결정된다.
     const tableForce = /(표|리스트|목록)\s*(으?로)\s*(보여|볼래|알려|출력|나열|정리|봐|줘|주)/.test(q);
     setTypingIntent(null);
+    setTypingSkill(null); // 일반 send는 스킬 로딩 문구 해제(직전 스킬 잔상 방지)
     // 그 외(cardIntent 미분류) — operia 모드: 순수 인사/잡담만 로컬 한 줄, 나머지 null 질의는 operia로 전달(세션 맥락 누적+재조회, 오페리아팀 요청).
     //   mock/backend 모드: 기존 로컬/AI 토글 유지(operiaMode=false → 아래 신규 분기 건너뜀).
     const operiaMode = activeChannelName() === "operia";
@@ -1581,6 +1588,7 @@ function App() {
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: "/" + command + (period ? " " + period : ""), skillId: command }]);
     setTyping(true);
     setTypingIntent(null);
+    setTypingSkill(skill.label || "리포트"); // 스킬 전용 로딩 문구("자금보고서 만드는 중…")
     showApiToast(`${activeChannelName()} · /${command}`, "api");
 
     const cards = Array.isArray(skill.cards) ? skill.cards : [];
@@ -1646,24 +1654,28 @@ function App() {
       <>
       {/* 상단 추천칩(FavoritesBar)은 webview에선 네이티브(Flutter)가 그리므로 숨김. 일반 모드는 started시 노출(기존 동작). */}
       {started && !WEBVIEW && <FavoritesBar onPick={send} />}
+      {/* 빈 랜딩(webview !started): 입력창+진입칩 묶음을 중상단으로 — 상/하 스페이서(flex-grow)로 그룹을 위로 올린다.
+          대화 시작(started)되면 스페이서 0 = 콘텐츠 flex-1 + 입력창 하단 도킹(기존과 동일). */}
+      {!started && <div className="flex-1" aria-hidden="true" />}
       {/* webview: 빈 상태에서도 WelcomeScreen 대신 채팅 셸(빈 대화영역). 일반 모드는 기존대로 !started→WelcomeScreen */}
       {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
         <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)}
-          className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll">
+          className={(started ? "flex-1" : "shrink-0") + " overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll"}>
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
           {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
-          {typing && <Typing intent={typingIntent} />}
+          {typing && <Typing intent={typingIntent} skill={typingSkill} />}
           <div className="h-1"></div>
         </div>
         }
 
       {/* 즐겨찾기 팝업: 입력창 왼쪽 ★ 버튼으로 토글. 하단 FAQ 접이식 패널은 제거됨. */}
       {favOpen && <FavoritesPopup items={favItems} onPick={(t) => { send(t); setFavOpen(false); }} onDelete={deleteFav} openKey={openFaqKey} setOpenKey={setOpenFaqKey} onClose={() => { setFavOpen(false); setOpenFaqKey(null); }} />}
-      {/* 입력 바: relative z-10 으로 팝업 시트 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭. */}
-      <div className="shrink-0 relative z-10 bg-white/95 backdrop-blur border-t border-gray-100">
+      {/* 입력 바: relative z-10 으로 팝업 시트 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭.
+          started(대화중)일 때만 상단 구분선(border-t) — 빈 랜딩에선 중상단에 떠 있으므로 구분선 제거. */}
+      <div className={"shrink-0 relative z-10 bg-white/95 backdrop-blur" + (started ? " border-t border-gray-100" : "")}>
         {/* 슬래시(/) 스킬 런처: input이 '/'로 시작할 때만 이 relative 컨테이너 기준 위(bottom-full)로 뜸 */}
         <SlashSkillMenu ref={slashRef} input={input}
           onPick={(skill, rest) => { const cmd = "/" + skill.command; setInput(cmd + (rest ? " " + rest : "")); slashRef.current?.dismiss?.(cmd); }} />
@@ -1703,6 +1715,8 @@ function App() {
           </button>
         </div>
       </div>
+      {/* 빈 랜딩 하단 스페이서: 상단 스페이서보다 크게(flex-[1.7]) → 입력창 묶음이 정중앙보다 살짝 위(중상단)에 위치. */}
+      {!started && <div className="flex-[1.7]" aria-hidden="true" />}
       </>
       }
 

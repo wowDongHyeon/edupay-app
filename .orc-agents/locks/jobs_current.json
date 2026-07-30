@@ -1,21 +1,4 @@
 {
-  "WS-20260728-t1-c7d2": {
-    "agent_id": "t1",
-    "files": [
-      "src/skills.js",
-      "src/skills/registry.js",
-      "src/skills/SlashSkillMenu.jsx",
-      "src/api/datasource/operia.js",
-      "src/charts/ChartRenderer.jsx",
-      "src/charts/CompositeReport.jsx",
-      "src/App.jsx"
-    ],
-    "started_at": "2026-07-28T09:24:43+00:00",
-    "status": "released",
-    "task_id": "스킬 v2 복합 자금보고서",
-    "updated_at": "2026-07-28T09:42:34+00:00",
-    "why": "통합 스키마+복합스킬: skills.js/SlashMenu 직접, operia/ChartRenderer/CompositeReport/App aegis"
-  },
   "WS-20260729-t1-e4a8": {
     "agent_id": "t1",
     "files": [
@@ -23,9 +6,9 @@
       "src/App.jsx"
     ],
     "started_at": "2026-07-29T01:03:35+00:00",
-    "status": "active",
+    "status": "released",
     "task_id": "스킬 UI 폴리시 3종",
-    "updated_at": "2026-07-29T01:03:35+00:00",
+    "updated_at": "2026-07-29T01:15:48+00:00",
     "why": "CompositeReport 폴리시(직접) + App 레이아웃/로딩문구(aegis)"
   }
 }

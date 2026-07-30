@@ -51,7 +51,7 @@ export function BarTemplate({ data, config, tab, onTab, loading, error, onRetry 
               contentStyle={{ borderRadius: 12, border: "1px solid #E0E2FA", fontSize: 12 }} />
             <Bar dataKey="amount" radius={[8, 8, 0, 0]} maxBarSize={35} isAnimationActive={false}>
               <LabelList dataKey="amount" position="top"
-                formatter={(v) => (v ? (v >= 10000 ? (Number.isInteger(v / 10000) ? v / 10000 : (v / 10000).toFixed(1)) + "만" : num(v)) : "")}
+                formatter={(v) => (v && v < 1e7 ? num(v) : "")}
                 style={{ fontSize: 10, fontWeight: 700, fill: "#6B7280" }} />
               {chart.map((e, i) => <Cell key={i} fill={i === chart.length - 1 ? "#5B4DD6" : "#D7D2F2"} />)}
             </Bar>

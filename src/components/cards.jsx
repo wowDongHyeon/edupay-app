@@ -146,7 +146,7 @@ function BarCard({ grade, view, months, result }) {
                      contentStyle={{ borderRadius: 12, border: "1px solid #E0E2FA", fontSize: 12 }} />
             <Bar dataKey="amount" radius={[8, 8, 0, 0]} maxBarSize={isWeek ? 26 : (n > 6 ? 22 : 44)} isAnimationActive={false}>
               <LabelList dataKey="amount" position="top"
-                         formatter={(v) => (v ? (v >= 10000 ? (Number.isInteger(v / 10000) ? v / 10000 : (v / 10000).toFixed(1)) + "만" : D.num(v)) : "")}
+                         formatter={(v) => (v && v < 1e7 ? D.num(v) : "")}
                          style={{ fontSize: n > 6 ? 8.5 : 10, fontWeight: 700, fill: "#6B7280" }} />
               {data.map((e, i) => <Cell key={i} fill={e.amount === max ? "#5B4DD6" : "#D7D2F2"} />)}
             </Bar>

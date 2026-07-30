@@ -7,3 +7,5 @@
 {"event": "release", "files": ["src/App.jsx", "src/api/datasource/operia.js", "src/charts/ChartRenderer.jsx", "src/charts/CompositeReport.jsx", "src/skills.js", "src/skills/SlashSkillMenu.jsx", "src/skills/registry.js"], "session_key": "WS-20260728-t1-c7d2", "ts": "2026-07-28T09:42:34+00:00"}
 {"event": "prune_job", "session_keys": ["WS-20260728-t1-b3e7"], "ts": "2026-07-28T09:42:34+00:00"}
 {"agent_id": "t1", "event": "claim", "files": ["src/charts/CompositeReport.jsx", "src/App.jsx"], "session_key": "WS-20260729-t1-e4a8", "task_id": "스킬 UI 폴리시 3종", "ts": "2026-07-29T01:03:35+00:00", "why": "CompositeReport 폴리시(직접) + App 레이아웃/로딩문구(aegis)"}
+{"event": "release", "files": ["src/App.jsx", "src/charts/CompositeReport.jsx"], "session_key": "WS-20260729-t1-e4a8", "ts": "2026-07-29T01:15:48+00:00"}
+{"event": "prune_job", "session_keys": ["WS-20260728-t1-c7d2"], "ts": "2026-07-29T01:15:48+00:00"}
