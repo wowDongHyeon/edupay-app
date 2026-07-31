@@ -1225,10 +1225,18 @@ function App() {
   const scrollRef = useRef(null);
   const frameRef = useRef(null);
   const started = messages.length > 0;
+  const [skillScrollId, setSkillScrollId] = useState(null); // 스킬(복합) 발동 시: 보고서 상단(해당 칩)을 화면 위로 스크롤. null이면 기존 맨-아래.
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, typing]);
+    const el = scrollRef.current;
+    if (!el) return;
+    // 스킬 리포트는 카드 여러 장이라 맨 아래로 가면 끝에 떨어짐 → 해당 칩 상단을 화면 위(헤더 밑)로. 일반 메시지는 맨 아래.
+    if (skillScrollId != null) {
+      const node = el.querySelector('[data-mid="' + skillScrollId + '"]');
+      if (node) { el.scrollTop += node.getBoundingClientRect().top - el.getBoundingClientRect().top - 8; return; }
+    }
+    el.scrollTop = el.scrollHeight;
+  }, [messages, typing, skillScrollId]);
 
   // [빈 랜딩 키보드 고착] 입력 포커스 시 브라우저가 focus를 화면에 넣으려고 overflow-hidden 프레임에
   //   scrollTop을 주입한다(재현 관측: 프레임 scrollTop 117). AOS는 키보드 닫힘 후 dvh 복원이 늦거나
@@ -1508,6 +1516,7 @@ function App() {
     const stale = () => convoEpochRef.current !== myEpoch;
     setFavOpen(false); // 전송 시 즐겨찾기 팝업 닫힘
     setInput("");
+    setSkillScrollId(null); // 일반 전송(+단일 스킬)은 기존 맨-아래 스크롤
     const history = messages;
     // skillId: 스킬 슬래시 런처로 보낸 메시지 태깅(v1 렌더 미사용 — 사용량 측정/v2 전용템플릿 대비). 모든 전송 경로가 이 user 메시지를 만들므로 여기서 태깅.
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: shown, ...(skillId ? { skillId } : {}) }]);
@@ -1599,7 +1608,9 @@ function App() {
     const stale = () => convoEpochRef.current !== myEpoch;
     setFavOpen(false);
     // 화면 user 메시지 = /명령어(+기간). operia 로는 앵커(prompt)만 나감(description 미전송).
-    setMessages((m) => [...m, { id: Date.now(), role: "user", text: "/" + command + (period ? " " + period : ""), skillId: command }]);
+    const chipId = Date.now();
+    setMessages((m) => [...m, { id: chipId, role: "user", text: "/" + command + (period ? " " + period : ""), skillId: command }]);
+    setSkillScrollId(chipId); // 이 보고서 상단(칩)을 화면 위로 스크롤(카드 여러 장 → 위에서부터 읽게)
     setTyping(true);
     setTypingIntent(null);
     setTypingSkill(skill.label || "리포트"); // 스킬 전용 로딩 문구("자금보고서 만드는 중…")
@@ -1679,7 +1690,7 @@ function App() {
           className={(started ? "flex-1" : "shrink-0") + " overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll"}>
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
-          {messages.map((m) => <Bubble key={m.id} msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} />)}
+          {messages.map((m) => <div key={m.id} data-mid={m.id}><Bubble msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} /></div>)}
           {typing && <Typing intent={typingIntent} skill={typingSkill} />}
           <div className="h-1"></div>
         </div>
