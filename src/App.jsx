@@ -2,12 +2,15 @@ import React from "react";
 // [브랜드 에셋] Vite가 URL로 번들 — 하드코딩 경로 금지. 로고는 icons/(프로젝트 root 하위)에서 import.
 import logoFoxpay from "../icons/logo_foxpay.svg";           // 컬러 워드마크(170×62) — 흰 배경 랜딩용
 import aiAvatar from "../icons/ai_avatar.png"; // 원형 AI 아바타(자체 보라 배경+흰 심볼)
+// [피그마 리스킨] PTS30200001 소비패턴분석_메인 에서 추출한 원본 래스터(둘 다 알파 채널 — 투명 배경 위에 얹힌다).
+import mascotBlob from "../icons/mascot_blob.png"; // 마스코트 캐릭터(보라 블롭 얼굴)
+import mascotOrb from "../icons/mascot_orb.png";   // 마스코트 뒤 무지개 그라데이션 오브(광원)
 import { EDUPAY, dragScroll } from "./data/edupay";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
 import { getDataSource, activeChannelName } from "./api/datasource";
 import { resetOperiaSession } from "./api/datasource/operia";
-import { getUserId } from "./api/session";
+import { getUserId, getUserName } from "./api/session";
 import { computeSummaryStats } from "./api/datasource/stats";
 import { ChartRenderer, SqlChip } from "./charts/ChartRenderer";
 import { CompositeReport } from "./charts/CompositeReport";
@@ -164,6 +167,25 @@ function queryDataSource(userInput, intent, scope, opts) {
 const WEBVIEW =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("view") === "webview";
+
+// [피그마 리스킨] 웹뷰일 때 <html> 에 .webview 를 붙여 index.css 가 배경을 transparent 로 덮게 한다.
+//   CSS 만으로는 ?view=webview 를 알 수 없으므로 JS 가 클래스 하나만 심어주는 방식(단일 접점).
+if (WEBVIEW && typeof document !== "undefined") document.documentElement.classList.add("webview");
+
+// [피그마 리스킨] 새 랜딩(마스코트+오브) on/off. 미설정=true(신규 디자인).
+//   검수 중 구/신 비교가 필요하면 .env.local 에 VITE_NEW_LANDING=false → 기존 로고 랜딩으로 즉시 복귀.
+const NEW_LANDING = import.meta.env.VITE_NEW_LANDING !== "false";
+
+// [실기기] 웹뷰 상단 네이티브 크롬(헤더+카테고리 칩바) 아래로 웹 콘텐츠를 밀어내는 상단 인셋(px).
+//   env(safe-area-inset-top)=상태바 노치만 커버하므로, 네이티브(Flutter)가 그리는 헤더+칩바 높이는 이 상수로 별도 확보.
+//   미확보 시 대화 첫 메시지가 칩바 뒤로 잘린다.
+//   ⚠ 크롬 높이는 기기마다 달라 실기기 튜닝 노브로 둔다(브라우저엔 네이티브 크롬이 없어 로컬 검증 불가).
+//   튜닝 우선순위: ?top_inset=NN URL 파라미터(재빌드 없이 기기서 값 탐색) → VITE_WEBVIEW_TOP_INSET → 기본 130.
+// ⚠ get()은 미지정 시 null → Number(null)=0 이라 그냥 넘기면 인셋이 항상 0으로 덮인다. 값이 있을 때만 숫자로 읽는다.
+const _rawTopInset = (typeof window !== "undefined") ? new URLSearchParams(window.location.search).get("top_inset") : null;
+const _urlTopInset = _rawTopInset ? Number(_rawTopInset) : NaN;
+const WEBVIEW_TOP_INSET = Number.isFinite(_urlTopInset) ? _urlTopInset : (Number(import.meta.env.VITE_WEBVIEW_TOP_INSET) || 130);
+const WEBVIEW_TOP_CSS = `calc(max(env(safe-area-inset-top), 12px) + ${WEBVIEW_TOP_INSET}px)`;
 
 // [개발용 디버그 표시 토글] 독립 플래그 2개(단일 출처). 기본 OFF(데모/실배포 깔끔), .env.local 에서 개별 ON.
 //   VITE_SHOW_SQL          → SQL/조회조건 칩 노출 여부
@@ -528,17 +550,49 @@ function MenuScreen({ onPick }) {
 
 }
 
-/* ── webview 진입 랜딩 (카카오뱅크 AI 스타일 중앙 정렬) — 실제 메시지는 아님 ─────────
-   빈 대화(진입/새 대화)에서만 노출: 로고 + "{userName}님 반가워요"(2줄, 볼드) + 핵심질의 4개 칩(중앙정렬).
-   userName 없으면 "반가워요"로 폴백. 전송되면 started=true → 숨김(호출부 조건). */
+/* ── webview 진입 랜딩 — [피그마 리스킨] PTS30200001 소비패턴분석_메인 ─────────
+   빈 대화(진입/새 대화)에서만 노출. 전송되면 started=true → 숨김(호출부 조건).
+   피그마 대비 변경점: 로고 워드마크 → 마스코트(오브+블롭) / 인사말 2줄 → 1줄 / 칩 full-width 좌측 → 가운데정렬 pill / 칩 이모지 제거.
+   NEW_LANDING=false 면 기존 로고 랜딩(IntroLandingLegacy)으로 즉시 복귀 — 검수 중 구·신 비교용. */
 function IntroLanding({ userName, onPick }) {
+  if (!NEW_LANDING) return <IntroLandingLegacy userName={userName} onPick={onPick} />;
+  return (
+    <div className="flex-1 flex flex-col items-center pt-6 px-6 edupay-fade">
+      {/* 마스코트 = 오브(뒤 광원) + 블롭 얼굴(앞). 둘 다 알파 PNG라 투명 배경 위에 그대로 얹힌다.
+          모션 명세가 피그마에 없어 정적으로 둔다(움직여야 하면 여기 wrapper 에 CSS 애니만 추가). */}
+      <div className="relative w-[170px] h-[170px] shrink-0 flex items-center justify-center">
+        <img src={mascotOrb} alt="" aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none" />
+        <img src={mascotBlob} alt="AI 금융친구"
+          className="relative w-[100px] h-auto select-none pointer-events-none" />
+      </div>
+      <h2 className="mt-4 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
+        {userName ? `${userName}님, 반가워요` : "반가워요"}
+      </h2>
+      {/* 추천 질문 칩 — 피그마(YXmI502, node 0-2241): 가운데정렬(items-center) + 콘텐츠 폭 pill, 아이콘 없음, 반투명 흰 배경 + 테두리.
+          투명 배경 위에 얹히므로 회색 채움(#F3F4F6) 대신 반투명 흰색 + 그림자로 떠 보이게 한다. */}
+      <div className="mt-7 w-full flex flex-col items-center gap-2.5">
+        {QUICK_QUERIES.map((q, i) =>
+        <button key={i} onClick={() => onPick(q.text)}
+        className="px-4 py-2.5 rounded-full text-[13.5px] font-semibold whitespace-nowrap bg-white/70 text-gray-700 border border-white/80 backdrop-blur-[2px] active:bg-violet-50 active:text-violet-600 active:scale-95 transition"
+        style={{ boxShadow: "0 6px 16px -10px rgba(91,77,214,0.45)" }}>
+            {q.text}
+          </button>
+        )}
+      </div>
+    </div>);
+
+}
+
+/* ── (구) 진입 랜딩 — 로고 워드마크 + 2줄 인사 + full-width 좌측정렬 칩(이모지 포함).
+   VITE_NEW_LANDING=false 일 때만 렌더. 리스킨 검수 통과 후 제거 대상. */
+function IntroLandingLegacy({ userName, onPick }) {
   return (
     <div className="flex-1 flex flex-col items-center pt-6 px-6 edupay-fade">
       <img src={logoFoxpay} alt="FOX PAY" className="w-[150px] h-auto" />
       <h2 className="mt-6 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
         {userName ? <>{userName}님<br />반가워요</> : "반가워요"}
       </h2>
-      {/* 핵심질의 4개 칩 — 세로 스택, full-width 왼쪽정렬(items-stretch). 콘텐츠 상단 붙이기(pt-6 + mt-8): 넓은 뷰에서 아래 여백만 남고 위로 정렬. iPhone에서도 인사말과 최소 간격 유지. 탭 → 전송 */}
       <div className="mt-8 w-full flex flex-col items-stretch gap-3">
         {QUICK_QUERIES.map((q, i) =>
         <button key={i} onClick={() => onPick(q.text)}
@@ -1127,14 +1181,16 @@ function App() {
   const faqHidden = (typeof window !== "undefined" && window.visualViewport) ? keyboardOpen : inputFocused;
   const [faqOpen, setFaqOpen] = useState(true); // (레거시) 키보드 가시성 계산에만 관여, 하단 패널 제거됨
   const [favOpen, setFavOpen] = useState(false); // 즐겨찾기 팝업 열림 상태 — 입력창 왼쪽 ★ 버튼으로 토글
-  // [진입 랜딩] 인사 표시용 이름 — 세션에 name 등 표시이름 필드가 없으므로 getUserId() 결과(userId) 사용.
-  //   폴백: name(없음) → userId → null(→ "반가워요"). getUserId 는 캐시 Promise(session.js).
+  // [진입 랜딩] 인사 표시용 이름 — session.getUserName() 사용.
+  //   앱팀이 getEduPayUser 응답에 userName 을 실어주면 이름, 아직 안 실어주면 userId 로 폴백(= 기존 동작).
+  //   배너용 noUserId 는 '식별자' 유무 판단이라 계속 getUserId() 기준.
   const [userName, setUserName] = useState(null);
   // 웹뷰에서 브릿지·URL·env 폴백 다 실패해 ID를 못 받으면 상단 안내 배너 노출용. 해석 후에만 세팅(초기 null 플래시 방지).
   const [noUserId, setNoUserId] = useState(false);
   useEffect(() => {
     let alive = true;
-    getUserId().then((u) => { if (alive) { setUserName(u || null); setNoUserId(u == null); } }).catch(() => { if (alive) setNoUserId(true); });
+    getUserName().then((n) => { if (alive) setUserName(n || null); }).catch(() => {});
+    getUserId().then((u) => { if (alive) setNoUserId(u == null); }).catch(() => { if (alive) setNoUserId(true); });
     return () => { alive = false; };
   }, []);
   const [typing, setTyping] = useState(false);
@@ -1651,9 +1707,11 @@ function App() {
     setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", skillId: command, report: { summary, slots } }]);
   }
 
+  // [피그마 리스킨] 프레임 배경: 웹뷰는 투명(네이티브 배경이 비침), 일반 모드는 --app-bg 폴백 그라데이션.
+  //   기존 bg-white 하드코딩을 제거하고 index.css 의 단일 변수로 일원화했다.
   return (
-    <div ref={frameRef} className={"relative w-full mx-auto bg-white flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
-    style={{ maxWidth: WEBVIEW ? undefined : 390 }}>
+    <div ref={frameRef} className={"relative w-full mx-auto flex flex-col overflow-hidden phone-frame" + (WEBVIEW ? " webview-full" : "")}
+    style={{ maxWidth: WEBVIEW ? undefined : 390, background: WEBVIEW ? "transparent" : "var(--app-bg)" }}>
       {/* 웹뷰에서 사용자 ID 미해석 시 비차단 안내 배너(계속 사용 가능, 원인만 안내). dev 브라우저(비웹뷰)엔 안 뜸. */}
       {WEBVIEW && noUserId &&
       <div className="shrink-0 flex items-center gap-2 px-4 py-2 text-[13px] bg-amber-50 text-amber-800 border-b border-amber-200">
@@ -1687,7 +1745,8 @@ function App() {
         <WelcomeScreen onPick={send} /> :
 
         <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)}
-          className={(started ? "flex-1" : "shrink-0") + " overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll"}>
+          className={(started ? "flex-1" : "shrink-0") + " overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll"}
+          style={{ paddingTop: (WEBVIEW && started) ? WEBVIEW_TOP_CSS : undefined }}>
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
           {messages.map((m) => <div key={m.id} data-mid={m.id}><Bubble msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} /></div>)}
@@ -1700,20 +1759,23 @@ function App() {
       {favOpen && <FavoritesPopup items={favItems} onPick={(t) => { send(t); setFavOpen(false); }} onDelete={deleteFav} openKey={openFaqKey} setOpenKey={setOpenFaqKey} onClose={() => { setFavOpen(false); setOpenFaqKey(null); }} />}
       {/* 입력 바: relative z-10 으로 팝업 시트 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭.
           started(대화중)일 때만 상단 구분선(border-t) — 빈 랜딩에선 중상단에 떠 있으므로 구분선 제거. */}
-      <div className={"shrink-0 relative z-10 bg-white/95 backdrop-blur" + (started ? " border-t border-gray-100" : "")}>
+      <div className={"shrink-0 relative z-10 backdrop-blur" + (started ? " border-t border-gray-100" : "")}
+        style={{ background: "var(--app-surface)" }}>
         {/* 슬래시(/) 스킬 런처: input이 '/'로 시작할 때만 이 relative 컨테이너 기준 위(bottom-full)로 뜸 */}
         <SlashSkillMenu ref={slashRef} input={input}
           onPick={(skill, rest) => { const cmd = "/" + skill.command; setInput(cmd + (rest ? " " + rest : "")); slashRef.current?.dismiss?.(cmd); }} />
-        <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
+        <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 24px)" }}>
           {/* ★ 즐겨찾기 버튼 (ChatGPT '+' 위치) */}
+          {/* [피그마 리스킨] 즐겨찾기 ★ — 회색 원형 채움 제거(피그마엔 아웃라인 아이콘만). 켜짐 상태는 색으로 유지. */}
           <button onClick={() => setFavOpen((o) => !o)} aria-label="즐겨찾기"
-            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-[#F3F4F6] transition active:scale-90"
+            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-transparent transition active:scale-90"
             style={{ color: favOpen ? "#5B4DD6" : "#8B8FA3" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill={favOpen ? "#5B4DD6" : "none"} stroke="currentColor" strokeWidth="2">
               <path d="M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.72.99-5.8-4.21-4.1 5.82-.85z" strokeLinejoin="round" />
             </svg>
           </button>
-          <div className="flex-1 min-w-0 flex items-center bg-[#F3F4F6] rounded-full px-4 h-11">
+          {/* [피그마 리스킨] 입력 pill — 투명 배경 위에서 회색 채움이 뜨므로 반투명 흰색 + 테두리로 교체 */}
+          <div className="flex-1 min-w-0 flex items-center rounded-full px-4 h-11 bg-white/75 border border-white/80">
             <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -1729,13 +1791,16 @@ function App() {
                 className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" />
 
           </div>
-          {/* 전송 버튼: 항상 보이게 — shrink-0 고정폭, 비활성도 흐리게(opacity) 하지 않고 선명한 회색배경+흰 화살표 유지 */}
+          {/* [피그마 리스킨] 전송 버튼 — 채움 원형(→ 화살표) → 종이비행기 아웃라인.
+              피그마엔 원형 배경이 없다. 활성=보라 스트로크, 비활성=회색 스트로크로 상태는 유지(가독성 회귀 방지). */}
           <button onClick={() => submitComposer()} disabled={!input.trim() || typing}
             aria-label="전송"
-            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition active:scale-90"
-            style={{ background: input.trim() && !typing ? "linear-gradient(135deg,#5B4DD6,#4A3FB0)" : "#A7AAB8" }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12h13M13 6l6 6-6 6" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition active:scale-90 bg-transparent"
+            style={{ color: input.trim() && !typing ? "#5B4DD6" : "#A7AAB8" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.5 2.5L10.5 13.5" />
+              <path d="M21.5 2.5l-7 19-4-8.5-8.5-4 19.5-6.5z" />
             </svg>
           </button>
         </div>
@@ -1770,7 +1835,7 @@ function App() {
         onPointerDown={onHistDown} onPointerMove={onHistMove} onPointerUp={onHistUp} onPointerCancel={onHistUp}
         aria-label="대화 기록"
         className="absolute z-20 flex items-center gap-1 rounded-full active:scale-95 select-none touch-none"
-        style={{ ...(histPos ? { left: histPos.left, top: histPos.top } : { left: 12, top: "max(env(safe-area-inset-top), 12px)" }),
+        style={{ ...(histPos ? { left: histPos.left, top: histPos.top } : { left: 12, top: WEBVIEW_TOP_CSS }),
           height: HISTORY_BTN.size, padding: "0 12px", touchAction: "none",
           background: "rgba(91,77,214,0.92)", boxShadow: "0 4px 14px rgba(91,77,214,0.35)",
           opacity: historyHidden ? 0 : HISTORY_BTN.idleOpacity, transition: "opacity .25s" }}>

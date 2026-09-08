@@ -57,6 +57,39 @@ export function getUserId() {
   return userCached;
 }
 
+let nameCached; // Promise<string|null> — 표시이름 1회 캐시
+
+// [피그마 리스킨 · 요청사항] 인사말에 쓸 '표시이름'.
+//   피그마 주석: "현재 Id 값을 띄우는데 유저의 이름을 띄워야 합니다 (ex. 홍길동님, 반가워요).
+//                param 에 userName 을 추가하는 것이 가능할까요?"
+//   → 네이티브(Flutter)가 getEduPayUser 응답에 userName(또는 name)을 실어주면 그 값을 쓴다.
+//     아직 안 실어주므로 현재는 ④ userId 로 폴백 → 기존 동작과 100% 동일(회귀 없음).
+//     앱팀이 필드를 추가하는 순간 웹 수정 없이 이름이 뜬다.
+//   폴백: ① 브릿지 userName|name → ② URL ?user_name= (dev) → ③ VITE_DEV_USER_NAME → ④ userId → ⑤ null
+async function resolveUserName() {
+  const res = await getBridge();
+  if (res && res.ok) {
+    const n = res.userName || res.name;
+    if (n) return String(n);
+  }
+  if (typeof window !== "undefined") {
+    const q = new URLSearchParams(window.location.search).get("user_name");
+    if (q) return q;
+  }
+  const envName = import.meta.env.VITE_DEV_USER_NAME;
+  if (envName) return String(envName);
+  return await getUserId(); // 이름 없으면 기존처럼 ID 표시
+}
+
+/**
+ * 인사말용 표시이름. 네이티브가 userName 을 주면 이름, 없으면 userId 로 폴백.
+ * @returns {Promise<string|null>}
+ */
+export function getUserName() {
+  if (!nameCached) nameCached = resolveUserName();
+  return nameCached;
+}
+
 /**
  * 사용자 실제 위치. 브릿지(getEduPayUser)의 lat/lng 우선(웹뷰 GPS 권한 우회).
  *  - 유효: { status:"ok", lat, lng }

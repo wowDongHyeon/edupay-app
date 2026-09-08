@@ -14,7 +14,7 @@ body {
 }
 body {
   font-family: "Pretendard", -apple-system, sans-serif;
-  background: #ffffff;
+  background: var(--app-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,6 +23,28 @@ body {
   --fox: #5b3bf6;
   --fox-deep: #4a2be0;
   --fox-soft: #eeedfb;
+
+  /* ───────── [피그마 리스킨] 앱 배경 — 단일 출처 ─────────
+     요청사항: "웹쪽에서 배경을 투명으로" → 웹뷰는 아래 html.webview 블록에서 transparent 로 덮는다.
+     여기 --app-bg 는 '일반 모드(브라우저 단독)' 폴백. 뒤에 네이티브 앱이 없으므로 투명하면 흰 바탕만 보인다.
+     배경 방침이 흰색/그라데이션/투명 중 무엇으로 확정되든 이 변수 한 줄만 고치면 전체가 따라온다. */
+  --app-bg:
+    radial-gradient(118% 58% at 50% 30%, rgba(196, 158, 255, 0.42) 0%, rgba(255, 178, 216, 0.26) 38%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
+  /* 채팅 셸(입력바 등) 표면색 — 투명 배경에서도 가독성을 유지해야 하는 곳에만 사용 */
+  --app-surface: rgba(255, 255, 255, 0.95);
+}
+
+/* [피그마 리스킨] 웹뷰(?view=webview)에서는 배경을 완전히 투명하게 — 네이티브(Flutter) 배경이 비쳐 보이게 한다.
+   App.jsx 가 WEBVIEW 일 때 <html> 에 .webview 를 붙인다. 투명 전달이 최종 확정되지 않았으므로
+   되돌릴 때는 이 블록만 지우면 --app-bg 로 복귀한다. */
+html.webview,
+html.webview body,
+html.webview #root {
+  background: transparent;
+}
+html.webview {
+  --app-surface: transparent;
 }
 #root {
   width: 100%;
