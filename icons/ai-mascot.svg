@@ -1,0 +1,82 @@
+<svg id="mascot" width="231" height="179" viewBox="0 0 231 179" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="mascot-root">
+<g id="mascot-body" filter="url(#filter0_ii_1_141)">
+<path d="M0 86.129C0 38.5613 38.6154 0 86.25 0H143.75C191.385 0 230 38.5613 230 86.129V103.355C230 144.58 196.533 178 155.25 178H74.75C33.4667 178 0 144.58 0 103.355V86.129Z" fill="url(#paint0_linear_1_141)"/>
+</g>
+<path d="M155.25 176.565V178H74.75V176.565H155.25ZM228.562 103.355V86.129C228.562 39.3541 190.591 1.43548 143.75 1.43548H86.25C39.4093 1.43548 1.4375 39.3541 1.4375 86.129V103.355C1.4375 143.787 34.2606 176.565 74.75 176.565V178L72.8212 177.975C32.4293 176.953 0 143.936 0 103.355V86.129C1.48189e-06 38.5613 38.6154 0 86.25 0H143.75C191.385 0 230 38.5613 230 86.129V103.355L229.975 105.281C228.952 145.616 195.888 178 155.25 178V176.565C195.739 176.565 228.562 143.787 228.562 103.355Z" fill="white" fill-opacity="0.7"/>
+<g id="mascot-face" filter="url(#filter1_di_1_141)">
+<path d="M29 92C29 66.5949 49.5352 46 74.8667 46H155.133C180.465 46 201 66.5949 201 92V100.625C201 121.267 184.315 138 163.733 138H66.2667C45.6849 138 29 121.267 29 100.625V92Z" fill="url(#paint1_linear_1_141)"/>
+</g>
+<g id="mascot-eyes">
+  <path id="eye-l-glow" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round" filter="url(#eyeGlow)"/>
+  <path id="eye-r-glow" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round" filter="url(#eyeGlow)"/>
+  <path id="eye-l" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" filter="url(#eyeCore)"/>
+  <path id="eye-r" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" filter="url(#eyeCore)"/>
+</g>
+</g>
+<defs>
+<filter id="eyeGlow" filterUnits="userSpaceOnUse" x="0" y="0" width="231" height="179"><feGaussianBlur stdDeviation="5"/></filter>
+<filter id="eyeCore" filterUnits="userSpaceOnUse" x="0" y="0" width="231" height="179"><feGaussianBlur stdDeviation="1"/></filter>
+
+<filter id="filter0_ii_1_141" x="0" y="-10" width="230" height="200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="12"/>
+<feGaussianBlur stdDeviation="7.5"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_1_141"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="-10"/>
+<feGaussianBlur stdDeviation="5"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.15 0"/>
+<feBlend mode="normal" in2="effect1_innerShadow_1_141" result="effect2_innerShadow_1_141"/>
+</filter>
+<filter id="filter1_di_1_141" x="28" y="46" width="174" height="95" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="2"/>
+<feGaussianBlur stdDeviation="0.5"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.3 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_141"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_141" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="2"/>
+<feGaussianBlur stdDeviation="1.5"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.282353 0 0 0 0 0.14902 0 0 0 0 0.913725 0 0 0 0.6 0"/>
+<feBlend mode="normal" in2="shape" result="effect2_innerShadow_1_141"/>
+</filter>
+<filter id="filter2_f_1_141" x="53" y="62" width="41" height="56" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur_1_141"/>
+</filter>
+<filter id="filter3_f_1_141" x="64" y="73" width="19" height="33" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_1_141"/>
+</filter>
+<filter id="filter4_f_1_141" x="136" y="62" width="41" height="56" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur_1_141"/>
+</filter>
+<filter id="filter5_f_1_141" x="147" y="73" width="19" height="33" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_1_141"/>
+</filter>
+<linearGradient id="paint0_linear_1_141" x1="182.563" y1="8.61291" x2="120.903" y2="178.056" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F196FF"/>
+<stop offset="1" stop-color="#4E43FC"/>
+</linearGradient>
+<linearGradient id="paint1_linear_1_141" x1="115" y1="46" x2="115" y2="138" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7C3FF3"/>
+<stop offset="1" stop-color="#362FCB"/>
+</linearGradient>
+</defs>
+</svg>

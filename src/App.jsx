@@ -1,10 +1,9 @@
 import React from "react";
 // [브랜드 에셋] Vite가 URL로 번들 — 하드코딩 경로 금지. 로고는 icons/(프로젝트 root 하위)에서 import.
 import logoFoxpay from "../icons/logo_foxpay.svg";           // 컬러 워드마크(170×62) — 흰 배경 랜딩용
-import aiAvatar from "../icons/ai_avatar.png"; // 원형 AI 아바타(자체 보라 배경+흰 심볼)
-// [피그마 리스킨] PTS30200001 소비패턴분석_메인 에서 추출한 원본 래스터(둘 다 알파 채널 — 투명 배경 위에 얹힌다).
-import mascotBlob from "../icons/mascot_blob.png"; // 마스코트 캐릭터(보라 블롭 얼굴)
-import mascotOrb from "../icons/mascot_orb.png";   // 마스코트 뒤 무지개 그라데이션 오브(광원)
+// [마스코트] 앱팀 제공 웹 이식본(2026-09-10). 랜딩·말풍선 아바타가 같은 마스코트를 쓴다.
+//   뒤 광원(오브 PNG)은 앱팀 SVG 에 없어 제거함(2026-09-10 확인).
+import { Mascot } from "./components/Mascot";
 import { EDUPAY, dragScroll } from "./data/edupay";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
@@ -180,11 +179,15 @@ const NEW_LANDING = import.meta.env.VITE_NEW_LANDING !== "false";
 //   env(safe-area-inset-top)=상태바 노치만 커버하므로, 네이티브(Flutter)가 그리는 헤더+칩바 높이는 이 상수로 별도 확보.
 //   미확보 시 대화 첫 메시지가 칩바 뒤로 잘린다.
 //   ⚠ 크롬 높이는 기기마다 달라 실기기 튜닝 노브로 둔다(브라우저엔 네이티브 크롬이 없어 로컬 검증 불가).
-//   튜닝 우선순위: ?top_inset=NN URL 파라미터(재빌드 없이 기기서 값 탐색) → VITE_WEBVIEW_TOP_INSET → 기본 130.
+//   ⚠ 반드시 "스크롤 컨테이너 안쪽" paddingTop 이어야 한다(프레임 padding 아님).
+//      스크롤 시 이 여백이 위로 사라져 콘텐츠가 칩바 뒤로 깔려 들어가는 것이 의도다
+//      (2026-09-08 이석호 팀장 통화: "스크롤을 올렸을 때 하단으로 깔려서 들어가거든요. 초반에는 겹쳐 보이면 안 되니까").
+//      프레임 padding 으로 옮기면 스크롤해도 칩바 영역을 침범하지 않아 이 요구가 깨진다.
+//   튜닝 우선순위: ?top_inset=NN URL 파라미터(재빌드 없이 기기서 값 탐색) → VITE_WEBVIEW_TOP_INSET → 기본 24.
 // ⚠ get()은 미지정 시 null → Number(null)=0 이라 그냥 넘기면 인셋이 항상 0으로 덮인다. 값이 있을 때만 숫자로 읽는다.
 const _rawTopInset = (typeof window !== "undefined") ? new URLSearchParams(window.location.search).get("top_inset") : null;
 const _urlTopInset = _rawTopInset ? Number(_rawTopInset) : NaN;
-const WEBVIEW_TOP_INSET = Number.isFinite(_urlTopInset) ? _urlTopInset : (Number(import.meta.env.VITE_WEBVIEW_TOP_INSET) || 130);
+const WEBVIEW_TOP_INSET = Number.isFinite(_urlTopInset) ? _urlTopInset : (Number(import.meta.env.VITE_WEBVIEW_TOP_INSET) || 24);
 const WEBVIEW_TOP_CSS = `calc(max(env(safe-area-inset-top), 12px) + ${WEBVIEW_TOP_INSET}px)`;
 
 // [개발용 디버그 표시 토글] 독립 플래그 2개(단일 출처). 기본 OFF(데모/실배포 깔끔), .env.local 에서 개별 ON.
@@ -260,11 +263,11 @@ function SparkleIcon({ size = 88 }) {
 }
 
 /* ── 채팅 AI 아바타 — 보라 라운드 사각 + 브랜드 심볼(launcher). Bubble/Typing 공통. ── */
-function AiAvatar() {
-  // 업체 제공 원형 아바타(자체 배경 O) — 보라 라운드사각/그라데이션·내부 심볼 없이 원형 이미지 그대로. 크기·여백은 기존과 동일.
-  return (
-    <img src={aiAvatar} alt="" className="w-7 h-7 rounded-full shrink-0 object-cover mt-0.5" />);
-
+function AiAvatar({ animated = false }) {
+  // 랜딩 마스코트와 같은 SVG. 말풍선 "위"에 놓이므로 카드 폭을 먹지 않아 레퍼런스 크기(40px)를 그대로 쓴다.
+  //   (왼쪽 배치였을 때는 폭을 키우면 옆 카드가 좁아져 잔액 카드 텍스트가 깨졌다 — 2026-09-11 실측)
+  // animated 는 가장 최근 AI 말풍선 하나에만 true — 말풍선 수만큼 rAF 루프가 늘어나는 것을 막는다.
+  return <Mascot width={40} animated={animated} label="" className="shrink-0" />;
 }
 
 const TABS = ["앱카드", "학생증", "금융친구"];
@@ -558,20 +561,16 @@ function IntroLanding({ userName, onPick }) {
   if (!NEW_LANDING) return <IntroLandingLegacy userName={userName} onPick={onPick} />;
   return (
     <div className="flex-1 flex flex-col items-center pt-6 px-6 edupay-fade">
-      {/* 마스코트 = 오브(뒤 광원) + 블롭 얼굴(앞). 둘 다 알파 PNG라 투명 배경 위에 그대로 얹힌다.
-          모션 명세가 피그마에 없어 정적으로 둔다(움직여야 하면 여기 wrapper 에 CSS 애니만 추가). */}
-      <div className="relative w-[170px] h-[170px] shrink-0 flex items-center justify-center">
-        <img src={mascotOrb} alt="" aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none" />
-        <img src={mascotBlob} alt="AI 금융친구"
-          className="relative w-[100px] h-auto select-none pointer-events-none" />
+      {/* 마스코트 — 대기 애니메이션 구동. 뒤 광원(오브)은 앱팀 SVG 에 없어 제거함. */}
+      <div className="h-[170px] shrink-0 flex items-center justify-center">
+        <Mascot width={150} />
       </div>
       <h2 className="mt-4 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
         {userName ? `${userName}님, 반가워요` : "반가워요"}
       </h2>
       {/* 추천 질문 칩 — 피그마(YXmI502, node 0-2241): 가운데정렬(items-center) + 콘텐츠 폭 pill, 아이콘 없음, 반투명 흰 배경 + 테두리.
           투명 배경 위에 얹히므로 회색 채움(#F3F4F6) 대신 반투명 흰색 + 그림자로 떠 보이게 한다. */}
-      <div className="mt-7 w-full flex flex-col items-center gap-2.5">
+      <div className="mt-auto mb-6 w-full flex flex-col items-center gap-2.5">
         {QUICK_QUERIES.map((q, i) =>
         <button key={i} onClick={() => onPick(q.text)}
         className="px-4 py-2.5 rounded-full text-[13.5px] font-semibold whitespace-nowrap bg-white/70 text-gray-700 border border-white/80 backdrop-blur-[2px] active:bg-violet-50 active:text-violet-600 active:scale-95 transition"
@@ -879,7 +878,7 @@ function isTechErrorMessage(em) {
   return false;                   // 한글 포함 → 백엔드 사용자 안내(보존)
 }
 
-function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq }) {
+function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq, animatedAvatar = false }) {
   // 아바타 아래 SQL 칩이 보여줄 데이터. 기본은 메시지 응답(월별 등), 리포트 카드는 현재 탭으로 setChip 동기화.
   const [chip, setChip] = React.useState({ sql: msg.sql, source: msg.source, rawRows: msg.tableData });
   // 사용자 말풍선은 좌측 스와이프 → '등록' 버튼(UserBubble). long-press 등록/복사는 모두 제거됨.
@@ -892,10 +891,13 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
   const isChart = !!msg.chartType; // 오페리아 데이터 메시지(ChartRenderer 렌더)
   const bigCard = isChart || isReport || ["spending", "report", "friendCompare", "nudgeCompare", "nudgeList", "merchantMap", "balance", "channel", "merchantBreakdown", "parentCard", "schoolCompare", "catSpend", "timePattern", "quiz", "recommend"].includes(msg.card);
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex gap-2 items-start">
-        <AiAvatar />
-        <div className={bigCard ? "flex-1 min-w-0" : "max-w-[85%]"}>
+    <div className="flex flex-col gap-1.5 items-start">
+      {/* 아바타는 말풍선 "위" — 다른 콘텐츠 탭과 동일한 배치(2026-09-11 이석호 팀장 통화).
+          옆이 아니라 위라서 카드가 가로 전체를 쓴다(왼쪽 배치 때 카드가 좁아지던 문제도 함께 해소).
+          ⚠ items-start 필수 — flex-col 기본값(stretch)이면 텍스트 말풍선이 가로 전체로 늘어난다.
+             카드는 전체 폭이 필요하므로 w-full 로 되돌린다. */}
+      <AiAvatar animated={animatedAvatar} />
+      <div className={bigCard ? "w-full min-w-0" : "max-w-[85%]"}>
           {/* 카드 응답(isChart)은 카드 섹션만 — 카드 위 answer 텍스트 버블 숨김. 텍스트만/에러/빈결과(카드 없음)는 그대로 표시. */}
           {msg.text && !isChart &&
           <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-md text-[14px] text-gray-800 leading-relaxed whitespace-pre-line shadow-sm" style={{ WebkitTouchCallout: "none" }}>
@@ -911,7 +913,6 @@ function Bubble({ msg, grade, onSend, onOpenContent, onCardQuery, onRegisterFaq 
           }
           {isReport && <CompositeReport report={msg.report} />}
           {isChart && <ChartRenderer intent={msg.intent} sql={msg.sql} source={msg.source} tableData={msg.tableData} columnMetadata={msg.columnMetadata} reportPlan={msg.reportPlan} summaryStats={msg.summaryStats} scope={msg.scope} appliedPeriod={msg.appliedPeriod} queryBreakdown={msg.queryBreakdown} queryInfo={msg.queryInfo} forceTable={msg.chartType === "table"} onCardQuery={onCardQuery} onActiveSql={setChip} />}
-        </div>
       </div>
       {/* §9 SQL 칩 — 카드 밖, 어시스턴트 아바타 아래(메시지 좌측 영역). 리포트 카드는 현재 탭(월/일) SQL로 setChip 동기화 */}
       {isChart && SHOW_SQL && <SqlChip sql={chip.sql} source={chip.source} rawRows={chip.rawRows} queryInfo={msg.queryInfo} />}
@@ -1030,9 +1031,9 @@ function Typing({ intent, skill }) {
   const pool = stage === "cheer" ? FOX_LOADER_CONFIG.cheerMessages : runPool;
   const msg = pool[idx % pool.length];
   return (
-    <div className="flex gap-2 items-start edupay-fade">
-      <AiAvatar />
-      <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2.5 items-center">
+    <div className="flex flex-col gap-1.5 edupay-fade">
+      <AiAvatar animated />
+      <div className="self-start bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm flex gap-2.5 items-center">
         {FOX_LOADER_ENABLED
           ? <FoxRunner stage={stage} />
           : /* 기본 폴백: 점 3개(여우 도입 전 마크업). 문구 순환은 아래 공통. */
@@ -1707,6 +1708,13 @@ function App() {
     setMessages((m) => [...m, { id: Date.now() + 1, role: "ai", skillId: command, report: { summary, slots } }]);
   }
 
+  // 가장 최근 AI 말풍선 id — 그 아바타 하나만 애니메이션을 돌린다(rAF 루프를 항상 1개로 유지).
+  //   로딩 중에는 Typing 아바타가 대신 움직이므로 말풍선 쪽은 모두 정지시킨다.
+  let lastAiId = null;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role !== "user") { lastAiId = messages[i].id; break; }
+  }
+
   // [피그마 리스킨] 프레임 배경: 웹뷰는 투명(네이티브 배경이 비침), 일반 모드는 --app-bg 폴백 그라데이션.
   //   기존 bg-white 하드코딩을 제거하고 index.css 의 단일 변수로 일원화했다.
   return (
@@ -1737,19 +1745,16 @@ function App() {
       <>
       {/* 상단 추천칩(FavoritesBar)은 webview에선 네이티브(Flutter)가 그리므로 숨김. 일반 모드는 started시 노출(기존 동작). */}
       {started && !WEBVIEW && <FavoritesBar onPick={send} />}
-      {/* 빈 랜딩(webview !started): 입력창+진입칩 묶음을 중상단으로 — 상/하 스페이서(flex-grow)로 그룹을 위로 올린다.
-          대화 시작(started)되면 스페이서 0 = 콘텐츠 flex-1 + 입력창 하단 도킹(기존과 동일). */}
-      {!started && <div className="flex-1" aria-hidden="true" />}
       {/* webview: 빈 상태에서도 WelcomeScreen 대신 채팅 셸(빈 대화영역). 일반 모드는 기존대로 !started→WelcomeScreen */}
       {(!started && !WEBVIEW) ?
         <WelcomeScreen onPick={send} /> :
 
         <div ref={scrollRef} onPointerDown={() => favOpen && setFavOpen(false)}
-          className={(started ? "flex-1" : "shrink-0") + " overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll"}
-          style={{ paddingTop: (WEBVIEW && started) ? WEBVIEW_TOP_CSS : undefined }}>
+          className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-3.5 edupay-noscroll"
+          style={{ paddingTop: WEBVIEW ? WEBVIEW_TOP_CSS : undefined }}>
           {/* 진입/새 대화: 카카오뱅크 스타일 중앙 랜딩(로고 + "{userId}님 반가워요" + 핵심질의 칩). 전송되면 started=true로 숨김. */}
           {WEBVIEW && !started && <IntroLanding userName={userName} onPick={send} />}
-          {messages.map((m) => <div key={m.id} data-mid={m.id}><Bubble msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} /></div>)}
+          {messages.map((m) => <div key={m.id} data-mid={m.id}><Bubble msg={m} grade={grade} onSend={send} onOpenContent={setModal} onCardQuery={cardQuery} onRegisterFaq={askRegisterFaq} animatedAvatar={!typing && m.id === lastAiId} /></div>)}
           {typing && <Typing intent={typingIntent} skill={typingSkill} />}
           <div className="h-1"></div>
         </div>
@@ -1758,8 +1763,8 @@ function App() {
       {/* 즐겨찾기 팝업: 입력창 왼쪽 ★ 버튼으로 토글. 하단 FAQ 접이식 패널은 제거됨. */}
       {favOpen && <FavoritesPopup items={favItems} onPick={(t) => { send(t); setFavOpen(false); }} onDelete={deleteFav} openKey={openFaqKey} setOpenKey={setOpenFaqKey} onClose={() => { setFavOpen(false); setOpenFaqKey(null); }} />}
       {/* 입력 바: relative z-10 으로 팝업 시트 위. 가로 overflow로 전송버튼이 절대 잘리지 않게 입력 래퍼 min-w-0 + 버튼 shrink-0 고정폭.
-          started(대화중)일 때만 상단 구분선(border-t) — 빈 랜딩에선 중상단에 떠 있으므로 구분선 제거. */}
-      <div className={"shrink-0 relative z-10 backdrop-blur" + (started ? " border-t border-gray-100" : "")}
+          상단 구분선 없음 — 웹뷰는 배경이 투명이라 밝은 보더가 네이티브 배경 위에 흰 줄로 떠 보인다(2026-09-10 요청). */}
+      <div className="shrink-0 relative z-10 backdrop-blur"
         style={{ background: "var(--app-surface)" }}>
         {/* 슬래시(/) 스킬 런처: input이 '/'로 시작할 때만 이 relative 컨테이너 기준 위(bottom-full)로 뜸 */}
         <SlashSkillMenu ref={slashRef} input={input}
@@ -1805,8 +1810,6 @@ function App() {
           </button>
         </div>
       </div>
-      {/* 빈 랜딩 하단 스페이서: 상단과 동일(flex-1) → 로고+칩+입력 그룹이 화면 세로 정중앙(위아래 여백 균등). */}
-      {!started && <div className="flex-1" aria-hidden="true" />}
       </>
       }
 
@@ -1835,6 +1838,7 @@ function App() {
         onPointerDown={onHistDown} onPointerMove={onHistMove} onPointerUp={onHistUp} onPointerCancel={onHistUp}
         aria-label="대화 기록"
         className="absolute z-20 flex items-center gap-1 rounded-full active:scale-95 select-none touch-none"
+        // absolute 의 containing block 은 프레임의 padding box — 프레임 paddingTop 이 안 먹으므로 버튼은 따로 민다.
         style={{ ...(histPos ? { left: histPos.left, top: histPos.top } : { left: 12, top: WEBVIEW_TOP_CSS }),
           height: HISTORY_BTN.size, padding: "0 12px", touchAction: "none",
           background: "rgba(91,77,214,0.92)", boxShadow: "0 4px 14px rgba(91,77,214,0.35)",
