@@ -2,8 +2,9 @@ import React from "react";
 // [브랜드 에셋] Vite가 URL로 번들 — 하드코딩 경로 금지. 로고는 icons/(프로젝트 root 하위)에서 import.
 import logoFoxpay from "../icons/logo_foxpay.svg";           // 컬러 워드마크(170×62) — 흰 배경 랜딩용
 // [마스코트] 앱팀 제공 웹 이식본(2026-09-10). 랜딩·말풍선 아바타가 같은 마스코트를 쓴다.
-//   뒤 광원(오브 PNG)은 앱팀 SVG 에 없어 제거함(2026-09-10 확인).
+//   뒤 광원(오브 PNG)은 2026-09-17 폭스 피드백(#2)으로 랜딩에 재적용 — 앱팀 제공 그라데이션 에셋.
 import { Mascot } from "./components/Mascot";
+import mascotOrb from "../icons/mascot_orb.png"; // 마스코트 뒤 파스텔 그라데이션 광원
 import { EDUPAY, dragScroll } from "./data/edupay";
 import { HistoryDrawer } from "./components/history";
 import { getAiEnabled, setAiEnabled as persistAiEnabled, isAiFeatureOn } from "./config";
@@ -183,11 +184,12 @@ const NEW_LANDING = import.meta.env.VITE_NEW_LANDING !== "false";
 //      스크롤 시 이 여백이 위로 사라져 콘텐츠가 칩바 뒤로 깔려 들어가는 것이 의도다
 //      (2026-09-08 이석호 팀장 통화: "스크롤을 올렸을 때 하단으로 깔려서 들어가거든요. 초반에는 겹쳐 보이면 안 되니까").
 //      프레임 padding 으로 옮기면 스크롤해도 칩바 영역을 침범하지 않아 이 요구가 깨진다.
-//   튜닝 우선순위: ?top_inset=NN URL 파라미터(재빌드 없이 기기서 값 탐색) → VITE_WEBVIEW_TOP_INSET → 기본 24.
+//   튜닝 우선순위: ?top_inset=NN URL 파라미터(재빌드 없이 기기서 값 탐색) → VITE_WEBVIEW_TOP_INSET → 기본 46.
+//   46 = 앱팀이 패치한 상단 영역 높이(Figma 2026-09-21 요청 #1). 그 전 24 로는 말풍선이 칩바와 겹쳤다.
 // ⚠ get()은 미지정 시 null → Number(null)=0 이라 그냥 넘기면 인셋이 항상 0으로 덮인다. 값이 있을 때만 숫자로 읽는다.
 const _rawTopInset = (typeof window !== "undefined") ? new URLSearchParams(window.location.search).get("top_inset") : null;
 const _urlTopInset = _rawTopInset ? Number(_rawTopInset) : NaN;
-const WEBVIEW_TOP_INSET = Number.isFinite(_urlTopInset) ? _urlTopInset : (Number(import.meta.env.VITE_WEBVIEW_TOP_INSET) || 24);
+const WEBVIEW_TOP_INSET = Number.isFinite(_urlTopInset) ? _urlTopInset : (Number(import.meta.env.VITE_WEBVIEW_TOP_INSET) || 46);
 const WEBVIEW_TOP_CSS = `calc(max(env(safe-area-inset-top), 12px) + ${WEBVIEW_TOP_INSET}px)`;
 
 // [개발용 디버그 표시 토글] 독립 플래그 2개(단일 출처). 기본 OFF(데모/실배포 깔끔), .env.local 에서 개별 ON.
@@ -559,18 +561,26 @@ function MenuScreen({ onPick }) {
    NEW_LANDING=false 면 기존 로고 랜딩(IntroLandingLegacy)으로 즉시 복귀 — 검수 중 구·신 비교용. */
 function IntroLanding({ userName, onPick }) {
   if (!NEW_LANDING) return <IntroLandingLegacy userName={userName} onPick={onPick} />;
+  // 세로 가운데 정렬 — 칩 묶음을 mt-auto 로 바닥에 붙이면 작은 기기에선 위 콘텐츠와 붙고
+  //   큰 기기에선 버튼이 너무 내려간다(Figma 2026-09-21 요청 #3). 한 덩어리로 중앙에 둔다.
   return (
-    <div className="flex-1 flex flex-col items-center pt-6 px-6 edupay-fade">
-      {/* 마스코트 — 대기 애니메이션 구동. 뒤 광원(오브)은 앱팀 SVG 에 없어 제거함. */}
-      <div className="h-[170px] shrink-0 flex items-center justify-center">
-        <Mascot width={150} />
+    <div className="flex-1 flex flex-col items-center justify-center px-6 edupay-fade">
+      {/* 마스코트 — 대기 애니메이션 구동. 뒤 파스텔 그라데이션 광원 재적용(2026-09-17 폭스 #2). */}
+      {/* 크기 = Figma(아트보드 375) 실측 82×64 기준 — 이전 200/150 은 약 1.9배 과대였다(2026-09-11 요청 #2).
+          전체 82×64 = 피그마 실측값. 피그마 원본은 몸통이 캔버스의 96%(글로우가 위 13px 에만 두툼)인데,
+          우리는 글로우가 원형 PNG 라 그만큼 못 붙인다 — 글로우만 분리된 에셋을 받으면 정확해진다(앱팀 요청 중).
+          ⚠ max-w-none 필수 — preflight 의 img{max-width:100%} 때문에 오브가 부모 폭으로 잘린다. */}
+      <div className="relative w-[82px] h-[64px] shrink-0 flex items-center justify-center">
+        <img src={mascotOrb} alt="" aria-hidden="true"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[82px] max-w-none pointer-events-none select-none z-0" />
+        <Mascot width={62} className="relative z-10" />
       </div>
       <h2 className="mt-4 text-[22px] font-extrabold text-gray-900 text-center leading-snug tracking-[-0.02em]">
         {userName ? `${userName}님, 반가워요` : "반가워요"}
       </h2>
       {/* 추천 질문 칩 — 피그마(YXmI502, node 0-2241): 가운데정렬(items-center) + 콘텐츠 폭 pill, 아이콘 없음, 반투명 흰 배경 + 테두리.
           투명 배경 위에 얹히므로 회색 채움(#F3F4F6) 대신 반투명 흰색 + 그림자로 떠 보이게 한다. */}
-      <div className="mt-auto mb-6 w-full flex flex-col items-center gap-2.5">
+      <div className="mt-7 w-full flex flex-col items-center gap-2.5">
         {QUICK_QUERIES.map((q, i) =>
         <button key={i} onClick={() => onPick(q.text)}
         className="px-4 py-2.5 rounded-full text-[13.5px] font-semibold whitespace-nowrap bg-white/70 text-gray-700 border border-white/80 backdrop-blur-[2px] active:bg-violet-50 active:text-violet-600 active:scale-95 transition"
@@ -1769,7 +1779,7 @@ function App() {
         {/* 슬래시(/) 스킬 런처: input이 '/'로 시작할 때만 이 relative 컨테이너 기준 위(bottom-full)로 뜸 */}
         <SlashSkillMenu ref={slashRef} input={input}
           onPick={(skill, rest) => { const cmd = "/" + skill.command; setInput(cmd + (rest ? " " + rest : "")); slashRef.current?.dismiss?.(cmd); }} />
-        <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 24px)" }}>
+        <div className="flex items-center gap-2.5 px-4 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 8px)" }}>
           {/* ★ 즐겨찾기 버튼 (ChatGPT '+' 위치) */}
           {/* [피그마 리스킨] 즐겨찾기 ★ — 회색 원형 채움 제거(피그마엔 아웃라인 아이콘만). 켜짐 상태는 색으로 유지. */}
           <button onClick={() => setFavOpen((o) => !o)} aria-label="즐겨찾기"
