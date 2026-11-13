@@ -1201,7 +1201,29 @@ function App() {
   useEffect(() => {
     let alive = true;
     getUserName().then((n) => { if (alive) setUserName(n || null); }).catch(() => {});
-    getUserId().then((u) => { if (alive) setNoUserId(u == null); }).catch(() => { if (alive) setNoUserId(true); });
+    // [재진입 복원] userId 가 풀리면 그 계정의 대화 기록을 읽고, 마지막 대화를 그대로 펼친다.
+    //   앱 종료·재로그인 후 다시 들어와도 이전 대화창으로 진입(2026-10-26 폭스 업무요청).
+    //   계정별 키 — 같은 사용자면 로그아웃 후에도 복원되고, 계정이 바뀌면 서로 안 보인다.
+    getUserId().then((u) => {
+      if (!alive) return;
+      setNoUserId(u == null);
+      const key = `edupay_convos_${u || "anon"}`;
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) {}
+      if (!list.length) {                               // 계정키 이전의 단일 키 → 최초 1회만 이관
+        try {
+          const legacy = JSON.parse(localStorage.getItem("edupay_convos") || "[]");
+          if (legacy.length) { list = legacy; localStorage.setItem(key, JSON.stringify(legacy)); }
+        } catch (e) {}
+      }
+      setConvos(list);
+      const last = list[0];                             // 자동저장이 최신 대화를 맨 앞에 둔다
+      if (last && Array.isArray(last.messages) && last.messages.length) {
+        setActiveId(last.id);
+        setMessages(last.messages);                     // messages 가 차면 started=true → 대화 화면
+      }
+      setStorageKey(key);                               // 이 시점부터 저장 허용
+    }).catch(() => { if (alive) { setNoUserId(true); setStorageKey("edupay_convos_anon"); } });
     return () => { alive = false; };
   }, []);
   const [typing, setTyping] = useState(false);
@@ -1209,9 +1231,10 @@ function App() {
   const [typingSkill, setTypingSkill] = useState(null); // 복합 스킬(runComposite) 실행 중 스킬 전용 로딩 문구용. 일반 send는 null.
   const [modal, setModal] = useState(null);
   const [tab, setTab] = useState("금융친구");
-  const [convos, setConvos] = useState(() => {
-    try {return JSON.parse(localStorage.getItem("edupay_convos") || "[]");} catch (e) {return [];}
-  });
+  // 대화 기록은 userId 가 풀린 뒤에 로드한다(계정별 분리) → 초기값은 빈 배열.
+  //   storageKey 가 null 인 동안은 영속화도 멈춘다(로드 전에 빈 배열로 덮어쓰는 사고 방지).
+  const [convos, setConvos] = useState([]);
+  const [storageKey, setStorageKey] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [showHistory, setShowHistory] = useState(false); // 대화기록: 헤더 🕘 → HistoryDrawer(＋새 대화·지난 대화·선택·삭제)로 일원화
   // AI(Claude) 답변 — VITE_AI_ENABLED=true 일 때만 기능/토글 노출. 런타임 토글은 localStorage 유지
@@ -1400,10 +1423,11 @@ function App() {
     } catch (e) {}
   }, []);
 
-  /* 대화 기록 영속화 */
+  /* 대화 기록 영속화 — 계정별 키. storageKey 가 정해지기 전(로드 중)에는 쓰지 않는다. */
   useEffect(() => {
-    try {localStorage.setItem("edupay_convos", JSON.stringify(convos));} catch (e) {}
-  }, [convos]);
+    if (!storageKey) return;
+    try {localStorage.setItem(storageKey, JSON.stringify(convos));} catch (e) {}
+  }, [convos, storageKey]);
 
   /* 현재 대화를 기록에 자동 저장(upsert) */
   useEffect(() => {
@@ -1443,31 +1467,17 @@ function App() {
     if (id === activeId) {resetConvoEpoch();resetOperiaSession();setMessages([]);setActiveId(null);}
   }
 
-  // [웹뷰 재진입 리셋] 네이티브가 웹뷰를 살려둔 채 재사용 → 숨겨졌다 다시 보일 때(뒤로가기 후 메뉴 재진입)
-  //   대화중이면 newChat()으로 초기화면(랜딩) 리셋. 직전 대화는 자동저장 useEffect로 이미 히스토리에 남아 유실 없음.
-  //   startedRef 로 최신 대화 상태를 읽어(리스너 1회 등록) stale closure 회피. WEBVIEW에서만 동작.
-  const startedRef = useRef(started);
-  startedRef.current = started;
-  const hiddenAtRef = useRef(0); // 숨겨진 시각(ms). 임계값 이상 숨겨졌다 돌아올 때만 재진입 리셋.
-  const REENTRY_RESET_MS = Number(import.meta.env.VITE_REENTRY_RESET_MS) || 10000; // 이 시간(ms) 이상 숨겨졌다 돌아오면 재진입=리셋. 미설정 시 10초. 짧은 화면 꺼짐은 유지
+  // [웹뷰 재진입] 숨겨졌다 다시 보일 때 열려 있던 오버레이만 닫는다.
+  //   ※ 2026-10-26 요청으로 "재진입 = 랜딩 리셋"은 제거했다(VITE_REENTRY_RESET_MS 포함).
+  //      나갔다 들어와도 대화가 그대로여야 한다 — 복원은 위 getUserId 로드에서 담당.
   useEffect(() => {
     if (!WEBVIEW) return;
-    const resetToLanding = () => {
-      // 재진입 시 started 무관하게 열려 있던 모든 오버레이를 먼저 닫는다(랜딩에서 ★ 즐겨찾기 팝업만 연 경우 포함).
+    const closeOverlays = () => {
       setFavOpen(false); setShowHistory(false);
       setFaqConfirm(null); setOpenFaqKey(null);
-      if (!startedRef.current) return;                  // 대화 없으면 종료(오버레이는 이미 닫힘)
-      newChat();                                        // 대화중이면 랜딩 리셋(직전 대화는 자동저장됨)
     };
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") { hiddenAtRef.current = Date.now(); return; }
-      if (document.visibilityState === "visible") {
-        const t = hiddenAtRef.current;
-        hiddenAtRef.current = 0;
-        if (t && Date.now() - t >= REENTRY_RESET_MS) resetToLanding(); // 짧은 화면 꺼짐(<임계값)은 대화 유지
-      }
-    };
-    const onPageShow = (e) => { if (e && e.persisted) resetToLanding(); }; // bfcache 복귀 대비
+    const onVisibility = () => { if (document.visibilityState === "visible") closeOverlays(); };
+    const onPageShow = (e) => { if (e && e.persisted) closeOverlays(); }; // bfcache 복귀 대비
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pageshow", onPageShow);
     return () => {
